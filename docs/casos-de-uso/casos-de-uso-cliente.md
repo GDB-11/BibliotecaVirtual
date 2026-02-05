@@ -99,6 +99,54 @@ Tablas Relacionadas
 •	BookCopyStatus
 •	User
 ________________________________________
+
+Diagramas UML – Casos de Uso (Responsabilidad del Cliente)
+
+A continuación se describen los diagramas UML de Casos de Uso que corresponden a las funcionalidades desarrolladas por el Cliente y al proceso transaccional.
+
+Diagrama de Casos de Uso – Cliente
+
+Actores:
+
+Cliente
+
+Casos de Uso:
+
+Consulta de Libros
+
+Consulta de Autores
+
+Proceso de Alquiler
+
+Relaciones:
+
+El actor Cliente interactúa directamente con los tres casos de uso.
+
+El caso de uso Proceso de Alquiler incluye implícitamente la consulta de libros, ya que el cliente debe seleccionar un libro antes de alquilarlo.
+
+Descripción UML (texto guía):
+
+Cliente → Consulta de Libros
+
+Cliente → Consulta de Autores
+
+Cliente → Proceso de Alquiler
+
+Proceso de Alquiler <> Consulta de Libros
+
+Notas para el Diagrama UML
+
+El diagrama debe mostrar un único actor (Cliente).
+
+Los casos de uso deben estar dentro del límite del sistema "Biblioteca Virtual".
+
+No se incluyen casos administrativos, ya que corresponden a otro integrante del equipo.
+
+Observación Final
+
+Estos diagramas UML representan de forma clara las interacciones del Cliente con el sistema y se encuentran alineados con los casos de uso redactados y con el modelo de base de datos del proyecto Biblioteca Virtual.
+
+
 Observación Final
 Estos casos de uso corresponden a la funcionalidad del Cliente y al proceso transaccional del sistema, y se encuentran alineados con el modelo de base de datos implementado en el proyecto Biblioteca Virtual.
 
