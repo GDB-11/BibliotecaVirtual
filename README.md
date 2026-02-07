@@ -36,4 +36,22 @@ Sistema backend para gestión de biblioteca desarrollado en Spring Boot con MySQ
 3. Ejecutar: `mvn spring-boot:run`
 4. Acceder a: `http://localhost:8080`
 
-## 📁 Estructura del Proyecto
+##  Estructura del Proyecto
+
+#  Base de Datos
+
+El proyecto utiliza las siguientes tablas principales:
+- `Author`, `Book`, `BookCopy`, `Category`
+- `Rental`, `RentalStatus`, `User`
+- `Country`, `Status`, `BookStatus`
+
+##  Autor
+
+src/main/java/com/biblioteca/app/
+├── controller/ # Endpoints REST
+├── dto/ # Objetos de transferencia
+├── entity/ # Entidades JPA
+├── repository/ # Acceso a datos
+└── service/ # Lógica de negocio
+
+Desarrollado como proyecto académico para LP2.
