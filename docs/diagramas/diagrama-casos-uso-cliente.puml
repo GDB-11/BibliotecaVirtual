@@ -1,0 +1,13 @@
+@startuml
+skinparam handwritten true
+caption Gráfica de Intensidad de Casos de Uso
+
+rectangle "UC3: Alquiler" as UC3 #line.bold
+rectangle "UC1: Libros" as UC1
+rectangle "UC2: Autores" as UC2
+
+UC3 : |####################|
+UC1 : |##########|
+UC2 : |######|
+@enduml
+
