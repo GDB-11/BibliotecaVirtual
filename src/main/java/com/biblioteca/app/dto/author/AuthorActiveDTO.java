@@ -1,4 +1,4 @@
-package com.biblioteca.app.dto;
+package com.biblioteca.app.dto.author;
 
 public interface AuthorActiveDTO {
 
