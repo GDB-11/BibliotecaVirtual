@@ -13,19 +13,16 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Country")
-public class Country {
+@Table(name = "BookCopyStatus")
+public class BookCopyStatus {
 
     @Id
     @UuidGenerator
-    @Column(name = "CountryId", columnDefinition = "BINARY(16)", nullable = false)
-    private UUID countryId;
+    @Column(name = "BookCopyStatusId", columnDefinition = "BINARY(16)", nullable = false)
+    private UUID bookCopyStatusId;
 
-    @Column(name = "CountryName", length = 100, nullable = false, unique = true)
-    private String countryName;
-
-    @Column(name = "CountryCode", length = 3)
-    private String countryCode;
+    @Column(name = "BookCopyStatusName", length = 50, nullable = false, unique = true)
+    private String bookCopyStatusName;
 
     @Column(name = "CreatedAt", updatable = false)
     private LocalDateTime createdAt;
@@ -45,47 +42,37 @@ public class Country {
     }
 
     // Constructores
-    public Country() {
+    public BookCopyStatus() {
     }
 
-    public Country(UUID countryId, String countryName, String countryCode) {
-        this.countryId = countryId;
-        this.countryName = countryName;
-        this.countryCode = countryCode;
+    public BookCopyStatus(UUID bookCopyStatusId, String bookCopyStatusName) {
+        this.bookCopyStatusId = bookCopyStatusId;
+        this.bookCopyStatusName = bookCopyStatusName;
     }
 
-    public Country(UUID countryId, String countryName, String countryCode,
+    public BookCopyStatus(UUID bookCopyStatusId, String bookCopyStatusName,
             LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.countryId = countryId;
-        this.countryName = countryName;
-        this.countryCode = countryCode;
+        this.bookCopyStatusId = bookCopyStatusId;
+        this.bookCopyStatusName = bookCopyStatusName;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
     // Getters y Setters
-    public UUID getCountryId() {
-        return countryId;
+    public UUID getBookCopyStatusId() {
+        return bookCopyStatusId;
     }
 
-    public void setCountryId(UUID countryId) {
-        this.countryId = countryId;
+    public void setBookCopyStatusId(UUID bookCopyStatusId) {
+        this.bookCopyStatusId = bookCopyStatusId;
     }
 
-    public String getCountryName() {
-        return countryName;
+    public String getBookCopyStatusName() {
+        return bookCopyStatusName;
     }
 
-    public void setCountryName(String countryName) {
-        this.countryName = countryName;
-    }
-
-    public String getCountryCode() {
-        return countryCode;
-    }
-
-    public void setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
+    public void setBookCopyStatusName(String bookCopyStatusName) {
+        this.bookCopyStatusName = bookCopyStatusName;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -106,6 +93,6 @@ public class Country {
 
     @Override
     public String toString() {
-        return countryName;
+        return bookCopyStatusName;
     }
 }

@@ -1,89 +1,220 @@
 package com.biblioteca.app.entity;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import org.hibernate.annotations.UuidGenerator;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Book")
 public class Book {
 
-    @Id
-    @Column(name = "BookId")
-    private Long bookId;
+	@Id
+	@UuidGenerator
+	@Column(name = "BookId", columnDefinition = "BINARY(16)", nullable = false)
+	private UUID bookId;
 
-    @Column(name = "Title")
-    private String title;
+	@Column(name = "ISBN", length = 20, nullable = false, unique = true)
+	private String isbn;
 
-    @Column(name = "ISBN")
-    private String isbn;
+	@Column(name = "Title", length = 500, nullable = false)
+	private String title;
 
-    @Column(name = "PublicationYear")
-    private Integer publicationYear;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "AuthorId", nullable = false, foreignKey = @ForeignKey(name = "fk_book_author"))
+	private Author author;
 
-    @Column(name = "AuthorId")
-    private Long authorId;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "CategoryId", nullable = false, foreignKey = @ForeignKey(name = "fk_book_category"))
+	private Category category;
 
-    @Column(name = "CategoryId")
-    private Long categoryId;
+	@Column(name = "PublicationYear")
+	private Integer publicationYear;
 
-    @Column(name = "BookStatusId")
-    private Long bookStatusId;
+	@Column(name = "Publisher", length = 255)
+	private String publisher;
 
-	public Long getBookId() {
+	@Column(name = "Pages")
+	private Integer pages;
+
+	@Column(name = "Language", length = 50)
+	private String language = "Español";
+
+	@Column(name = "Description", columnDefinition = "TEXT")
+	private String description;
+
+	@Column(name = "CoverImageUrl", length = 500)
+	private String coverImageUrl;
+
+	// Relación ManyToOne con BookStatus
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "BookStatusId", nullable = false, foreignKey = @ForeignKey(name = "fk_book_bookstatus"))
+	private BookStatus bookStatus;
+
+	@Column(name = "CreatedAt", updatable = false)
+	private LocalDateTime createdAt;
+
+	@Column(name = "UpdatedAt")
+	private LocalDateTime updatedAt;
+
+	@PrePersist
+	protected void onCreate() {
+		createdAt = LocalDateTime.now();
+		updatedAt = LocalDateTime.now();
+		if (language == null) {
+			language = "Español";
+		}
+	}
+
+	@PreUpdate
+	protected void onUpdate() {
+		updatedAt = LocalDateTime.now();
+	}
+
+	// Constructores
+	public Book() {
+	}
+
+	public Book(UUID bookId, String isbn, String title, Author author,
+			Category category, BookStatus bookStatus) {
+		this.bookId = bookId;
+		this.isbn = isbn;
+		this.title = title;
+		this.author = author;
+		this.category = category;
+		this.bookStatus = bookStatus;
+	}
+
+	// Getters y Setters
+	public UUID getBookId() {
 		return bookId;
 	}
 
-	public String getTitle() {
-		return title;
+	public void setBookId(UUID bookId) {
+		this.bookId = bookId;
 	}
 
 	public String getIsbn() {
 		return isbn;
 	}
 
-	public Integer getPublicationYear() {
-		return publicationYear;
+	public void setIsbn(String isbn) {
+		this.isbn = isbn;
 	}
 
-	public Long getAuthorId() {
-		return authorId;
-	}
-
-	public Long getCategoryId() {
-		return categoryId;
-	}
-
-	public Long getBookStatusId() {
-		return bookStatusId;
-	}
-
-	public void setBookId(Long bookId) {
-		this.bookId = bookId;
+	public String getTitle() {
+		return title;
 	}
 
 	public void setTitle(String title) {
 		this.title = title;
 	}
 
-	public void setIsbn(String isbn) {
-		this.isbn = isbn;
+	public Author getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(Author author) {
+		this.author = author;
+	}
+
+	public Category getCategory() {
+		return category;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
+	}
+
+	public Integer getPublicationYear() {
+		return publicationYear;
 	}
 
 	public void setPublicationYear(Integer publicationYear) {
 		this.publicationYear = publicationYear;
 	}
 
-	public void setAuthorId(Long authorId) {
-		this.authorId = authorId;
+	public String getPublisher() {
+		return publisher;
 	}
 
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
+	public void setPublisher(String publisher) {
+		this.publisher = publisher;
 	}
 
-	public void setBookStatusId(Long bookStatusId) {
-		this.bookStatusId = bookStatusId;
+	public Integer getPages() {
+		return pages;
 	}
 
-    // getters y setters
-    
+	public void setPages(Integer pages) {
+		this.pages = pages;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getCoverImageUrl() {
+		return coverImageUrl;
+	}
+
+	public void setCoverImageUrl(String coverImageUrl) {
+		this.coverImageUrl = coverImageUrl;
+	}
+
+	public BookStatus getBookStatus() {
+		return bookStatus;
+	}
+
+	public void setBookStatus(BookStatus bookStatus) {
+		this.bookStatus = bookStatus;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public String getPublicationYearString() {
+		if (publicationYear == null) {
+			return "-";
+		}
+
+		if (publicationYear <= 0) {
+			int bcYear = -publicationYear + 1;
+			return bcYear + " a.C.";
+		} else {
+			return String.valueOf(publicationYear);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return title;
+	}
 }
