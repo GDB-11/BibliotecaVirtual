@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Footer</title>
+</head>
+<body>
+    <footer class="mt-5 py-3 text-center text-muted" th:fragment="footer">
+        <div class="container">
+            <hr class="mb-3">
+            <p class="mb-0">
+                &copy; <span th:text="${#dates.year(#dates.createNow())}">2024</span> 
+                Biblioteca Virtual - Admin - Sistema de Gestión Bibliotecaria
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
