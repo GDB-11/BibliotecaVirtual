@@ -1,3 +1,4 @@
+<!-- src/main/resources/templates/admin/shared/header.html -->
 <!DOCTYPE html>
 <html lang="es" 
       xmlns:th="http://www.thymeleaf.org"
@@ -29,9 +30,6 @@
                             type="button" 
                             id="userDropdown" 
                             data-bs-toggle="dropdown">
-                        <span sec:authentication="name" class="user-initial" 
-                              th:attr="data-email=${#authentication.name}">
-                        </span>
                         <img th:src="'https://ui-avatars.com/api/?name=' + ${#strings.substring(#authentication.name, 0, 1)} + '&background=3498db&color=fff'" 
                              class="rounded-circle me-2" 
                              width="35" 

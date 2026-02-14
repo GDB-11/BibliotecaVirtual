@@ -105,6 +105,16 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("SELECT COUNT(u) FROM User u WHERE u.status.statusName = 'Active'")
     long countActive();
 
+    @Query("""
+        SELECT COUNT(u)
+        FROM User u
+        JOIN u.userRoles ur
+        JOIN ur.role r
+        WHERE u.status.statusName = 'Active'
+        AND r.roleName = 'Admin'
+    """)
+    long countActiveAdmins();
+
     /**
      * Verifica si un usuario tiene un rol específico
      * 
@@ -119,4 +129,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
         AND ur.role.roleName = :roleName
     """)
     boolean hasRole(@Param("userId") UUID userId, @Param("roleName") String roleName);
+
+    /**
+     * Busca un usuario por ID con roles cargados (EAGER)
+     */
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.userRoles ur LEFT JOIN FETCH ur.role WHERE u.userId = :userId")
+    Optional<User> findByIdWithRoles(@Param("userId") UUID userId);
 }

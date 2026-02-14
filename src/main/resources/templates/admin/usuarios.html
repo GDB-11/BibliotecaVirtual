@@ -1,0 +1,314 @@
+<!-- src/main/resources/templates/admin/usuarios.html -->
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Gestión de Usuarios</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-people me-2"></i>Mantenimiento de Usuarios</h2>
+                    <p class="text-muted mb-0">Gestión completa de usuarios del sistema</p>
+                </div>
+                <div>
+                    <a th:href="@{/admin/usuarios/nuevo}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Nuevo Usuario
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Total Usuarios</small>
+                                <h4 class="mb-0" th:text="${totalUsers}">0</h4>
+                            </div>
+                            <i class="bi bi-people-fill fs-2 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-success border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Activos</small>
+                                <h4 class="mb-0" th:text="${activeUsersCount}">0</h4>
+                            </div>
+                            <i class="bi bi-check-circle-fill fs-2 text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-info border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Administradores</small>
+                                <h4 class="mb-0" th:text="${adminCount}">0</h4>
+                            </div>
+                            <i class="bi bi-shield-check fs-2 text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-warning border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">En esta Página</small>
+                                <h4 class="mb-0" th:text="${usersResult.items.size()}">0</h4>
+                            </div>
+                            <i class="bi bi-list-ul fs-2 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" th:action="@{/admin/usuarios}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Buscar</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" name="search" class="form-control" 
+                                       placeholder="Email del usuario..." th:value="${searchValue}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Rol</label>
+                            <select name="roleId" class="form-select">
+                                <option value="">Todos</option>
+                                <option th:each="role : ${roles}" 
+                                        th:value="${role.roleId}" 
+                                        th:text="${role.roleName}"
+                                        th:selected="${role.roleId.toString() == roleIdValue}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Estado</label>
+                            <select name="statusId" class="form-select">
+                                <option value="">Todos</option>
+                                <option th:each="status : ${statuses}" 
+                                        th:value="${status.statusId}" 
+                                        th:text="${status.statusName}"
+                                        th:selected="${status.statusId.toString() == statusIdValue}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-funnel"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Listado de Usuarios</h5>
+                <div>
+                    <span class="text-muted me-3">
+                        Mostrando <span th:text="${usersResult.startItem}">0</span> - 
+                        <span th:text="${usersResult.endItem}">0</span> de 
+                        <span th:text="${usersResult.totalItems}">0</span>
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div th:if="${usersResult.items.empty}" class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3">No se encontraron usuarios</p>
+                    <a th:if="${not #strings.isEmpty(searchValue) or not #strings.isEmpty(statusIdValue)}" 
+                       th:href="@{/admin/usuarios}" class="btn btn-outline-primary">
+                        <i class="bi bi-x-circle"></i> Limpiar filtros
+                    </a>
+                </div>
+
+                <div th:unless="${usersResult.items.empty}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Roles</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Última Actualización</th>
+                                    <th style="width: 150px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="user : ${usersResult.items}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2"
+                                                 style="width: 40px; height: 40px;">
+                                                <i class="bi bi-person-fill text-primary fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <strong th:text="${user.email}"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="06636b676f6a46637e676b766a632865696b">[email&#160;protected]</a></strong>
+                                                <br>
+                                                <small class="text-muted">ID: <span th:text="${#strings.substring(user.userId, 0, 8)}"></span>...</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div th:if="${not #lists.isEmpty(user.roleNames)}">
+                                            <span th:each="roleName : ${user.roleNames}" 
+                                                  th:class="'badge me-1 ' + (${roleName == 'Admin'} ? 'bg-danger' : 'bg-primary')">
+                                                <i th:if="${roleName == 'Admin'}" class="bi bi-shield-fill-check me-1"></i>
+                                                <span th:text="${roleName}">Role</span>
+                                            </span>
+                                        </div>
+                                        <span th:if="${#lists.isEmpty(user.roleNames)}" class="text-muted">Sin roles</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${user.statusName == 'Active'}" class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>Activo
+                                        </span>
+                                        <span th:unless="${user.statusName == 'Active'}" class="badge bg-secondary">
+                                            <i class="bi bi-x-circle me-1"></i>Inactivo
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 00:00</small>
+                                    </td>
+                                    <td>
+                                        <small th:text="${#temporals.format(user.updatedAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 00:00</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a th:href="@{/admin/usuarios/{id}(id=${user.userId})}" 
+                                               class="btn btn-info" title="Ver detalles">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a th:href="@{/admin/usuarios/{id}/editar(id=${user.userId})}" 
+                                               class="btn btn-warning" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-danger" 
+                                                    data-bs-toggle="modal" 
+                                                    th:data-bs-target="'#deleteModal' + ${userStat.index}"
+                                                    title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" th:id="'deleteModal' + ${userStat.index}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title">
+                                                            <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminación
+                                                        </h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>¿Está seguro de que desea eliminar al usuario <strong th:text="${user.email}"></strong>?</p>
+                                                        <p class="text-danger mb-0">
+                                                            <i class="bi bi-exclamation-circle me-1"></i>
+                                                            Esta acción no se puede deshacer.
+                                                        </p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                            <i class="bi bi-x-circle"></i> Cancelar
+                                                        </button>
+                                                        <form th:action="@{/admin/usuarios/{id}/eliminar(id=${user.userId})}" method="post" style="display: inline;">
+                                                            <button type="submit" class="btn btn-danger">
+                                                                <i class="bi bi-trash"></i> Eliminar
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav th:if="${usersResult.totalPages > 1}" aria-label="Paginación de usuarios" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <!-- Botón Anterior -->
+                            <li class="page-item" th:classappend="${not usersResult.hasPreviousPage()} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/admin/usuarios(p=${usersResult.previousPage},search=${searchValue},statusId=${statusIdValue},roleId=${roleIdValue})}">
+                                    <i class="bi bi-chevron-left"></i> Anterior
+                                </a>
+                            </li>
+                            
+                            <!-- Primera página -->
+                            <li th:if="${usersResult.getPageRange(itemsPerPage)[0] > 1}" class="page-item">
+                                <a class="page-link" 
+                                   th:href="@{/admin/usuarios(p=1,search=${searchValue},statusId=${statusIdValue},roleId=${roleIdValue})}">1</a>
+                            </li>
+                            <li th:if="${usersResult.getPageRange(itemsPerPage)[0] > 2}" class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            
+                            <!-- Páginas del rango -->
+                            <li th:each="i : ${#numbers.sequence(usersResult.getPageRange(itemsPerPage)[0], usersResult.getPageRange(itemsPerPage)[1])}" 
+                                class="page-item" th:classappend="${i == usersResult.currentPage} ? 'active'">
+                                <a class="page-link" 
+                                   th:href="@{/admin/usuarios(p=${i},search=${searchValue},statusId=${statusIdValue},roleId=${roleIdValue})}"
+                                   th:text="${i}">1</a>
+                            </li>
+                            
+                            <!-- Última página -->
+                            <li th:if="${usersResult.getPageRange(itemsPerPage)[1] < usersResult.totalPages - 1}" class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            <li th:if="${usersResult.getPageRange(itemsPerPage)[1] < usersResult.totalPages}" class="page-item">
+                                <a class="page-link" 
+                                   th:href="@{/admin/usuarios(p=${usersResult.totalPages},search=${searchValue},statusId=${statusIdValue},roleId=${roleIdValue})}"
+                                   th:text="${usersResult.totalPages}">10</a>
+                            </li>
+                            
+                            <!-- Botón Siguiente -->
+                            <li class="page-item" th:classappend="${not usersResult.hasNextPage()} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/admin/usuarios(p=${usersResult.nextPage},search=${searchValue},statusId=${statusIdValue},roleId=${roleIdValue})}">
+                                    Siguiente <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>

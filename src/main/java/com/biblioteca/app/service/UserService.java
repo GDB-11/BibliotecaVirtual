@@ -151,7 +151,7 @@ public class UserService {
      * Obtiene un usuario por ID
      */
     public Optional<User> getUserById(UUID userId) {
-        return userRepository.findById(userId);
+        return userRepository.findByIdWithRoles(userId);
     }
 
     /**
@@ -290,10 +290,34 @@ public class UserService {
     }
 
     /**
+     * Cuenta usuarios activos con rol de Admin
+     */
+    public long getActiveAdminsCount() {
+        return userRepository.countActiveAdmins();
+    }
+
+    /**
      * Verifica si existe un email
      */
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    /**
+     * Cambia la contraseña de un usuario (admin)
+     * No requiere contraseña actual
+     */
+    @Transactional
+    public void adminChangePassword(UUID userId, String newPassword) {
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new IllegalArgumentException("La nueva contraseña debe tener al menos 6 caracteres");
+        }
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        user.setPassword(PasswordUtil.hashPassword(newPassword));
+        userRepository.save(user);
     }
 
     // ========== MÉTODOS PRIVADOS DE CONVERSIÓN ==========
