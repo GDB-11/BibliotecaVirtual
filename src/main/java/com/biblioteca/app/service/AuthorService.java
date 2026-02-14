@@ -259,6 +259,9 @@ public class AuthorService {
         dto.setBirthYear(author.getBirthYear());
         dto.setDeathYear(author.getDeathYear());
         dto.setPhotoUrl(author.getPhotoUrl());
+        dto.setEmail(author.getEmail());
+        dto.setWebsite(author.getWebsite());
+        dto.setBiography(author.getBiography());
         return dto;
     }
 

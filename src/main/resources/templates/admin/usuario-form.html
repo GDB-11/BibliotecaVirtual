@@ -144,9 +144,6 @@
                                             <i class="bi bi-x-circle me-1"></i> Cancelar
                                         </a>
                                         <div>
-                                            <button type="reset" class="btn btn-outline-secondary me-2">
-                                                <i class="bi bi-arrow-counterclockwise me-1"></i> Restablecer
-                                            </button>
                                             <button type="submit" 
                                                     class="btn" 
                                                     th:classappend="${isNew} ? 'btn-success' : 'btn-warning'">
@@ -282,7 +279,7 @@
                         <table class="table table-sm table-borderless mb-0">
                             <tr>
                                 <th style="width: 40%">ID:</th>
-                                <td><code class="small" th:text="${#strings.substring(user.userId, 0, 13) + '...'}"></code></td>
+                                <td><code class="small" th:text="${user.userId}"></code></td>
                             </tr>
                             <tr>
                                 <th>Creado:</th>
@@ -387,8 +384,9 @@
         </div>
 
         <!-- Scripts -->
-        <th:block layout:fragment="extra-js">
-            <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        <th:block layout:fragment="extra-scripts">
+            <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+            <script>
                 // Toggle password visibility
                 function togglePassword(fieldId) {
                     const field = document.getElementById(fieldId);

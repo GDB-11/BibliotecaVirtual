@@ -14,6 +14,9 @@ public class AuthorDTO {
     private String statusName;
     private Integer birthYear;
     private Integer deathYear;
+    private String email;
+    private String website;
+    private String biography;
     private String photoUrl;
 
     // Constructores
@@ -66,6 +69,30 @@ public class AuthorDTO {
 
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public String getBiography() {
+        return biography;
+    }
+
+    public void setBiography(String biography) {
+        this.biography = biography;
     }
 
     public String getStatusName() {
