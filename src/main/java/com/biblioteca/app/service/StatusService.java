@@ -1,6 +1,8 @@
 package com.biblioteca.app.service;
 
+import com.biblioteca.app.entity.BookStatus;
 import com.biblioteca.app.entity.Status;
+import com.biblioteca.app.repository.BookStatusRepository;
 import com.biblioteca.app.repository.StatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Servicio para la gestión de estados.
+ * Servicio para la gestión de estados y estados de libros.
  * Proporciona operaciones CRUD y consultas relacionadas con estados.
  */
 @Service
@@ -20,6 +22,9 @@ public class StatusService {
     
     @Autowired
     private StatusRepository statusRepository;
+    
+    @Autowired
+    private BookStatusRepository bookStatusRepository;
     
     /**
      * Obtiene todos los estados del sistema.
@@ -105,12 +110,65 @@ public class StatusService {
             .getStatusId();
     }
     
+    // ==================== BOOK STATUS METHODS ====================
+    
     /**
-     * Cuenta el total de estados.
+     * Obtiene todos los estados de libros.
      * 
-     * @return Cantidad de estados
+     * @return Lista de todos los estados de libros
      */
-    public long count() {
-        return statusRepository.count();
+    public List<BookStatus> findAllBookStatuses() {
+        return bookStatusRepository.findAll();
+    }
+    
+    /**
+     * Obtiene un estado de libro por su ID.
+     * 
+     * @param bookStatusId UUID del estado de libro
+     * @return Optional con el estado de libro si existe
+     */
+    public Optional<BookStatus> findBookStatusById(UUID bookStatusId) {
+        return bookStatusRepository.findById(bookStatusId);
+    }
+    
+    /**
+     * Obtiene un estado de libro por su nombre.
+     * 
+     * @param bookStatusName Nombre del estado de libro
+     * @return Optional con el estado de libro si existe
+     */
+    public Optional<BookStatus> findBookStatusByName(String bookStatusName) {
+        return bookStatusRepository.findByBookStatusName(bookStatusName);
+    }
+    
+    /**
+     * Verifica si existe un estado de libro con el nombre dado.
+     * 
+     * @param bookStatusName Nombre del estado de libro
+     * @return true si existe, false si no
+     */
+    public boolean existsBookStatusByName(String bookStatusName) {
+        return bookStatusRepository.existsByBookStatusName(bookStatusName);
+    }
+    
+    /**
+     * Guarda o actualiza un estado de libro.
+     * 
+     * @param bookStatus Estado de libro a guardar
+     * @return Estado de libro guardado
+     */
+    @Transactional
+    public BookStatus saveBookStatus(BookStatus bookStatus) {
+        return bookStatusRepository.save(bookStatus);
+    }
+    
+    /**
+     * Elimina un estado de libro por su ID.
+     * 
+     * @param bookStatusId UUID del estado de libro a eliminar
+     */
+    @Transactional
+    public void deleteBookStatus(UUID bookStatusId) {
+        bookStatusRepository.deleteById(bookStatusId);
     }
 }

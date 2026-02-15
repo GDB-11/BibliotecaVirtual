@@ -78,6 +78,16 @@ public class AuthorService {
     }
 
     /**
+     * Obtiene todos los autores ordenados por nombre.
+     * Para selectores/dropdowns.
+     * 
+     * @return Lista de todos los autores
+     */
+    public List<Author> findAll() {
+        return authorRepository.findAllByOrderByFullNameAsc();
+    }
+
+    /**
      * Busca un autor por nombre completo.
      * 
      * @param fullName Nombre completo del autor

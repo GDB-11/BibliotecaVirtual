@@ -1,0 +1,364 @@
+<!-- src/main/resources/templates/admin/libros.html -->
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Gestión de Libros</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-book me-2"></i>Mantenimiento de Libros</h2>
+                    <p class="text-muted mb-0">Gestión completa del catálogo de libros</p>
+                </div>
+                <div>
+                    <a th:href="@{/admin/libros/nuevo}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Nuevo Libro
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Total Libros</small>
+                                <h4 class="mb-0" th:text="${totalBooks}">0</h4>
+                            </div>
+                            <i class="bi bi-book-fill fs-2 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-success border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Disponibles</small>
+                                <h4 class="mb-0" th:text="${activeBooksCount}">0</h4>
+                            </div>
+                            <i class="bi bi-check-circle-fill fs-2 text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-warning border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">En Alquiler</small>
+                                <h4 class="mb-0" th:text="${booksWithActiveRentals}">0</h4>
+                            </div>
+                            <i class="bi bi-arrow-repeat fs-2 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-info border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Registros en Página</small>
+                                <h4 class="mb-0" th:text="${#lists.size(booksResult.items)}">0</h4>
+                            </div>
+                            <i class="bi bi-list-ul fs-2 text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" th:action="@{/admin/libros}">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Buscar</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" 
+                                       name="search" 
+                                       class="form-control" 
+                                       placeholder="Título o ISBN..." 
+                                       th:value="${searchValue}">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Autor</label>
+                            <select name="authorId" class="form-select">
+                                <option value="">Todos</option>
+                                <option th:each="author : ${authors}" 
+                                        th:value="${author.authorId}" 
+                                        th:text="${author.fullName}"
+                                        th:selected="${author.authorId.toString() == authorIdValue}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Categoría</label>
+                            <select name="categoryId" class="form-select">
+                                <option value="">Todas</option>
+                                <option th:each="category : ${categories}" 
+                                        th:value="${category.categoryId}" 
+                                        th:text="${category.categoryName}"
+                                        th:selected="${category.categoryId.toString() == categoryIdValue}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Estado</label>
+                            <select name="bookStatusId" class="form-select">
+                                <option value="">Todos</option>
+                                <option th:each="bookStatus : ${bookStatuses}" 
+                                        th:value="${bookStatus.bookStatusId}" 
+                                        th:text="${bookStatus.bookStatusName}"
+                                        th:selected="${bookStatus.bookStatusId.toString() == bookStatusIdValue}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-funnel"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Books Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Catálogo de Libros</h5>
+                <div>
+                    <span class="text-muted me-3">
+                        Mostrando <span th:text="${booksResult.startItem}">0</span> - 
+                        <span th:text="${booksResult.endItem}">0</span> de 
+                        <span th:text="${booksResult.totalItems}">0</span>
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(booksResult.items)}" class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3">No se encontraron libros</p>
+                    <div th:if="${not #strings.isEmpty(searchValue) or not #strings.isEmpty(authorIdValue) or not #strings.isEmpty(categoryIdValue) or not #strings.isEmpty(bookStatusIdValue)}">
+                        <a th:href="@{/admin/libros}" class="btn btn-outline-primary">
+                            <i class="bi bi-x-circle"></i> Limpiar filtros
+                        </a>
+                    </div>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(booksResult.items)}" class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ISBN</th>
+                                <th>Título</th>
+                                <th>Autor</th>
+                                <th>Editorial</th>
+                                <th>Año</th>
+                                <th>Categoría</th>
+                                <th>Estado</th>
+                                <th style="width: 150px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="book, iterStat : ${booksResult.items}">
+                                <td><code th:text="${book.isbn}">ISBN</code></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:if="${book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)}" 
+                                             th:src="${book.coverImageUrl}" 
+                                             class="rounded me-2" 
+                                             width="30" 
+                                             height="40"
+                                             th:alt="${book.title}"
+                                             style="object-fit: cover;"
+                                             onerror="this.style.display='none'">
+                                        <span th:if="${book.coverImageUrl == null or #strings.isEmpty(book.coverImageUrl)}"
+                                              class="bg-primary text-white rounded me-2 d-inline-flex align-items-center justify-content-center"
+                                              style="width: 30px; height: 40px; font-size: 12px;"
+                                              th:text="${#strings.substring(book.title, 0, 1)}">
+                                        </span>
+                                        <strong th:text="${book.title}">Título</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span th:if="${book.author != null}" th:text="${book.author.fullName}">Autor</span>
+                                    <span th:unless="${book.author != null}" class="text-muted">-</span>
+                                </td>
+                                <td>
+                                    <span th:if="${book.publisher != null and not #strings.isEmpty(book.publisher)}" 
+                                          th:text="${book.publisher}">Editorial</span>
+                                    <span th:unless="${book.publisher != null and not #strings.isEmpty(book.publisher)}" 
+                                          class="text-muted">-</span>
+                                </td>
+                                <td th:text="${book.publicationYearString}">Año</td>
+                                <td>
+                                    <span th:if="${book.category != null}" 
+                                          class="badge bg-primary" 
+                                          th:text="${book.category.categoryName}">Categoría</span>
+                                    <span th:unless="${book.category != null}" 
+                                          class="badge bg-secondary">Sin categoría</span>
+                                </td>
+                                <td>
+                                    <span th:if="${book.bookStatus != null and book.bookStatus.bookStatusName == 'Activo'}" 
+                                          class="badge bg-success">Activo</span>
+                                    <span th:unless="${book.bookStatus != null and book.bookStatus.bookStatusName == 'Activo'}" 
+                                          class="badge bg-secondary">Inactivo</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/admin/libros/{id}(id=${book.bookId})}" 
+                                           class="btn btn-info" 
+                                           data-bs-toggle="tooltip" 
+                                           title="Ver detalles">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a th:href="@{/admin/libros/{id}/editar(id=${book.bookId})}" 
+                                           class="btn btn-warning" 
+                                           data-bs-toggle="tooltip" 
+                                           title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                th:data-bs-target="'#deleteModal' + ${iterStat.index}"
+                                                title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" th:id="'deleteModal' + ${iterStat.index}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title">
+                                                        <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminación
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>¿Está seguro de que desea eliminar el libro <strong th:text="${book.title}"></strong>?</p>
+                                                    <p class="text-danger mb-0">
+                                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                                        Esta acción no se puede deshacer.
+                                                    </p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                        <i class="bi bi-x-circle"></i> Cancelar
+                                                    </button>
+                                                    <form th:action="@{/admin/libros/{id}/eliminar(id=${book.bookId})}" method="post" style="display: inline;">
+                                                        <button type="submit" class="btn btn-danger">
+                                                            <i class="bi bi-trash"></i> Eliminar
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav th:if="${booksResult.totalPages > 1}" aria-label="Paginación de libros" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <!-- Botón Anterior -->
+                        <li class="page-item" th:classappend="${not booksResult.hasPreviousPage()} ? 'disabled'">
+                            <a class="page-link" 
+                               th:href="@{/admin/libros(p=${booksResult.previousPage}, search=${searchValue}, authorId=${authorIdValue}, categoryId=${categoryIdValue}, bookStatusId=${bookStatusIdValue})}">
+                                <i class="bi bi-chevron-left"></i> Anterior
+                            </a>
+                        </li>
+
+                        <!-- Números de página -->
+                        <th:block th:with="pageRange=${booksResult.getPageRange(5)}">
+                            <!-- Primera página si no está en el rango -->
+                            <li th:if="${pageRange[0] > 1}" class="page-item">
+                                <a class="page-link" 
+                                   th:href="@{/admin/libros(p=1, search=${searchValue}, authorId=${authorIdValue}, categoryId=${categoryIdValue}, bookStatusId=${bookStatusIdValue})}">
+                                    1
+                                </a>
+                            </li>
+                            <li th:if="${pageRange[0] > 2}" class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+
+                            <!-- Páginas del rango -->
+                            <li th:each="i : ${#numbers.sequence(pageRange[0], pageRange[1])}" 
+                                class="page-item" 
+                                th:classappend="${i == booksResult.currentPage} ? 'active'">
+                                <a class="page-link" 
+                                   th:href="@{/admin/libros(p=${i}, search=${searchValue}, authorId=${authorIdValue}, categoryId=${categoryIdValue}, bookStatusId=${bookStatusIdValue})}"
+                                   th:text="${i}">1</a>
+                            </li>
+
+                            <!-- Última página si no está en el rango -->
+                            <li th:if="${pageRange[1] < booksResult.totalPages - 1}" class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            <li th:if="${pageRange[1] < booksResult.totalPages}" class="page-item">
+                                <a class="page-link" 
+                                   th:href="@{/admin/libros(p=${booksResult.totalPages}, search=${searchValue}, authorId=${authorIdValue}, categoryId=${categoryIdValue}, bookStatusId=${bookStatusIdValue})}"
+                                   th:text="${booksResult.totalPages}">10</a>
+                            </li>
+                        </th:block>
+
+                        <!-- Botón Siguiente -->
+                        <li class="page-item" th:classappend="${not booksResult.hasNextPage()} ? 'disabled'">
+                            <a class="page-link" 
+                               th:href="@{/admin/libros(p=${booksResult.nextPage}, search=${searchValue}, authorId=${authorIdValue}, categoryId=${categoryIdValue}, bookStatusId=${bookStatusIdValue})}">
+                                Siguiente <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <script>
+            // Initialize tooltips
+            document.addEventListener('DOMContentLoaded', function() {
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>
