@@ -15,10 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.biblioteca.app.dto.RentalActiveDTO;
 import com.biblioteca.app.dto.RentalCompleteDTO;
+import com.biblioteca.app.dto.rental.BookMostRequestedDTO;
 import com.biblioteca.app.dto.rental.BookRentalStatsDTO;
 import com.biblioteca.app.dto.shared.PagedResult;
 import com.biblioteca.app.entity.Rental;
 import com.biblioteca.app.repository.RentalRepository;
+import com.biblioteca.app.repository.projection.BookMostRequestedProjection;
 import com.biblioteca.app.repository.projection.BookRentalStatsProjection;
 import com.biblioteca.app.helper.PageMapper;
 
@@ -230,6 +232,46 @@ public class RentalService {
         return (int) rentalRepository.countActiveRentals();
     }
 
+    /**
+     * Obtiene libros más pedidos con paginación y filtro por categoría
+     */
+    public PagedResult<BookMostRequestedDTO> getMostRequestedBooks(
+            int currentPage, 
+            int pageSize, 
+            String categoryId) {
+        
+        // Validar página
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+        
+        // Calcular offset
+        int offset = (currentPage - 1) * pageSize;
+        
+        // Obtener total de registros
+        long totalItems = rentalRepository.countMostRequestedBooks(categoryId);
+        
+        // Obtener datos paginados
+        List<BookMostRequestedProjection> projections = rentalRepository.findMostRequestedBooks(
+            categoryId, pageSize, offset);
+        
+        // Convertir a DTOs
+        List<BookMostRequestedDTO> items = projections.stream()
+            .map(this::toMostRequestedDTO)
+            .collect(Collectors.toList());
+        
+        // Calcular porcentaje de popularidad
+        if (!items.isEmpty()) {
+            Integer maxRentals = items.get(0).getTotalRentals();
+            items.forEach(item -> item.setPopularityPercentage(maxRentals));
+        }
+        
+        // Crear resultado paginado
+        PagedResult<BookMostRequestedDTO> result = new PagedResult<>(items, currentPage, pageSize, (int) totalItems);
+        
+        return result;
+    }
+
     // ========== METODOS PRIVADOS DE CONVERSIÓN ==========
 
     /**
@@ -244,6 +286,22 @@ public class RentalService {
             projection.getCategoryName(),
             projection.getRentalCount(),
             projection.getActiveRentals()
+        );
+    }
+
+    /**
+     * Convierte una proyección de libros más pedidos a DTO
+     */
+    private BookMostRequestedDTO toMostRequestedDTO(BookMostRequestedProjection projection) {
+        return new BookMostRequestedDTO(
+            projection.getBookId(),
+            projection.getTitle(),
+            projection.getIsbn(),
+            projection.getAuthorName(),
+            projection.getCategoryName(),
+            projection.getTotalRentals(),
+            projection.getYesterdayRentals(),
+            projection.getTodayRentals()
         );
     }
 }

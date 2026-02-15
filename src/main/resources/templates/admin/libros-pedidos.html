@@ -1,0 +1,305 @@
+<!-- src/main/resources/templates/admin/libros-pedidos.html -->
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Libros Más Pedidos - BiblioAdmin</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Libros Más Pedidos</h2>
+                    <p class="text-muted mb-0">Ranking de libros más solicitados</p>
+                </div>
+                <div>
+                    <button class="btn btn-success" data-bs-toggle="tooltip" title="Exportar a Excel">
+                        <i class="bi bi-file-earmark-excel"></i> Exportar
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="tooltip" title="Imprimir reporte">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Alert -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Error:</strong> <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" th:action="@{/admin/libros-pedidos}">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Categoría</label>
+                            <select class="form-select" name="categoryId" th:value="${categoryIdValue}">
+                                <option value="">Todas las categorías</option>
+                                <option th:each="category : ${categories}" 
+                                        th:value="${category.categoryId}" 
+                                        th:text="${category.categoryName}"
+                                        th:selected="${category.categoryId.toString() == categoryIdValue}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Resultados por página</label>
+                            <select class="form-select" name="size">
+                                <option value="10" th:selected="${pageSizeValue == 10}">Top 10</option>
+                                <option value="20" th:selected="${pageSizeValue == 20}">Top 20</option>
+                                <option value="50" th:selected="${pageSizeValue == 50}">Top 50</option>
+                                <option value="100" th:selected="${pageSizeValue == 100}">Top 100</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-funnel"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Top 3 Highlight -->
+        <div th:if="${booksStats.items != null and booksStats.items.size() >= 3}" class="row g-4 mb-4">
+            <!-- Primer lugar -->
+            <div th:with="book1=${booksStats.items[0]}" class="col-md-4">
+                <div class="card border-warning shadow-lg">
+                    <div class="card-body text-center">
+                        <div class="position-relative d-inline-block mb-3">
+                            <i class="bi bi-trophy-fill text-warning" style="font-size: 4rem;"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
+                                #1
+                            </span>
+                        </div>
+                        <h4 class="fw-bold" th:text="${book1.title}">Título</h4>
+                        <p class="text-muted mb-2" th:text="${book1.authorName}">Autor</p>
+                        <h2 class="text-warning fw-bold" th:text="${book1.totalRentals}">0</h2>
+                        <p class="text-muted">alquileres totales</p>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Segundo lugar -->
+            <div th:with="book2=${booksStats.items[1]}" class="col-md-4">
+                <div class="card border-secondary shadow">
+                    <div class="card-body text-center">
+                        <div class="position-relative d-inline-block mb-3">
+                            <i class="bi bi-trophy-fill text-secondary" style="font-size: 4rem;"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">
+                                #2
+                            </span>
+                        </div>
+                        <h4 class="fw-bold" th:text="${book2.title}">Título</h4>
+                        <p class="text-muted mb-2" th:text="${book2.authorName}">Autor</p>
+                        <h2 class="text-secondary fw-bold" th:text="${book2.totalRentals}">0</h2>
+                        <p class="text-muted">alquileres totales</p>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-secondary" role="progressbar" 
+                                 th:style="'width: ' + ${book2.popularityPercentage} + '%'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tercer lugar -->
+            <div th:with="book3=${booksStats.items[2]}" class="col-md-4">
+                <div class="card border-info shadow">
+                    <div class="card-body text-center">
+                        <div class="position-relative d-inline-block mb-3">
+                            <i class="bi bi-trophy-fill text-info" style="font-size: 4rem;"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info">
+                                #3
+                            </span>
+                        </div>
+                        <h4 class="fw-bold" th:text="${book3.title}">Título</h4>
+                        <p class="text-muted mb-2" th:text="${book3.authorName}">Autor</p>
+                        <h2 class="text-info fw-bold" th:text="${book3.totalRentals}">0</h2>
+                        <p class="text-muted">alquileres totales</p>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-info" role="progressbar" 
+                                 th:style="'width: ' + ${book3.popularityPercentage} + '%'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complete Ranking Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Ranking Completo</h5>
+                <span class="badge bg-secondary" th:text="${booksStats.totalItems} + ' libro(s) encontrado(s)'">
+                    0 libro(s) encontrado(s)
+                </span>
+            </div>
+            <div class="card-body">
+                <div th:if="${booksStats.items == null or booksStats.items.isEmpty()}" class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3">No hay libros alquilados aún</p>
+                    <a th:if="${categoryIdValue != null and !categoryIdValue.isEmpty()}" 
+                       th:href="@{/admin/libros-pedidos}" 
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-x-circle"></i> Limpiar filtros
+                    </a>
+                </div>
+
+                <div th:unless="${booksStats.items == null or booksStats.items.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 80px;">Posición</th>
+                                    <th>ISBN</th>
+                                    <th>Título</th>
+                                    <th>Autor</th>
+                                    <th>Categoría</th>
+                                    <th>Alquileres</th>
+                                    <th>Tendencia Diaria</th>
+                                    <th>Popularidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="bookStat, iterStat : ${booksStats.items}" 
+                                    th:with="position=${booksStats.startItem + iterStat.index}"
+                                    th:classappend="${position == 1 ? 'table-warning' : (position == 2 ? 'table-secondary' : (position == 3 ? 'table-info' : ''))}">
+                                    <td class="text-center">
+                                        <span th:if="${position == 1}" class="badge bg-warning fs-6" th:text="${position}">1</span>
+                                        <span th:if="${position == 2}" class="badge bg-secondary fs-6" th:text="${position}">2</span>
+                                        <span th:if="${position == 3}" class="badge bg-info fs-6" th:text="${position}">3</span>
+                                        <span th:if="${position > 3}" th:text="${position}">4</span>
+                                    </td>
+                                    <td><code th:text="${bookStat.isbn}">ISBN</code></td>
+                                    <td>
+                                        <strong th:if="${position <= 3}" th:text="${bookStat.title}">Título</strong>
+                                        <span th:unless="${position <= 3}" th:text="${bookStat.title}">Título</span>
+                                    </td>
+                                    <td th:text="${bookStat.authorName}">Autor</td>
+                                    <td>
+                                        <span class="badge bg-primary" th:text="${bookStat.categoryName}">Categoría</span>
+                                    </td>
+                                    <td>
+                                        <strong th:if="${position <= 3}" th:text="${bookStat.totalRentals}">0</strong>
+                                        <span th:unless="${position <= 3}" th:text="${bookStat.totalRentals}">0</span>
+                                    </td>
+                                    <td>
+                                        <span th:class="${bookStat.trendClass}">
+                                            <i th:class="'bi ' + ${bookStat.trendIcon}"></i>
+                                            <span th:text="${#numbers.formatDecimal(bookStat.trendPercentage, 1, 1)}">0.0</span>%
+                                        </span>
+                                        <br>
+                                        <small class="text-muted">
+                                            Ayer: <span th:text="${bookStat.yesterdayRentals}">0</span> | 
+                                            Hoy: <span th:text="${bookStat.todayRentals}">0</span>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div th:class="'progress-bar ' + ${position == 1 ? 'bg-warning' : (position == 2 ? 'bg-secondary' : (position == 3 ? 'bg-info' : ''))}" 
+                                                 role="progressbar" 
+                                                 th:style="'width: ' + ${bookStat.popularityPercentage} + '%'"
+                                                 th:text="${#numbers.formatDecimal(bookStat.popularityPercentage, 1, 1)} + '%'">
+                                                0%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav th:if="${booksStats.totalPages > 1}" aria-label="Paginación de libros pedidos" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <!-- Botón Anterior -->
+                            <li class="page-item" th:classappend="${!booksStats.hasPreviousPage() ? 'disabled' : ''}">
+                                <a class="page-link" 
+                                   th:href="@{/admin/libros-pedidos(p=${booksStats.previousPage},size=${pageSizeValue},categoryId=${categoryIdValue})}">
+                                    <i class="bi bi-chevron-left"></i> Anterior
+                                </a>
+                            </li>
+                            
+                            <!-- Números de página -->
+                            <th:block th:with="pageRange=${booksStats.getPageRange(5)}">
+                                <li th:if="${pageRange[0] > 1}" class="page-item">
+                                    <a class="page-link" 
+                                       th:href="@{/admin/libros-pedidos(p=1,size=${pageSizeValue},categoryId=${categoryIdValue})}">
+                                        1
+                                    </a>
+                                </li>
+                                <li th:if="${pageRange[0] > 2}" class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                                
+                                <th:block th:each="i : ${#numbers.sequence(pageRange[0], pageRange[1])}">
+                                    <li class="page-item" th:classappend="${i == booksStats.currentPage ? 'active' : ''}">
+                                        <a class="page-link" 
+                                           th:href="@{/admin/libros-pedidos(p=${i},size=${pageSizeValue},categoryId=${categoryIdValue})}"
+                                           th:text="${i}">
+                                            1
+                                        </a>
+                                    </li>
+                                </th:block>
+                                
+                                <li th:if="${pageRange[1] < booksStats.totalPages - 1}" class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                                <li th:if="${pageRange[1] < booksStats.totalPages}" class="page-item">
+                                    <a class="page-link" 
+                                       th:href="@{/admin/libros-pedidos(p=${booksStats.totalPages},size=${pageSizeValue},categoryId=${categoryIdValue})}"
+                                       th:text="${booksStats.totalPages}">
+                                        10
+                                    </a>
+                                </li>
+                            </th:block>
+                            
+                            <!-- Botón Siguiente -->
+                            <li class="page-item" th:classappend="${!booksStats.hasNextPage() ? 'disabled' : ''}">
+                                <a class="page-link" 
+                                   th:href="@{/admin/libros-pedidos(p=${booksStats.nextPage},size=${pageSizeValue},categoryId=${categoryIdValue})}">
+                                    Siguiente <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    
+                    <!-- Page Info -->
+                    <div th:if="${booksStats.totalPages > 1}" class="text-center text-muted mt-2">
+                        <small>
+                            Mostrando <span th:text="${booksStats.startItem}">1</span> - 
+                            <span th:text="${booksStats.endItem}">10</span> de 
+                            <span th:text="${booksStats.totalItems}">100</span> libros
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts adicionales -->
+    <th:block layout:fragment="scripts">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            document.addEventListener('DOMContentLoaded', function() {
+                // Inicializar tooltips
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            });
+            /*]]>*/
+        </script>
+    </th:block>
+</body>
+</html>

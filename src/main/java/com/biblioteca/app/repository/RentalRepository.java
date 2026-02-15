@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import com.biblioteca.app.dto.RentalActiveDTO;
 import com.biblioteca.app.dto.RentalCompleteDTO;
 import com.biblioteca.app.entity.Rental;
+import com.biblioteca.app.repository.projection.BookMostRequestedProjection;
 import com.biblioteca.app.repository.projection.BookRentalStatsProjection;
 
 public interface RentalRepository extends JpaRepository<Rental, UUID> {
@@ -183,4 +184,53 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
         AND r.dueDate < :now
     """)
     long countOverdueRentals(@Param("now") LocalDateTime now);
+
+    /**
+     * Cuenta libros más pedidos con filtro opcional por categoría
+     */
+    @Query(value = """
+        SELECT COUNT(DISTINCT b.BookId) 
+        FROM Book b
+        INNER JOIN Author a ON b.AuthorId = a.AuthorId
+        INNER JOIN Category c ON b.CategoryId = c.CategoryId
+        INNER JOIN BookCopy bc ON b.BookId = bc.BookId
+        INNER JOIN Rental r ON bc.BookCopyId = r.BookCopyId
+        WHERE (:categoryId IS NULL OR b.CategoryId = UUID_TO_BIN(:categoryId))
+    """, nativeQuery = true)
+    long countMostRequestedBooks(@Param("categoryId") String categoryId);
+
+    /**
+     * Obtiene libros más pedidos con paginación y filtro por categoría
+     */
+    @Query(value = """
+        SELECT 
+            BIN_TO_UUID(b.BookId) as bookId,
+            b.Title as title,
+            b.ISBN as isbn,
+            a.FullName as authorName,
+            c.CategoryName as categoryName,
+            COUNT(r.RentalId) as totalRentals,
+            SUM(CASE 
+                WHEN DATE(r.RentalDate) = DATE(DATE_SUB(NOW(), INTERVAL 1 DAY)) 
+                THEN 1 ELSE 0 
+            END) as yesterdayRentals,
+            SUM(CASE 
+                WHEN DATE(r.RentalDate) = CURDATE() 
+                THEN 1 ELSE 0 
+            END) as todayRentals
+        FROM Book b
+        INNER JOIN Author a ON b.AuthorId = a.AuthorId
+        INNER JOIN Category c ON b.CategoryId = c.CategoryId
+        INNER JOIN BookCopy bc ON b.BookId = bc.BookId
+        INNER JOIN Rental r ON bc.BookCopyId = r.BookCopyId
+        WHERE (:categoryId IS NULL OR b.CategoryId = UUID_TO_BIN(:categoryId))
+        GROUP BY b.BookId, b.Title, b.ISBN, a.FullName, c.CategoryName
+        ORDER BY totalRentals DESC, b.Title ASC
+        LIMIT :limit OFFSET :offset
+    """, nativeQuery = true)
+    List<BookMostRequestedProjection> findMostRequestedBooks(
+        @Param("categoryId") String categoryId,
+        @Param("limit") int limit,
+        @Param("offset") int offset
+    );
 }

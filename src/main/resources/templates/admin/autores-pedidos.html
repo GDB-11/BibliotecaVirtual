@@ -1,0 +1,331 @@
+<!-- src/main/resources/templates/admin/autores-pedidos.html -->
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Autores Más Pedidos - BiblioAdmin</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-people-fill me-2"></i>Autores Más Pedidos</h2>
+                    <p class="text-muted mb-0">Ranking de autores más solicitados</p>
+                </div>
+                <div>
+                    <button class="btn btn-success" data-bs-toggle="tooltip" title="Exportar a Excel">
+                        <i class="bi bi-file-earmark-excel"></i> Exportar
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="tooltip" title="Imprimir reporte">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Alert -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Error:</strong> <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" th:action="@{/admin/autores-pedidos}">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">Nacionalidad</label>
+                            <select class="form-select" name="countryId">
+                                <option value="">Todas</option>
+                                <option th:each="country : ${countries}" 
+                                        th:value="${country.countryId}" 
+                                        th:text="${country.countryName}"
+                                        th:selected="${country.countryId.toString() == countryIdValue}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" name="statusId">
+                                <option value="">Todos</option>
+                                <option th:each="status : ${statuses}" 
+                                        th:value="${status.statusId}" 
+                                        th:text="${status.statusName}"
+                                        th:selected="${status.statusId.toString() == statusIdValue}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Top</label>
+                            <select class="form-select" name="top">
+                                <option value="10" th:selected="${topValue == 10}">Top 10</option>
+                                <option value="20" th:selected="${topValue == 20}">Top 20</option>
+                                <option value="50" th:selected="${topValue == 50}">Top 50</option>
+                                <option value="100" th:selected="${topValue == 100}">Top 100</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-funnel"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Top 3 Authors -->
+        <div th:if="${topAuthors != null and topAuthors.size() >= 3}" class="row g-4 mb-4">
+            <!-- Primer Lugar -->
+            <div th:with="author1=${topAuthors[0]}" class="col-md-4">
+                <div class="card border-warning shadow-lg">
+                    <div class="card-body text-center">
+                        <div class="position-relative d-inline-block mb-3">
+                            <img th:if="${author1.photoUrl != null and !author1.photoUrl.isEmpty()}"
+                                 th:src="${author1.photoUrl}" 
+                                 class="rounded-circle border border-warning border-4" 
+                                 th:alt="${author1.fullName}"
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                            <img th:unless="${author1.photoUrl != null and !author1.photoUrl.isEmpty()}"
+                                 th:src="'https://ui-avatars.com/api/?name=' + ${author1.fullName.replace(' ', '+')} + '&size=120&background=ffc107&color=000'" 
+                                 class="rounded-circle border border-warning border-4" 
+                                 th:alt="${author1.fullName}">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning fs-6">
+                                #1
+                            </span>
+                        </div>
+                        <h4 class="fw-bold" th:text="${author1.fullName}">Autor</h4>
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-flag-fill"></i> <span th:text="${author1.countryName}">País</span>
+                        </p>
+                        <h2 class="text-warning fw-bold" th:text="${author1.totalRentals}">0</h2>
+                        <p class="text-muted mb-3">alquileres totales</p>
+                        <div class="row g-2 text-start">
+                            <div class="col-6">
+                                <small class="text-muted">Libros:</small>
+                                <div class="fw-bold" th:text="${author1.totalBooks}">0</div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Disponibles:</small>
+                                <div class="fw-bold" th:text="${author1.availableCopies}">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Segundo Lugar -->
+            <div th:with="author2=${topAuthors[1]}" class="col-md-4">
+                <div class="card border-secondary shadow">
+                    <div class="card-body text-center">
+                        <div class="position-relative d-inline-block mb-3">
+                            <img th:if="${author2.photoUrl != null and !author2.photoUrl.isEmpty()}"
+                                 th:src="${author2.photoUrl}" 
+                                 class="rounded-circle border border-secondary border-4" 
+                                 th:alt="${author2.fullName}"
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                            <img th:unless="${author2.photoUrl != null and !author2.photoUrl.isEmpty()}"
+                                 th:src="'https://ui-avatars.com/api/?name=' + ${author2.fullName.replace(' ', '+')} + '&size=120&background=6c757d&color=fff'" 
+                                 class="rounded-circle border border-secondary border-4" 
+                                 th:alt="${author2.fullName}">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary fs-6">
+                                #2
+                            </span>
+                        </div>
+                        <h4 class="fw-bold" th:text="${author2.fullName}">Autor</h4>
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-flag-fill"></i> <span th:text="${author2.countryName}">País</span>
+                        </p>
+                        <h2 class="text-secondary fw-bold" th:text="${author2.totalRentals}">0</h2>
+                        <p class="text-muted mb-3">alquileres totales</p>
+                        <div class="row g-2 text-start">
+                            <div class="col-6">
+                                <small class="text-muted">Libros:</small>
+                                <div class="fw-bold" th:text="${author2.totalBooks}">0</div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Disponibles:</small>
+                                <div class="fw-bold" th:text="${author2.availableCopies}">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tercer Lugar -->
+            <div th:with="author3=${topAuthors[2]}" class="col-md-4">
+                <div class="card border-info shadow">
+                    <div class="card-body text-center">
+                        <div class="position-relative d-inline-block mb-3">
+                            <img th:if="${author3.photoUrl != null and !author3.photoUrl.isEmpty()}"
+                                 th:src="${author3.photoUrl}" 
+                                 class="rounded-circle border border-info border-4" 
+                                 th:alt="${author3.fullName}"
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                            <img th:unless="${author3.photoUrl != null and !author3.photoUrl.isEmpty()}"
+                                 th:src="'https://ui-avatars.com/api/?name=' + ${author3.fullName.replace(' ', '+')} + '&size=120&background=0dcaf0&color=000'" 
+                                 class="rounded-circle border border-info border-4" 
+                                 th:alt="${author3.fullName}">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info fs-6">
+                                #3
+                            </span>
+                        </div>
+                        <h4 class="fw-bold" th:text="${author3.fullName}">Autor</h4>
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-flag-fill"></i> <span th:text="${author3.countryName}">País</span>
+                        </p>
+                        <h2 class="text-info fw-bold" th:text="${author3.totalRentals}">0</h2>
+                        <p class="text-muted mb-3">alquileres totales</p>
+                        <div class="row g-2 text-start">
+                            <div class="col-6">
+                                <small class="text-muted">Libros:</small>
+                                <div class="fw-bold" th:text="${author3.totalBooks}">0</div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Disponibles:</small>
+                                <div class="fw-bold" th:text="${author3.availableCopies}">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary bg-gradient text-white">
+                    <div class="card-body">
+                        <h6><i class="bi bi-people me-2"></i>Total Autores</h6>
+                        <h3 class="mb-0" th:text="${totalAuthors}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success bg-gradient text-white">
+                    <div class="card-body">
+                        <h6><i class="bi bi-star me-2"></i>Con Alquileres</h6>
+                        <h3 class="mb-0" th:text="${totalAuthorsWithRentals}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info bg-gradient text-white">
+                    <div class="card-body">
+                        <h6><i class="bi bi-bookmark-check me-2"></i>Total Alquileres</h6>
+                        <h3 class="mb-0" th:text="${totalRentals}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning bg-gradient text-white">
+                    <div class="card-body">
+                        <h6><i class="bi bi-graph-up me-2"></i>Promedio/Autor</h6>
+                        <h3 class="mb-0" th:text="${#numbers.formatDecimal(avgRentalsPerAuthor, 1, 1)}">0.0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ranking Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Ranking Completo</h5>
+                <span class="badge bg-secondary" th:text="${topAuthors.size()} + ' resultado(s)'">
+                    0 resultado(s)
+                </span>
+            </div>
+            <div class="card-body p-0">
+                <div th:if="${topAuthors == null or topAuthors.isEmpty()}" class="alert alert-info m-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <span th:if="${countryIdValue != null and !countryIdValue.isEmpty() or statusIdValue != null and !statusIdValue.isEmpty()}">
+                        No se encontraron autores con alquileres para los filtros aplicados.
+                    </span>
+                    <span th:unless="${countryIdValue != null and !countryIdValue.isEmpty() or statusIdValue != null and !statusIdValue.isEmpty()}">
+                        No hay autores con alquileres registrados en el sistema.
+                    </span>
+                </div>
+
+                <div th:unless="${topAuthors == null or topAuthors.isEmpty()}" class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="text-center" width="80">Ranking</th>
+                                <th>Autor</th>
+                                <th class="text-center">Nacionalidad</th>
+                                <th class="text-center">Libros</th>
+                                <th class="text-center">Ejemplares</th>
+                                <th class="text-center">Alquileres</th>
+                                <th class="text-center">Promedio/Libro</th>
+                                <th class="text-center">Disponibilidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="author, iterStat : ${topAuthors}">
+                                <td class="text-center" th:with="ranking=${iterStat.index + 1}">
+                                    <span th:if="${ranking == 1}" class="badge bg-warning fs-6" th:text="'#' + ${ranking}">#1</span>
+                                    <span th:if="${ranking == 2}" class="badge bg-secondary fs-6" th:text="'#' + ${ranking}">#2</span>
+                                    <span th:if="${ranking == 3}" class="badge bg-info fs-6" th:text="'#' + ${ranking}">#3</span>
+                                    <span th:if="${ranking > 3}" class="badge bg-light text-dark fs-6" th:text="'#' + ${ranking}">#4</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:if="${author.photoUrl != null and !author.photoUrl.isEmpty()}"
+                                             th:src="${author.photoUrl}" 
+                                             class="rounded-circle me-2" 
+                                             th:alt="${author.fullName}"
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        <img th:unless="${author.photoUrl != null and !author.photoUrl.isEmpty()}"
+                                             th:src="'https://ui-avatars.com/api/?name=' + ${author.fullName.replace(' ', '+')} + '&size=40&background=random'" 
+                                             class="rounded-circle me-2" 
+                                             th:alt="${author.fullName}">
+                                        <strong th:text="${author.fullName}">Autor</strong>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary">
+                                        <i class="bi bi-flag-fill"></i> <span th:text="${author.countryName}">País</span>
+                                    </span>
+                                </td>
+                                <td class="text-center" th:text="${author.totalBooks}">0</td>
+                                <td class="text-center" th:text="${author.totalCopies}">0</td>
+                                <td class="text-center"><strong th:text="${author.totalRentals}">0</strong></td>
+                                <td class="text-center" th:text="${#numbers.formatDecimal(author.avgRentalsPerBook, 1, 1)}">0.0</td>
+                                <td class="text-center" th:with="availRate=${author.availabilityRate}">
+                                    <div class="progress" style="height: 20px;">
+                                        <div th:class="'progress-bar ' + ${availRate >= 70 ? 'bg-success' : (availRate >= 40 ? 'bg-warning' : 'bg-danger')}" 
+                                             role="progressbar" 
+                                             th:style="'width: ' + ${availRate} + '%'">
+                                            <span th:text="${#numbers.formatDecimal(availRate, 0, 0)} + '%'">0%</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts adicionales -->
+    <th:block layout:fragment="scripts">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            document.addEventListener('DOMContentLoaded', function() {
+                // Inicializar tooltips
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            });
+            /*]]>*/
+        </script>
+    </th:block>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!-- src/main/resources/templates/admin/fragments/rental-detail.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="rental-detail" th:if="${rental != null}">
+        <div class="row">
+            <!-- Columna izquierda: Informacion del libro y ejemplar -->
+            <div class="col-md-6">
+                <h6 class="border-bottom pb-2 mb-3">
+                    <i class="bi bi-book me-2"></i>Información del Libro
+                </h6>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Título</label>
+                    <p class="mb-1 fw-bold" th:text="${rental.bookCopy?.book?.title ?: 'N/A'}">Título del libro</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Autor</label>
+                    <p class="mb-1" th:text="${rental.bookCopy?.book?.author?.fullName ?: 'N/A'}">Autor</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">ISBN</label>
+                    <p class="mb-1">
+                        <code th:text="${rental.bookCopy?.book?.isbn ?: 'N/A'}">ISBN</code>
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Categoría</label>
+                    <p class="mb-1">
+                        <span class="badge bg-info" th:text="${rental.bookCopy?.book?.category?.categoryName ?: 'N/A'}">Categoría</span>
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Código del Ejemplar</label>
+                    <p class="mb-1">
+                        <code class="text-primary" th:text="${rental.bookCopy?.bookCopyId ?: 'N/A'}">Código</code>
+                    </p>
+                </div>
+                
+                <h6 class="border-bottom pb-2 mb-3 mt-4">
+                    <i class="bi bi-person me-2"></i>Información del Usuario
+                </h6>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Email</label>
+                    <p class="mb-1" th:text="${rental.user?.email ?: 'N/A'}">email@ejemplo.com</p>
+                </div>
+            </div>
+            
+            <!-- Columna derecha: Informacion del alquiler -->
+            <div class="col-md-6">
+                <h6 class="border-bottom pb-2 mb-3">
+                    <i class="bi bi-calendar-check me-2"></i>Información del Alquiler
+                </h6>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Código de Alquiler</label>
+                    <p class="mb-1">
+                        <code th:text="${rental.rentalId}">ID</code>
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Estado</label>
+                    <p class="mb-1">
+                        <span th:with="
+                            now=${T(java.time.LocalDateTime).now()},
+                            isOverdue=${now.isAfter(rental.dueDate)},
+                            statusLabel=${isOverdue ? 'Vencido' : rental.rentalStatus.rentalStatusName},
+                            statusClass=${isOverdue ? 'bg-danger' : (rental.rentalStatus.rentalStatusName == 'En Proceso' ? 'bg-success' : 'bg-secondary')}"
+                            class="badge" 
+                            th:classappend="${statusClass}"
+                            th:text="${statusLabel}">
+                            Estado
+                        </span>
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Fecha de Alquiler</label>
+                    <p class="mb-1" th:text="${#temporals.format(rental.rentalDate, 'dd/MM/yyyy HH:mm')}">Fecha</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Fecha de Vencimiento</label>
+                    <p class="mb-1" th:text="${#temporals.format(rental.dueDate, 'dd/MM/yyyy HH:mm')}">Vencimiento</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Días de Alquiler</label>
+                    <p class="mb-1">
+                        <span class="badge bg-primary" th:text="${rental.rentalDays} + ' dias'">X dias</span>
+                    </p>
+                </div>
+                
+                <div th:with="
+                    now=${T(java.time.LocalDateTime).now()},
+                    isOverdue=${now.isAfter(rental.dueDate)},
+                    daysOverdue=${isOverdue ? T(java.time.temporal.ChronoUnit).DAYS.between(rental.dueDate.toLocalDate(), now.toLocalDate()) : 0}">
+                    
+                    <div th:if="${isOverdue}" class="mb-3">
+                        <label class="text-muted small">Días de Retraso</label>
+                        <p class="mb-1">
+                            <span class="badge bg-danger" th:text="${daysOverdue} + ' dias'">X dias</span>
+                        </p>
+                    </div>
+                    
+                    <h6 class="border-bottom pb-2 mb-3 mt-4">
+                        <i class="bi bi-cash-coin me-2"></i>Información de Costos
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="text-muted small">Tarifa Diaria</label>
+                        <p class="mb-1">
+                            <strong>S/ </strong><span th:text="${#numbers.formatDecimal(rental.dailyRate, 1, 2)}">0.00</span>
+                        </p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="text-muted small">Costo Base</label>
+                        <p class="mb-1">
+                            <strong>S/ </strong><span th:text="${#numbers.formatDecimal(rental.dailyRate * rental.rentalDays, 1, 2)}">0.00</span>
+                            <small class="text-muted">
+                                (<span th:text="${rental.rentalDays}">X</span> días × S/ <span th:text="${#numbers.formatDecimal(rental.dailyRate, 1, 2)}">0.00</span>)
+                            </small>
+                        </p>
+                    </div>
+                    
+                    <div th:if="${isOverdue and penaltyRate != null}" class="mb-3">
+                        <label class="text-muted small">Penalidad por Retraso</label>
+                        <p class="mb-1 text-danger">
+                            <strong>S/ </strong><span th:text="${#numbers.formatDecimal(penaltyRate * daysOverdue, 1, 2)}">0.00</span>
+                            <small class="text-muted">
+                                (<span th:text="${daysOverdue}">X</span> dias × S/ <span th:text="${#numbers.formatDecimal(penaltyRate, 1, 2)}">0.00</span>)
+                            </small>
+                        </p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="text-muted small">Costo Total</label>
+                        <p class="mb-1">
+                            <strong class="fs-5 text-primary">
+                                S/ <span th:text="${isOverdue and penaltyRate != null 
+                                    ? #numbers.formatDecimal((rental.dailyRate * rental.rentalDays) + (penaltyRate * daysOverdue), 1, 2)
+                                    : #numbers.formatDecimal(rental.totalCost, 1, 2)}">0.00</span>
+                            </strong>
+                        </p>
+                    </div>
+                </div>
+                
+                <div th:if="${rental.notes != null and !#strings.isEmpty(rental.notes)}" class="mb-3">
+                    <label class="text-muted small">Notas</label>
+                    <p class="mb-1 text-muted fst-italic" th:text="${rental.notes}">Notas del alquiler</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fechas de auditoria -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="alert alert-light border mb-0">
+                    <small class="text-muted">
+                        <i class="bi bi-clock-history me-1"></i>
+                        <strong>Creado:</strong> <span th:text="${#temporals.format(rental.createdAt, 'dd/MM/yyyy HH:mm')}">Fecha</span>
+                        <span class="mx-2">|</span>
+                        <strong>Última actualización:</strong> <span th:text="${#temporals.format(rental.updatedAt, 'dd/MM/yyyy HH:mm')}">Fecha</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:fragment="rental-detail" th:unless="${rental != null}">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            No se pudo cargar la información del alquiler.
+        </div>
+    </div>
+</body>
+</html>
