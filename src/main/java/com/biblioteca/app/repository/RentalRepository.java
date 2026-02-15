@@ -123,4 +123,64 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
         ORDER BY r.RentalDate
     """, nativeQuery = true)
     List<RentalCompleteDTO> findAllRentals();
+
+    /**
+     * Busca alquileres activos con filtros de búsqueda y paginación
+     */
+    @Query(value = """
+        SELECT r FROM Rental r
+        WHERE r.rentalStatus.rentalStatusName = 'En Proceso'
+        AND r.returnDate IS NULL
+        AND (:search IS NULL OR :search = '' OR 
+             LOWER(r.bookCopy.book.title) LIKE LOWER(CONCAT('%', :search, '%')) OR
+             LOWER(r.bookCopy.book.author.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR
+             LOWER(r.user.email) LIKE LOWER(CONCAT('%', :search, '%')) OR
+             CAST(r.rentalId AS string) LIKE CONCAT('%', :search, '%'))
+        AND (:dateFrom IS NULL OR r.rentalDate >= :dateFrom)
+        AND (:dateTo IS NULL OR r.rentalDate <= :dateTo)
+        ORDER BY r.dueDate ASC
+    """)
+    org.springframework.data.domain.Page<Rental> findActiveRentalsWithFilters(
+        @Param("search") String search,
+        @Param("dateFrom") LocalDateTime dateFrom,
+        @Param("dateTo") LocalDateTime dateTo,
+        org.springframework.data.domain.Pageable pageable
+    );
+
+    /**
+     * Cuenta alquileres activos que están al día (no vencidos ni por vencer pronto)
+     */
+    @Query(value = """
+        SELECT COUNT(r) FROM Rental r
+        WHERE r.rentalStatus.rentalStatusName = 'En Proceso'
+        AND r.returnDate IS NULL
+        AND r.dueDate > :dueSoonThreshold
+    """)
+    long countOnTimeRentals(@Param("dueSoonThreshold") LocalDateTime dueSoonThreshold);
+
+    /**
+     * Cuenta alquileres activos que están por vencer pronto
+     */
+    @Query(value = """
+        SELECT COUNT(r) FROM Rental r
+        WHERE r.rentalStatus.rentalStatusName = 'En Proceso'
+        AND r.returnDate IS NULL
+        AND r.dueDate > :now
+        AND r.dueDate <= :dueSoonThreshold
+    """)
+    long countDueSoonRentals(
+        @Param("now") LocalDateTime now,
+        @Param("dueSoonThreshold") LocalDateTime dueSoonThreshold
+    );
+
+    /**
+     * Cuenta alquileres vencidos
+     */
+    @Query(value = """
+        SELECT COUNT(r) FROM Rental r
+        WHERE r.rentalStatus.rentalStatusName = 'En Proceso'
+        AND r.returnDate IS NULL
+        AND r.dueDate < :now
+    """)
+    long countOverdueRentals(@Param("now") LocalDateTime now);
 }

@@ -7,16 +7,20 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.biblioteca.app.dto.RentalActiveDTO;
 import com.biblioteca.app.dto.RentalCompleteDTO;
 import com.biblioteca.app.dto.rental.BookRentalStatsDTO;
+import com.biblioteca.app.dto.shared.PagedResult;
 import com.biblioteca.app.entity.Rental;
 import com.biblioteca.app.repository.RentalRepository;
 import com.biblioteca.app.repository.projection.BookRentalStatsProjection;
+import com.biblioteca.app.helper.PageMapper;
 
 /**
  * Servicio para la gestión de alquileres
@@ -135,10 +139,101 @@ public class RentalService {
         return rentalRepository.findAllRentals();
     }
 
-    // ========== MÉTODOS PRIVADOS DE CONVERSIÓN ==========
+    /**
+     * Busca alquileres activos con filtros y paginación
+     * 
+     * @param page Número de página (1-indexed)
+     * @param size Tamaño de página
+     * @param search Término de búsqueda
+     * @param statusFilter Filtro de estado (vencer/vencido)
+     * @param dueSoonDays Días para considerar "por vencer"
+     * @param dateFrom Fecha desde (formato yyyy-MM-dd)
+     * @param dateTo Fecha hasta (formato yyyy-MM-dd)
+     * @return Resultado paginado de alquileres activos
+     */
+    public PagedResult<Rental> findActiveRentals(
+            int page, 
+            int size, 
+            String search, 
+            String statusFilter, 
+            int dueSoonDays,
+            String dateFrom, 
+            String dateTo) {
+        
+        Pageable pageable = PageRequest.of(page - 1, size);
+        
+        LocalDateTime dateFromParsed = null;
+        LocalDateTime dateToParsed = null;
+        
+        if (dateFrom != null && !dateFrom.isEmpty()) {
+            dateFromParsed = LocalDateTime.parse(dateFrom + "T00:00:00");
+        }
+        
+        if (dateTo != null && !dateTo.isEmpty()) {
+            dateToParsed = LocalDateTime.parse(dateTo + "T23:59:59");
+        }
+        
+        Page<Rental> rentalsPage = rentalRepository.findActiveRentalsWithFilters(
+            search, dateFromParsed, dateToParsed, pageable);
+        
+        List<Rental> filteredRentals = rentalsPage.getContent();
+        
+        // Filtrar por estado si es necesario
+        if (statusFilter != null && !statusFilter.isEmpty()) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime dueSoonThreshold = now.plusDays(dueSoonDays);
+            
+            if ("vencer".equals(statusFilter)) {
+                filteredRentals = filteredRentals.stream()
+                    .filter(r -> r.getDueDate().isAfter(now) && r.getDueDate().isBefore(dueSoonThreshold))
+                    .collect(Collectors.toList());
+            } else if ("vencido".equals(statusFilter)) {
+                filteredRentals = filteredRentals.stream()
+                    .filter(r -> r.getDueDate().isBefore(now))
+                    .collect(Collectors.toList());
+            }
+        }
+        
+        return PageMapper.toPagedResult(filteredRentals, rentalsPage.getTotalElements(), page, size);
+    }
 
     /**
-     * Convierte una proyección a DTO
+     * Cuenta alquileres activos que estan al dia
+     */
+    public int getOnTimeRentalsCount(int dueSoonDays) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime dueSoonThreshold = now.plusDays(dueSoonDays);
+        return (int) rentalRepository.countOnTimeRentals(dueSoonThreshold);
+    }
+
+    /**
+     * Cuenta alquileres que estan por vencer pronto
+     */
+    public int getDueSoonRentalsCount(int dueSoonDays) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime dueSoonThreshold = now.plusDays(dueSoonDays);
+        return (int) rentalRepository.countDueSoonRentals(now, dueSoonThreshold);
+    }
+
+    /**
+     * Cuenta alquileres vencidos
+     */
+    public int getOverdueRentalsCount() {
+        LocalDateTime now = LocalDateTime.now();
+        return (int) rentalRepository.countOverdueRentals(now);
+    }
+
+    /**
+     * Obtiene el total de alquileres activos
+     */
+    public int getActiveRentalsCount() {
+        return (int) rentalRepository.countActiveRentals();
+    }
+
+    // ========== METODOS PRIVADOS DE CONVERSIÓN ==========
+
+    /**
+     * Convierte una proyeccion a DTO
      */
     private BookRentalStatsDTO toDTO(BookRentalStatsProjection projection) {
         return new BookRentalStatsDTO(
