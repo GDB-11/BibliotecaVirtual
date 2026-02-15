@@ -109,4 +109,28 @@ public class PageMapper {
     public static int toUserPageNumber(int pageBase0) {
         return pageBase0 + 1;
     }
+
+    /**
+     * Crea un PagedResult desde una lista ya filtrada con información de paginación manual.
+     * Útil cuando se necesita filtrar en memoria después de obtener resultados de BD.
+     * 
+     * @param items Lista de elementos (ya filtrada)
+     * @param totalElements Total de elementos antes del filtrado en memoria
+     * @param currentPage Página actual (base 1)
+     * @param pageSize Tamaño de página
+     * @return PagedResult con los elementos proporcionados
+     */
+    public static <T> PagedResult<T> toPagedResult(
+            List<T> items, 
+            long totalElements, 
+            int currentPage, 
+            int pageSize) {
+        
+        return new PagedResult<>(
+            items,
+            currentPage,
+            pageSize,
+            (int) totalElements
+        );
+    }
 }
