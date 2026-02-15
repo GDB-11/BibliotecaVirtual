@@ -12,7 +12,13 @@ import com.biblioteca.app.entity.BookCopyStatus;
 public interface BookCopyStatusRepository extends JpaRepository<BookCopyStatus, UUID> {
 
     /**
+<<<<<<< HEAD
      * Busca un estado por nombre
      */
     Optional<BookCopyStatus> findByBookCopyStatusName(String name);
+=======
+     * Busca un estado de ejemplar por su nombre
+     */
+    Optional<BookCopyStatus> findByBookCopyStatusName(String statusName);
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 }

@@ -29,6 +29,9 @@ public interface StatusRepository extends JpaRepository<Status, UUID> {
      * @return true si existe, false si no
      */
     boolean existsByStatusName(String statusName);
+<<<<<<< HEAD
     
 
+=======
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 }

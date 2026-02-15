@@ -152,6 +152,7 @@ public class BookService {
     public List<BookActiveDTO> getActiveBooks() {
         return bookRepository.findActiveBooks();
     }
+<<<<<<< HEAD
     
     
     
@@ -211,4 +212,6 @@ public class BookService {
     
     
     
+=======
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 }

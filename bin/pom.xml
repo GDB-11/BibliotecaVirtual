@@ -30,6 +30,7 @@
 		<java.version>25</java.version>
 	</properties>
 	<dependencies>
+<<<<<<< HEAD
 		<!-- Spring Boot Starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -80,6 +81,24 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
+=======
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Web / REST -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 		
 		<!-- JPA -->
 		<dependency>
@@ -93,6 +112,7 @@
 		    <artifactId>mysql-connector-j</artifactId>
 		    <scope>runtime</scope>
 		</dependency>
+<<<<<<< HEAD
 
 		<!-- Testing -->
         <dependency>
@@ -106,6 +126,8 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+=======
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 		
 	</dependencies>
 

@@ -121,6 +121,7 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
         ORDER BY b.Title
     """, nativeQuery = true)
     List<BookActiveDTO> findActiveBooks();
+<<<<<<< HEAD
     
     
     
@@ -140,4 +141,6 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
     
     
     
+=======
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 }

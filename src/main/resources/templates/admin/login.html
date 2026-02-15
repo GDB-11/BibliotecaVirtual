@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+<!-- src/main/resources/templates/admin/login.html -->
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -6,9 +10,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Admin Login - BiblioAdmin</title>
     
+<<<<<<< HEAD
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous" />
 
+=======
+    <!-- Bootstrap 5.3.8 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous" />
+
+    <!-- Bootstrap Icons -->
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
     
     <style>
@@ -92,13 +104,17 @@
             border-radius: 10px;
             transition: transform 0.3s;
             color: white;
+<<<<<<< HEAD
             margin-bottom: 20px; /* Espacio para el nuevo enlace */
+=======
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
         }
         .btn-login:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
             color: white;
         }
+<<<<<<< HEAD
         /* Estilo para el nuevo enlace */
         .user-link {
             text-align: center;
@@ -112,6 +128,8 @@
         .user-link a:hover {
             text-decoration: underline;
         }
+=======
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
         .alert {
             border-radius: 10px;
             border: none;
@@ -133,6 +151,10 @@
 <body>
     <div class="container">
         <div class="login-container row g-0">
+<<<<<<< HEAD
+=======
+            <!-- Left Side - Branding -->
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
             <div class="col-md-5 login-left">
                 <i class="bi bi-book-fill"></i>
                 <h2>BiblioAdmin</h2>
@@ -143,27 +165,47 @@
                 </div>
             </div>
             
+<<<<<<< HEAD
+=======
+            <!-- Right Side - Login Form -->
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
             <div class="col-md-7 login-right">
                 <div class="login-header">
                     <h3>Iniciar Sesión</h3>
                     <p>Acceda al panel de administración</p>
                 </div>
                 
+<<<<<<< HEAD
+=======
+                <!-- Success Message (Logout) -->
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
                 <div th:if="${success}" class="alert alert-success d-flex align-items-center" role="alert">
                     <i class="bi bi-check-circle-fill me-2"></i>
                     <div th:text="${success}">Sesión cerrada correctamente</div>
                 </div>
                 
+<<<<<<< HEAD
+=======
+                <!-- Warning Messages -->
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
                 <div th:if="${warning}" class="alert alert-warning d-flex align-items-center" role="alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
                     <div th:text="${warning}">Advertencia</div>
                 </div>
                 
+<<<<<<< HEAD
+=======
+                <!-- Error Message -->
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
                 <div th:if="${error}" class="alert alert-danger d-flex align-items-center" role="alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
                     <div th:text="${error}">Error al iniciar sesión</div>
                 </div>
                 
+<<<<<<< HEAD
+=======
+                <!-- Login Form -->
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
                 <form th:action="@{/admin/login}" method="post">
                     <div class="mb-3">
                         <label for="email" class="form-label">
@@ -219,6 +261,7 @@
                     <button type="submit" class="btn btn-primary btn-login w-100">
                         <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
                     </button>
+<<<<<<< HEAD
 
                     <div class="user-link">
                         <i class="bi bi-person me-1"></i>
@@ -235,11 +278,17 @@
 					    </small>
 					</div>
                     
+=======
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
                 </form>
             </div>
         </div>
     </div>
     
+<<<<<<< HEAD
+=======
+    <!-- Bootstrap JS -->
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>

@@ -42,7 +42,11 @@ public class SecurityConfig {
     public SecurityFilterChain adminSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .securityMatcher("/admin/**")
+<<<<<<< HEAD
             .userDetailsService(userDetailsService)
+=======
+            .userDetailsService(userDetailsService)  // ✅ AÑADE ESTO
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/admin/login", "/admin/css/**", "/admin/js/**", "/admin/images/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -70,8 +74,15 @@ public class SecurityConfig {
                 })
             )
             .sessionManagement(session -> session
+<<<<<<< HEAD
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false)
+=======
+                .sessionConcurrency(concurrency -> concurrency
+                    .maximumSessions(1)
+                    .maxSessionsPreventsLogin(false)
+                )
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
             );
 
         return http.build();
@@ -86,6 +97,7 @@ public class SecurityConfig {
     public SecurityFilterChain clientSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .securityMatcher("/**")
+<<<<<<< HEAD
             .userDetailsService(userDetailsService)
             .authorizeHttpRequests(auth -> auth
                 // Rutas públicas
@@ -106,20 +118,45 @@ public class SecurityConfig {
                 .loginProcessingUrl("/login")
                 .defaultSuccessUrl("/user/dashboard", true)
                 .failureUrl("/user/login?error=true")
+=======
+            .userDetailsService(userDetailsService)  // ✅ AÑADE ESTO
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/books/**", "/authors/**").permitAll()
+                .requestMatchers("/rentals/**", "/profile/**").hasAnyRole("USER", "ADMIN")
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
+                .defaultSuccessUrl("/", true)
+                .failureUrl("/login?error=true")
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .permitAll()
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
+<<<<<<< HEAD
                 .logoutSuccessUrl("/user/login?logout=success")
+=======
+                .logoutSuccessUrl("/login?logout=success")
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
             )
             .sessionManagement(session -> session
+<<<<<<< HEAD
                 .maximumSessions(2)
                 .maxSessionsPreventsLogin(false)
+=======
+                .sessionConcurrency(concurrency -> concurrency
+                    .maximumSessions(2)
+                    .maxSessionsPreventsLogin(false)
+                )
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
             );
 
         return http.build();

@@ -299,6 +299,7 @@ public class BookCopyService {
     public String getDiscontinuedStatusId() {
         return bookCopyStatusService.getDiscontinuedStatusId().toString();
     }
+<<<<<<< HEAD
     
     
     
@@ -322,4 +323,6 @@ public class BookCopyService {
     
     
     
+=======
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 }

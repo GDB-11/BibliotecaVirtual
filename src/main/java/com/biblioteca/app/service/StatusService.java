@@ -171,6 +171,7 @@ public class StatusService {
     public void deleteBookStatus(UUID bookStatusId) {
         bookStatusRepository.deleteById(bookStatusId);
     }
+<<<<<<< HEAD
     
     
     
@@ -187,4 +188,6 @@ public class StatusService {
     
     
     
+=======
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 }

@@ -1,6 +1,9 @@
 package com.biblioteca.app.service;
 
+<<<<<<< HEAD
 import java.math.BigDecimal;
+=======
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -11,12 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+<<<<<<< HEAD
 import org.springframework.data.domain.Sort;
+=======
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.biblioteca.app.dto.RentalActiveDTO;
 import com.biblioteca.app.dto.RentalCompleteDTO;
+<<<<<<< HEAD
 import com.biblioteca.app.dto.rental.BookRentalStatsDTO;
 import com.biblioteca.app.dto.shared.PagedResult;
 import com.biblioteca.app.entity.BookCopy;
@@ -30,6 +37,16 @@ import com.biblioteca.app.repository.RentalRepository;
 import com.biblioteca.app.repository.RentalStatusRepository;
 import com.biblioteca.app.repository.projection.BookRentalStatsProjection;
 import com.biblioteca.app.repository.UserRepository;
+=======
+import com.biblioteca.app.dto.rental.BookMostRequestedDTO;
+import com.biblioteca.app.dto.rental.BookRentalStatsDTO;
+import com.biblioteca.app.dto.shared.PagedResult;
+import com.biblioteca.app.entity.Rental;
+import com.biblioteca.app.repository.RentalRepository;
+import com.biblioteca.app.repository.projection.BookMostRequestedProjection;
+import com.biblioteca.app.repository.projection.BookRentalStatsProjection;
+import com.biblioteca.app.helper.PageMapper;
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 
 /**
  * Servicio para la gestión de alquileres
@@ -41,6 +58,7 @@ public class RentalService {
     @Autowired
     private RentalRepository rentalRepository;
 
+<<<<<<< HEAD
     @Autowired
     private RentalStatusRepository rentalStatusRepository;
     
@@ -58,6 +76,8 @@ public class RentalService {
     
     // ========== MÉTODOS EXISTENTES ==========
     
+=======
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
     /**
      * Obtiene un alquiler por ID
      */
@@ -167,6 +187,18 @@ public class RentalService {
 
     /**
      * Busca alquileres activos con filtros y paginación
+<<<<<<< HEAD
+=======
+     * 
+     * @param page Número de página (1-indexed)
+     * @param size Tamaño de página
+     * @param search Término de búsqueda
+     * @param statusFilter Filtro de estado (vencer/vencido)
+     * @param dueSoonDays Días para considerar "por vencer"
+     * @param dateFrom Fecha desde (formato yyyy-MM-dd)
+     * @param dateTo Fecha hasta (formato yyyy-MM-dd)
+     * @return Resultado paginado de alquileres activos
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
      */
     public PagedResult<Rental> findActiveRentals(
             int page, 
@@ -195,6 +227,10 @@ public class RentalService {
         
         List<Rental> filteredRentals = rentalsPage.getContent();
         
+<<<<<<< HEAD
+=======
+        // Filtrar por estado si es necesario
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
         if (statusFilter != null && !statusFilter.isEmpty()) {
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime dueSoonThreshold = now.plusDays(dueSoonDays);
@@ -246,8 +282,56 @@ public class RentalService {
         return (int) rentalRepository.countActiveRentals();
     }
 
+<<<<<<< HEAD
     // ========== METODOS PRIVADOS DE CONVERSIÓN ==========
 
+=======
+    /**
+     * Obtiene libros más pedidos con paginación y filtro por categoría
+     */
+    public PagedResult<BookMostRequestedDTO> getMostRequestedBooks(
+            int currentPage, 
+            int pageSize, 
+            String categoryId) {
+        
+        // Validar página
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+        
+        // Calcular offset
+        int offset = (currentPage - 1) * pageSize;
+        
+        // Obtener total de registros
+        long totalItems = rentalRepository.countMostRequestedBooks(categoryId);
+        
+        // Obtener datos paginados
+        List<BookMostRequestedProjection> projections = rentalRepository.findMostRequestedBooks(
+            categoryId, pageSize, offset);
+        
+        // Convertir a DTOs
+        List<BookMostRequestedDTO> items = projections.stream()
+            .map(this::toMostRequestedDTO)
+            .collect(Collectors.toList());
+        
+        // Calcular porcentaje de popularidad
+        if (!items.isEmpty()) {
+            Integer maxRentals = items.get(0).getTotalRentals();
+            items.forEach(item -> item.setPopularityPercentage(maxRentals));
+        }
+        
+        // Crear resultado paginado
+        PagedResult<BookMostRequestedDTO> result = new PagedResult<>(items, currentPage, pageSize, (int) totalItems);
+        
+        return result;
+    }
+
+    // ========== METODOS PRIVADOS DE CONVERSIÓN ==========
+
+    /**
+     * Convierte una proyeccion a DTO
+     */
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
     private BookRentalStatsDTO toDTO(BookRentalStatsProjection projection) {
         return new BookRentalStatsDTO(
             projection.getBookId(),
@@ -259,6 +343,7 @@ public class RentalService {
             projection.getActiveRentals()
         );
     }
+<<<<<<< HEAD
     
     // ========== MÉTODOS PARA MÓDULO DE USUARIO ==========
 
@@ -408,5 +493,22 @@ public class RentalService {
     public List<Rental> findLastByUser(UUID userId, int limit) {
         Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "rentalDate"));
         return rentalRepository.findByUser_UserId(userId, pageable).getContent();
+=======
+
+    /**
+     * Convierte una proyección de libros más pedidos a DTO
+     */
+    private BookMostRequestedDTO toMostRequestedDTO(BookMostRequestedProjection projection) {
+        return new BookMostRequestedDTO(
+            projection.getBookId(),
+            projection.getTitle(),
+            projection.getIsbn(),
+            projection.getAuthorName(),
+            projection.getCategoryName(),
+            projection.getTotalRentals(),
+            projection.getYesterdayRentals(),
+            projection.getTodayRentals()
+        );
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
     }
 }

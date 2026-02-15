@@ -109,6 +109,35 @@ public class AuthorStatsDTO {
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * Calcula el promedio de alquileres por libro
+     */
+    public Double getAvgRentalsPerBook() {
+        if (totalBooks == null || totalBooks == 0) {
+            return 0.0;
+        }
+        if (totalRentals == null) {
+            return 0.0;
+        }
+        return (double) totalRentals / totalBooks;
+    }
+
+    /**
+     * Calcula la tasa de disponibilidad (porcentaje de copias disponibles)
+     */
+    public Double getAvailabilityRate() {
+        if (totalCopies == null || totalCopies == 0) {
+            return 0.0;
+        }
+        if (availableCopies == null) {
+            return 0.0;
+        }
+        return ((double) availableCopies / totalCopies) * 100.0;
+    }
+
+    /**
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
      * Nombre a mostrar (pseudónimo si existe, sino nombre completo)
      */
     public String getDisplayName() {

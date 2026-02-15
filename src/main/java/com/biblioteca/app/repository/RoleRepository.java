@@ -29,4 +29,14 @@ public interface RoleRepository extends JpaRepository<Role, UUID> {
      * @return true si existe, false si no
      */
     boolean existsByRoleName(String roleName);
+<<<<<<< HEAD
 }
+=======
+}
+
+
+
+
+
+
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d

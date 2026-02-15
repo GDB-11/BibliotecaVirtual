@@ -2,6 +2,7 @@
 <html lang="es" 
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<<<<<<< HEAD
       layout:decorate="~{user/layout}">
 <head>
     <title>Dashboard - Biblioteca Virtual</title>
@@ -560,6 +561,165 @@
                                 </div>
                                 <div class="action-title">Mi Perfil</div>
                                 <div class="action-desc">Actualiza tus datos personales</div>
+=======
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="content-header">
+            <h2 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+            <p class="text-muted mb-0">Resumen general del sistema</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Libros</h6>
+                                <h3 class="mb-0" th:text="${totalBooks}">0</h3>
+                            </div>
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-book fs-2 text-primary"></i>
+                            </div>
+                        </div>
+                        <small class="text-muted">Registrados en el sistema</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card stat-card border-start border-warning border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">En Alquiler</h6>
+                                <h3 class="mb-0" th:text="${rentedCopies}">0</h3>
+                            </div>
+                            <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-bookmark-check fs-2 text-warning"></i>
+                            </div>
+                        </div>
+                        <small class="text-muted">Ejemplares alquilados</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card stat-card border-start border-success border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Autores</h6>
+                                <h3 class="mb-0" th:text="${totalAuthors}">0</h3>
+                            </div>
+                            <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-people fs-2 text-success"></i>
+                            </div>
+                        </div>
+                        <small class="text-muted">Registrados en el sistema</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card stat-card border-start border-danger border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Disponibles</h6>
+                                <h3 class="mb-0" th:text="${availableCopies}">0</h3>
+                            </div>
+                            <div class="bg-danger bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-box-seam fs-2 text-danger"></i>
+                            </div>
+                        </div>
+                        <small class="text-muted">Ejemplares disponibles</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts/Recent Activity -->
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Alquileres Recientes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Libro</th>
+                                        <th>Usuario</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(recentRentals)}">
+                                        <td colspan="4" class="text-center text-muted">
+                                            <i class="bi bi-inbox fs-3"></i>
+                                            <p class="mb-0">No hay alquileres recientes</p>
+                                        </td>
+                                    </tr>
+                                    <tr th:each="rental : ${recentRentals}">
+                                        <td>
+                                            <strong th:text="${rental.bookCopy.book.title}">Título del Libro</strong>
+                                        </td>
+                                        <td th:text="${rental.user.email}">usuario@email.com</td>
+                                        <td th:text="${#temporals.format(rental.rentalDate, 'dd/MM/yyyy HH:mm')}">01/01/2024</td>
+                                        <td>
+                                            <span th:if="${rental.rentalStatus.rentalStatusName == 'En Proceso'}" 
+                                                  class="badge bg-success">Activo</span>
+                                            <span th:if="${rental.rentalStatus.rentalStatusName == 'Devuelto'}" 
+                                                  class="badge bg-secondary">Devuelto</span>
+                                            <span th:if="${rental.rentalStatus.rentalStatusName == 'Cancelado'}" 
+                                                  class="badge bg-danger">Cancelado</span>
+                                            <span th:if="${rental.rentalStatus.rentalStatusName != 'En Proceso' 
+                                                       && rental.rentalStatus.rentalStatusName != 'Devuelto' 
+                                                       && rental.rentalStatus.rentalStatusName != 'Cancelado'}" 
+                                                  class="badge bg-info" 
+                                                  th:text="${rental.rentalStatus.rentalStatusName}">Estado</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Más Populares</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(topBooks)}" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-3"></i>
+                            <p class="mb-0">No hay datos de alquileres</p>
+                        </div>
+                        
+                        <div th:each="book, iterStat : ${topBooks}" 
+                             class="d-flex align-items-center mb-3 p-2 bg-light rounded">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center ps-3 pe-3 text-white" 
+                                 style="width: 40px; height: 40px;"
+                                 th:classappend="${iterStat.index == 0} ? 'bg-warning' : (${iterStat.index == 1} ? 'bg-secondary' : (${iterStat.index == 2} ? 'bg-info' : 'bg-success'))">
+                                <strong th:text="${iterStat.index + 1}">1</strong>
+                            </div>
+                            <div class="flex-grow-1 ps-2">
+                                <h6 class="mb-0" th:text="${book.title}">Título del Libro</h6>
+                                <small class="text-muted">
+                                    <span th:text="${book.rentalCount}">0</span> alquileres
+                                </small>
+>>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
                             </div>
                         </div>
                     </div>
