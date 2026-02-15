@@ -1,0 +1,33 @@
+@startuml
+|Cliente|
+start
+:Consultar catálogo de libros;
+:Seleccionar libro;
+
+|Sistema|
+:Verificar disponibilidad de ejemplares;
+
+if (¿Hay ejemplares disponibles?) then (Sí)
+  :Mostrar ejemplares disponibles;
+
+  |Cliente|
+  :Seleccionar ejemplar;
+  :Confirmar alquiler;
+
+  |Sistema|
+  :Registrar alquiler;
+  :Actualizar estado del ejemplar a "Prestado";
+  :Mostrar confirmación;
+
+  |Cliente|
+  :Recibir confirmación;
+else (No)
+  |Sistema|
+  :Mostrar mensaje de no disponibilidad;
+
+  |Cliente|
+  :Visualizar mensaje;
+endif
+
+stop
+@enduml

@@ -1,0 +1,577 @@
+<!-- src/main/resources/templates/admin/libro-form.html -->
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="${isNew} ? 'Nuevo Libro' : (${isReadOnly} ? 'Ver Libro' : 'Editar Libro')">Libro</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/libros}">Libros</a></li>
+                <li class="breadcrumb-item active" aria-current="page" 
+                    th:text="${isNew} ? 'Nuevo' : (${isReadOnly} ? 'Ver' : 'Editar')">Acción</li>
+            </ol>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0">
+                        <i class="bi" th:classappend="${isNew} ? 'bi-plus-circle' : (${isReadOnly} ? 'bi-eye' : 'bi-pencil-square')"></i>
+                        <span th:text="${isNew} ? 'Nuevo Libro' : (${isReadOnly} ? 'Ver Libro' : 'Editar Libro')">Libro</span>
+                    </h2>
+                    <p class="text-muted mb-0" th:if="${not isNew}">
+                        Libro: <strong th:text="${book.title}">Título del Libro</strong>
+                    </p>
+                </div>
+                <div>
+                    <a th:href="@{/admin/libros}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Formulario Principal -->
+                <div class="card">
+                    <div class="card-header text-white" 
+                         th:classappend="${isNew} ? 'bg-success' : (${isReadOnly} ? 'bg-info' : 'bg-warning')">
+                        <h5 class="mb-0">
+                            <i class="bi" th:classappend="${isNew} ? 'bi-plus-circle' : (${isReadOnly} ? 'bi-eye' : 'bi-pencil')"></i>
+                            <span th:text="${isNew} ? 'Información del Nuevo Libro' : (${isReadOnly} ? 'Información del Libro' : 'Editar Información')">
+                                Información
+                            </span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="${isNew} ? @{/admin/libros/nuevo} : @{/admin/libros/{id}/editar(id=${book.bookId})}" 
+                              method="post" 
+                              id="bookForm">
+                            
+                            <!-- Información Básica -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-info-circle-fill me-2"></i>Datos Principales
+                                    </h6>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="isbn" class="form-label">ISBN *</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="isbn" 
+                                           name="isbn" 
+                                           th:value="${book != null ? book.isbn : ''}"
+                                           placeholder="978-84-xxx-xxxx-x" 
+                                           th:readonly="${isReadOnly}"
+                                           required>
+                                    <div class="form-text">Código ISBN único del libro</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="title" class="form-label">Título *</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="title" 
+                                           name="title" 
+                                           th:value="${book != null ? book.title : ''}"
+                                           placeholder="Título del libro" 
+                                           th:readonly="${isReadOnly}"
+                                           required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="authorId" class="form-label">Autor *</label>
+                                    <select class="form-select" 
+                                            id="authorId" 
+                                            name="authorId" 
+                                            th:disabled="${isReadOnly}"
+                                            required>
+                                        <option value="">Seleccionar autor...</option>
+                                        <option th:each="author : ${authors}" 
+                                                th:value="${author.authorId}" 
+                                                th:text="${author.fullName}"
+                                                th:selected="${book != null and book.author != null and author.authorId == book.author.authorId}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="categoryId" class="form-label">Categoría *</label>
+                                    <select class="form-select" 
+                                            id="categoryId" 
+                                            name="categoryId" 
+                                            th:disabled="${isReadOnly}"
+                                            required>
+                                        <option value="">Seleccionar categoría...</option>
+                                        <option th:each="category : ${categories}" 
+                                                th:value="${category.categoryId}" 
+                                                th:text="${category.categoryName}"
+                                                th:selected="${book != null and book.category != null and category.categoryId == book.category.categoryId}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Información de Publicación -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-building me-2"></i>Información de Publicación
+                                    </h6>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="publisher" class="form-label">Editorial</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="publisher" 
+                                           name="publisher" 
+                                           th:value="${book != null ? book.publisher : ''}"
+                                           placeholder="Nombre de la editorial"
+                                           th:readonly="${isReadOnly}">
+                                    <div class="form-text">Casa editorial que publicó el libro</div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label for="publicationYear" class="form-label">Año de Publicación</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="publicationYear" 
+                                           name="publicationYear" 
+                                           th:value="${book != null ? book.publicationYear : ''}"
+                                           placeholder="2024"
+                                           max="2100"
+                                           step="1"
+                                           th:readonly="${isReadOnly}">
+                                    <div class="form-text">Año de publicación</div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label for="pages" class="form-label">Número de Páginas</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="pages" 
+                                           name="pages" 
+                                           th:value="${book != null ? book.pages : ''}"
+                                           placeholder="350"
+                                           min="1"
+                                           step="1"
+                                           th:readonly="${isReadOnly}">
+                                    <div class="form-text">Total de páginas</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="language" class="form-label">Idioma</label>
+                                    <select class="form-select" 
+                                            id="language" 
+                                            name="language"
+                                            th:disabled="${isReadOnly}">
+                                        <option value="">Seleccionar idioma...</option>
+                                        <option value="Español" th:selected="${book != null and book.language == 'Español'}">Español</option>
+                                        <option value="Inglés" th:selected="${book != null and book.language == 'Inglés'}">Inglés</option>
+                                        <option value="Francés" th:selected="${book != null and book.language == 'Francés'}">Francés</option>
+                                        <option value="Alemán" th:selected="${book != null and book.language == 'Alemán'}">Alemán</option>
+                                        <option value="Italiano" th:selected="${book != null and book.language == 'Italiano'}">Italiano</option>
+                                        <option value="Portugués" th:selected="${book != null and book.language == 'Portugués'}">Portugués</option>
+                                        <option value="Latín" th:selected="${book != null and book.language == 'Latín'}">Latín</option>
+                                        <option value="Griego" th:selected="${book != null and book.language == 'Griego'}">Griego</option>
+                                        <option value="Otro" th:selected="${book != null and book.language == 'Otro'}">Otro</option>
+                                    </select>
+                                    <div class="form-text">Idioma original del libro</div>
+                                </div>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-card-text me-2"></i>Descripción del Contenido
+                                    </h6>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="description" class="form-label">Descripción</label>
+                                    <textarea class="form-control" 
+                                              id="description" 
+                                              name="description" 
+                                              rows="5"
+                                              placeholder="Sinopsis o descripción del libro..."
+                                              th:readonly="${isReadOnly}"
+                                              th:text="${book != null ? book.description : ''}"></textarea>
+                                    <div class="form-text">
+                                        <span id="descCount">0</span> caracteres
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Portada -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-image me-2"></i>Portada del Libro
+                                    </h6>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="coverImageUrl" class="form-label">URL de la Portada</label>
+                                    <input type="url" 
+                                           class="form-control" 
+                                           id="coverImageUrl" 
+                                           name="coverImageUrl" 
+                                           th:value="${book != null ? book.coverImageUrl : ''}"
+                                           placeholder="https://example.com/portada.jpg"
+                                           th:readonly="${isReadOnly}">
+                                    <div class="form-text">URL de la imagen de portada (JPG, PNG)</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <p class="mb-2"><strong>Vista previa:</strong></p>
+                                            <img id="coverPreview" 
+                                                 th:src="${book != null and book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)} ? ${book.coverImageUrl} : 'https://via.placeholder.com/200x300/3498db/ffffff?text=Portada'"
+                                                 class="img-fluid rounded shadow" 
+                                                 style="max-height: 300px;"
+                                                 alt="Portada del libro"
+                                                 onerror="this.src='https://via.placeholder.com/200x300/3498db/ffffff?text=Error'">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Estado -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-toggle-on me-2"></i>Estado de Disponibilidad
+                                    </h6>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="bookStatusId" class="form-label">Estado del Libro *</label>
+                                    <select class="form-select" 
+                                            id="bookStatusId" 
+                                            name="bookStatusId" 
+                                            th:disabled="${isReadOnly}"
+                                            required>
+                                        <option value="">Seleccionar...</option>
+                                        <option th:each="status : ${bookStatuses}" 
+                                                th:value="${status.bookStatusId}" 
+                                                th:text="${status.bookStatusName}"
+                                                th:selected="${book != null and book.bookStatus != null and status.bookStatusId == book.bookStatus.bookStatusId}">
+                                        </option>
+                                    </select>
+                                    <div class="form-text">
+                                        Estado actual del libro en el sistema
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones de Acción para Crear/Editar -->
+                            <div th:unless="${isReadOnly}" class="row">
+                                <div class="col-12">
+                                    <hr class="my-4">
+                                    <div class="d-flex justify-content-between">
+                                        <a th:href="@{/admin/libros}" class="btn btn-secondary">
+                                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                                        </a>
+                                        <div>
+                                            <button type="reset" class="btn btn-outline-secondary me-2">
+                                                <i class="bi bi-arrow-counterclockwise me-1"></i> Restablecer
+                                            </button>
+                                            <button type="submit" 
+                                                    class="btn" 
+                                                    th:classappend="${isNew} ? 'btn-success' : 'btn-warning'">
+                                                <i class="bi bi-save me-1"></i>
+                                                <span th:text="${isNew} ? 'Crear Libro' : 'Guardar Cambios'">Guardar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones para Vista de Solo Lectura -->
+                            <div th:if="${isReadOnly}" class="row">
+                                <div class="col-12">
+                                    <hr class="my-4">
+                                    <div class="d-flex justify-content-between">
+                                        <a th:href="@{/admin/libros}" class="btn btn-secondary">
+                                            <i class="bi bi-arrow-left me-1"></i> Volver al Listado
+                                        </a>
+                                        <a th:href="@{/admin/libros/{id}/editar(id=${book.bookId})}" 
+                                           class="btn btn-warning">
+                                            <i class="bi bi-pencil me-1"></i> Editar Libro
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar with Info -->
+            <div class="col-lg-4">
+                <!-- Book Info Card (Solo en edición/vista) -->
+                <div th:if="${not isNew}" class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información del Registro</h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr>
+                                <th style="width: 40%">ID:</th>
+                                <td><code class="small" th:text="${book.bookId}">ID</code></td>
+                            </tr>
+                            <tr>
+                                <th>ISBN:</th>
+                                <td><code class="small" th:text="${book.isbn}">ISBN</code></td>
+                            </tr>
+                            <tr>
+                                <th>Creado:</th>
+                                <td class="small" th:text="${#temporals.format(book.createdAt, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                            </tr>
+                            <tr>
+                                <th>Actualizado:</th>
+                                <td class="small" th:text="${#temporals.format(book.updatedAt, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                            </tr>
+                            <tr>
+                                <th>Estado Actual:</th>
+                                <td>
+                                    <span th:if="${book.bookStatus != null and book.bookStatus.bookStatusName == 'Activo'}" 
+                                          class="badge bg-success">Disponible</span>
+                                    <span th:unless="${book.bookStatus != null and book.bookStatus.bookStatusName == 'Activo'}" 
+                                          class="badge bg-secondary">No Disponible</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Author Info Card -->
+                <div th:if="${not isNew and book.author != null}" class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="bi bi-person-badge me-2"></i>Información del Autor</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <img th:if="${book.author.photoUrl != null and not #strings.isEmpty(book.author.photoUrl)}"
+                                 th:src="${book.author.photoUrl}" 
+                                 class="rounded-circle mb-2" 
+                                 width="80" 
+                                 height="80"
+                                 th:alt="${book.author.fullName}"
+                                 onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=' + this.alt.replace(' ', '+') + '&size=80&background=3498db&color=fff'">
+                            <img th:if="${book.author.photoUrl == null or #strings.isEmpty(book.author.photoUrl)}"
+                                 th:src="'https://ui-avatars.com/api/?name=' + ${#strings.replace(book.author.fullName, ' ', '+')} + '&size=80&background=3498db&color=fff'"
+                                 class="rounded-circle mb-2" 
+                                 width="80" 
+                                 height="80"
+                                 th:alt="${book.author.fullName}">
+                            <h6 class="mb-0" th:text="${book.author.fullName}">Autor</h6>
+                            <small th:if="${book.author.country != null}" class="text-muted">
+                                <i class="bi bi-flag-fill"></i> <span th:text="${book.author.country.countryName}">País</span>
+                            </small>
+                        </div>
+                        <div class="d-grid">
+                            <a th:href="@{/admin/autores/{id}(id=${book.author.authorId})}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Ver Autor
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="bi bi-question-circle me-2"></i>Ayuda</h6>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="fw-bold">Campos obligatorios</h6>
+                        <ul class="small">
+                            <li>ISBN</li>
+                            <li>Título</li>
+                            <li>Autor</li>
+                            <li>Categoría</li>
+                            <li>Estado del Libro</li>
+                        </ul>
+
+                        <h6 class="fw-bold mt-3">Consejos</h6>
+                        <ul class="small mb-0">
+                            <li>El ISBN debe ser único en el sistema</li>
+                            <li>Una buena descripción ayuda a los usuarios</li>
+                            <li>La imagen de portada mejora la presentación</li>
+                            <li>Verifica que el autor y la categoría sean correctos</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Quick Actions (Solo en vista/edición) -->
+                <div th:if="${not isNew}" class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h6 class="mb-0"><i class="bi bi-lightning me-2"></i>Acciones Rápidas</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a th:if="${isReadOnly}" 
+                               th:href="@{/admin/libros/{id}/editar(id=${book.bookId})}" 
+                               class="btn btn-outline-warning btn-sm">
+                                <i class="bi bi-pencil me-1"></i> Editar
+                            </a>
+                            <a th:if="${not isReadOnly}" 
+                               th:href="@{/admin/libros/{id}(id=${book.bookId})}" 
+                               class="btn btn-outline-info btn-sm">
+                                <i class="bi bi-eye me-1"></i> Solo Vista
+                            </a>
+                            <button type="button" 
+                                    class="btn btn-outline-danger btn-sm"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteConfirmModal">
+                                <i class="bi bi-trash me-1"></i> Eliminar Libro
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div th:if="${not isNew}" class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminación
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Está seguro de que desea eliminar el libro <strong th:text="${book.title}"></strong>?</p>
+                        <p class="text-danger mb-0">
+                            <i class="bi bi-exclamation-circle me-1"></i>
+                            Esta acción no se puede deshacer y se eliminarán todos los datos relacionados.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <form th:action="@{/admin/libros/{id}/eliminar(id=${book.bookId})}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <div layout:fragment="extra-scripts">
+            <script th:inline="javascript">
+                // Character counter for description
+                const descriptionTextarea = document.getElementById('description');
+                const descCount = document.getElementById('descCount');
+                
+                function updateCharCount() {
+                    const count = descriptionTextarea.value.length;
+                    descCount.textContent = count;
+                    
+                    if (count > 2000) {
+                        descCount.classList.add('text-warning');
+                    } else {
+                        descCount.classList.remove('text-warning');
+                    }
+                }
+                
+                if (descriptionTextarea) {
+                    descriptionTextarea.addEventListener('input', updateCharCount);
+                    updateCharCount(); // Initial count
+                }
+
+                // Cover URL preview
+                const coverUrlInput = document.getElementById('coverImageUrl');
+                const coverPreview = document.getElementById('coverPreview');
+                
+                if (coverUrlInput) {
+                    coverUrlInput.addEventListener('change', function() {
+                        const url = this.value.trim();
+                        if (url) {
+                            coverPreview.src = url;
+                        }
+                    });
+                }
+
+                // Form validation
+                const form = document.getElementById('bookForm');
+                
+                if (form) {
+                    form.addEventListener('submit', function(event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                }
+
+                // Unsaved changes warning
+                let formChanged = false;
+                
+                if (form) {
+                    const formInputs = form.querySelectorAll('input, select, textarea');
+                    formInputs.forEach(input => {
+                        input.addEventListener('change', function() {
+                            formChanged = true;
+                        });
+                    });
+
+                    window.addEventListener('beforeunload', function(e) {
+                        if (formChanged) {
+                            e.preventDefault();
+                            e.returnValue = '';
+                            return '';
+                        }
+                    });
+
+                    form.addEventListener('submit', function() {
+                        formChanged = false;
+                    });
+                }
+
+                // Initialize tooltips
+                document.addEventListener('DOMContentLoaded', function() {
+                    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
+                });
+            </script>
+        </div>
+    </div>
+</body>
+</html>

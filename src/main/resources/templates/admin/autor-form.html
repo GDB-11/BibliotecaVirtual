@@ -1,0 +1,670 @@
+<!-- src/main/resources/templates/admin/autor-form.html -->
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="${isNew} ? 'Nuevo Autor' : (${isReadOnly} ? 'Ver Autor' : 'Editar Autor')">Autor</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/autores}">Autores</a></li>
+                <li class="breadcrumb-item active" aria-current="page" 
+                    th:text="${isNew} ? 'Nuevo' : (${isReadOnly} ? 'Ver' : 'Editar')">Acción</li>
+            </ol>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0">
+                        <i class="bi" th:classappend="${isNew} ? 'bi-plus-circle' : (${isReadOnly} ? 'bi-eye' : 'bi-pencil-square')"></i>
+                        <span th:text="${isNew} ? 'Nuevo Autor' : (${isReadOnly} ? 'Ver Autor' : 'Editar Autor')">Autor</span>
+                    </h2>
+                    <p class="text-muted mb-0" th:if="${not isNew}">
+                        Autor: <strong th:text="${author.fullName}">Nombre del Autor</strong>
+                    </p>
+                </div>
+                <div>
+                    <a th:href="@{/admin/autores}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Formulario Principal -->
+                <div class="card">
+                    <div class="card-header text-white" 
+                         th:classappend="${isNew} ? 'bg-success' : (${isReadOnly} ? 'bg-info' : 'bg-warning')">
+                        <h5 class="mb-0">
+                            <i class="bi" th:classappend="${isNew} ? 'bi-plus-circle' : (${isReadOnly} ? 'bi-eye' : 'bi-pencil')"></i>
+                            <span th:text="${isNew} ? 'Información del Nuevo Autor' : (${isReadOnly} ? 'Información del Autor' : 'Editar Información')">
+                                Información
+                            </span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="${isNew} ? @{/admin/autores/nuevo} : @{/admin/autores/{id}/editar(id=${author.authorId})}" 
+                              method="post" 
+                              id="authorForm">
+                            
+                            <!-- Información Básica -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-person-fill me-2"></i>Datos Personales
+                                    </h6>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="fullName" class="form-label">Nombre Completo *</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="fullName" 
+                                           name="fullName" 
+                                           th:value="${author != null ? author.fullName : ''}"
+                                           placeholder="Nombre completo del autor" 
+                                           th:readonly="${isReadOnly}"
+                                           required>
+                                    <div class="invalid-feedback">
+                                        Por favor ingrese el nombre del autor.
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="pseudonym" class="form-label">Pseudónimo</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="pseudonym" 
+                                           name="pseudonym" 
+                                           th:value="${author != null ? author.pseudonym : ''}"
+                                           placeholder="Nombre artístico o pseudónimo"
+                                           th:readonly="${isReadOnly}">
+                                    <div class="form-text">Opcional: si el autor usa un nombre diferente</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="countryId" class="form-label">Nacionalidad *</label>
+                                    <select class="form-select" 
+                                            id="countryId" 
+                                            name="countryId" 
+                                            th:disabled="${isReadOnly}"
+                                            required>
+                                        <option value="">Seleccionar...</option>
+                                        <option th:each="country : ${countries}" 
+                                                th:value="${country.countryId}" 
+                                                th:text="${country.countryName}"
+                                                th:selected="${author != null and author.country != null and country.countryId.equals(author.country.countryId)}">
+                                            País
+                                        </option>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Por favor seleccione un país.
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="birthYear" class="form-label">Año de Nacimiento</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="birthYear" 
+                                           name="birthYear" 
+                                           th:value="${author != null ? author.birthYear : ''}"
+                                           placeholder="ej. 1950 o -300 (a.C.)"
+                                           min="-3000" 
+                                           max="2025"
+                                           step="1"
+                                           th:readonly="${isReadOnly}">
+                                    <div class="form-text">Usa números negativos para años a.C. (ej. -300 = 300 a.C.)</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="deathYear" class="form-label">Año de Fallecimiento</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="deathYear" 
+                                           name="deathYear" 
+                                           th:value="${author != null ? author.deathYear : ''}"
+                                           placeholder="ej. 2020 o -200 (a.C.)"
+                                           min="-3000" 
+                                           max="2025"
+                                           step="1"
+                                           th:readonly="${isReadOnly}">
+                                    <div class="form-text">Usa números negativos para años a.C. Deja vacío si vive.</div>
+                                </div>
+                            </div>
+
+                            <!-- Información de Contacto -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-envelope-fill me-2"></i>Información de Contacto
+                                    </h6>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label">
+                                        <i class="bi bi-envelope me-1"></i>Email de Contacto
+                                    </label>
+                                    <input type="email" 
+                                           class="form-control" 
+                                           id="email" 
+                                           name="email" 
+                                           th:value="${author != null ? author.email : ''}"
+                                           placeholder="autor@example.com"
+                                           th:readonly="${isReadOnly}">
+                                    <div class="form-text">Email público del autor</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="website" class="form-label">
+                                        <i class="bi bi-globe me-1"></i>Sitio Web
+                                    </label>
+                                    <input type="url" 
+                                           class="form-control" 
+                                           id="website" 
+                                           name="website" 
+                                           th:value="${author != null ? author.website : ''}"
+                                           placeholder="https://www.ejemplo.com"
+                                           th:readonly="${isReadOnly}">
+                                    <div class="form-text">Sitio web oficial o página personal</div>
+                                </div>
+                            </div>
+
+                            <!-- Biografía -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-card-text me-2"></i>Biografía y Descripción
+                                    </h6>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="biography" class="form-label">Biografía</label>
+                                    <textarea class="form-control" 
+                                              id="biography" 
+                                              name="biography" 
+                                              rows="5"
+                                              placeholder="Breve biografía o descripción del autor..."
+                                              th:readonly="${isReadOnly}"
+                                              th:text="${author != null ? author.biography : ''}"></textarea>
+                                    <div class="form-text">
+                                        <span id="bioCount">0</span> caracteres
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Foto -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-image me-2"></i>Imagen del Autor
+                                    </h6>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="photoUrl" class="form-label">URL de la Foto</label>
+                                    <input type="url" 
+                                           class="form-control" 
+                                           id="photoUrl" 
+                                           name="photoUrl" 
+                                           th:value="${author != null ? author.photoUrl : ''}"
+                                           placeholder="https://example.com/foto.jpg"
+                                           th:readonly="${isReadOnly}">
+                                    <div class="form-text">URL de la imagen del autor (JPG, PNG)</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <p class="mb-2"><strong>Vista previa:</strong></p>
+                                            <div class="position-relative d-inline-block">
+                                                <img id="photoPreview" 
+                                                     th:src="${(author != null and author.photoUrl != null and not #strings.isEmpty(author.photoUrl)) ? author.photoUrl : ('https://ui-avatars.com/api/?name=' + ((author != null and author.fullName != null and not #strings.isEmpty(author.fullName)) ? #strings.replace(author.fullName, ' ', '+') : 'Autor') + '&size=150&background=3498db&color=fff')}" 
+                                                     class="rounded-circle border border-3 border-primary" 
+                                                     width="150" 
+                                                     height="150"
+                                                     alt="Foto del autor"
+                                                     onerror="this.src='https://ui-avatars.com/api/?name=Autor&size=150&background=3498db&color=fff'">
+                                                <div id="photoLoading" class="position-absolute top-50 start-50 translate-middle d-none">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">Cargando...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-muted" id="photoStatus">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    Ingresa una URL para ver la vista previa
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Estado -->
+                            <div class="row g-3 mb-4" th:if="${not isNew}">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-toggle-on me-2"></i>Estado
+                                    </h6>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="statusId" class="form-label">Estado del Registro *</label>
+                                    <select class="form-select" 
+                                            id="statusId" 
+                                            name="statusId" 
+                                            th:disabled="${isReadOnly}"
+                                            required>
+                                        <option value="">Seleccionar...</option>
+                                        <option th:each="status : ${statuses}" 
+                                                th:value="${status.statusId}" 
+                                                th:text="${status.statusName}"
+                                                th:selected="${author != null and author.status != null and status.statusId.equals(author.status.statusId)}">
+                                            Estado
+                                        </option>
+                                    </select>
+                                    <div class="form-text">
+                                        Los autores inactivos no aparecerán en listados públicos
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones de Acción -->
+                            <div class="row" th:if="${not isReadOnly}">
+                                <div class="col-12">
+                                    <hr class="my-4">
+                                    <div class="d-flex justify-content-between">
+                                        <a th:href="@{/admin/autores}" class="btn btn-secondary">
+                                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                                        </a>
+                                        <div>
+                                            <button type="submit" 
+                                                    class="btn" 
+                                                    th:classappend="${isNew} ? 'btn-success' : 'btn-warning'">
+                                                <i class="bi bi-save me-1"></i> 
+                                                <span th:text="${isNew} ? 'Crear Autor' : 'Guardar Cambios'">Guardar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Botones para Vista de Solo Lectura -->
+                            <div class="row" th:if="${isReadOnly}">
+                                <div class="col-12">
+                                    <hr class="my-4">
+                                    <div class="d-flex justify-content-between">
+                                        <a th:href="@{/admin/autores}" class="btn btn-secondary">
+                                            <i class="bi bi-arrow-left me-1"></i> Volver al Listado
+                                        </a>
+                                        <a th:href="@{/admin/autores/{id}/editar(id=${author.authorId})}" 
+                                           class="btn btn-warning">
+                                            <i class="bi bi-pencil me-1"></i> Editar Autor
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar with Info -->
+            <div class="col-lg-4">
+                <!-- Author Info Card (Solo en edición/vista) -->
+                <div class="card mb-4" th:if="${not isNew}">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información del Registro</h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr>
+                                <th style="width: 40%">ID:</th>
+                                <td><code class="small" th:text="${author.authorId}">UUID</code></td>
+                            </tr>
+                            <tr>
+                                <th>Creado:</th>
+                                <td class="small" th:text="${#temporals.format(author.createdAt, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                            </tr>
+                            <tr>
+                                <th>Actualizado:</th>
+                                <td class="small" th:text="${#temporals.format(author.updatedAt, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                            </tr>
+                            <tr>
+                                <th>Estado Actual:</th>
+                                <td>
+                                    <span th:if="${author != null and author.status != null and author.status.statusName == 'Active'}" 
+                                          class="badge bg-success">Activo</span>
+                                    <span th:if="${author != null and author.status != null and author.status.statusName != 'Active'}" 
+                                          class="badge bg-secondary">Inactivo</span>
+                                    <span th:if="${author == null or author.status == null}"
+                                          class="badge bg-secondary">Nuevo</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${bookCount != null}">
+                                <th>Libros:</th>
+                                <td><strong th:text="${bookCount}">0</strong> registrados</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Help Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="bi bi-question-circle me-2"></i>Ayuda</h6>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="fw-bold">Campos obligatorios</h6>
+                        <ul class="small">
+                            <li>Nombre Completo</li>
+                            <li>Nacionalidad</li>
+                            <li th:if="${not isNew}">Estado</li>
+                        </ul>
+
+                        <h6 class="fw-bold mt-3">Consejos</h6>
+                        <ul class="small mb-0">
+                            <li>Usa el pseudónimo si el autor es conocido por otro nombre</li>
+                            <li>Para autores antiguos, usa años negativos (ej. -300 = 300 a.C.)</li>
+                            <li>La biografía ayuda a los usuarios a conocer al autor</li>
+                            <li>Una buena foto mejora la presentación</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Quick Actions (Solo en vista de solo lectura) -->
+                <div class="card" th:if="${isReadOnly and not isNew}">
+                    <div class="card-header bg-dark text-white">
+                        <h6 class="mb-0"><i class="bi bi-lightning me-2"></i>Acciones Rápidas</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/admin/autores/{id}/editar(id=${author.authorId})}" 
+                               class="btn btn-warning btn-sm">
+                                <i class="bi bi-pencil me-1"></i> Editar Autor
+                            </a>
+                            <button type="button" 
+                                    class="btn btn-danger btn-sm"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteConfirmModal">
+                                <i class="bi bi-trash me-1"></i> Eliminar Autor
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true" th:if="${not isNew}">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminación
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" 
+                                data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Está seguro de que desea eliminar al autor 
+                           <strong th:text="${author.fullName}">Nombre</strong>?</p>
+                        <p class="text-danger mb-0">
+                            <i class="bi bi-exclamation-circle me-1"></i>
+                            Esta acción no se puede deshacer y se eliminarán todos los datos relacionados.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <form th:action="@{/admin/autores/{id}/eliminar(id=${author.authorId})}" 
+                              method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <div layout:fragment="extra-scripts">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            // Character counter for biography
+            const biographyTextarea = document.getElementById('biography');
+            const bioCount = document.getElementById('bioCount');
+            
+            function updateCharCount() {
+                if (biographyTextarea && bioCount) {
+                    const count = biographyTextarea.value.length;
+                    bioCount.textContent = count;
+                    
+                    if (count > 1000) {
+                        bioCount.classList.add('text-warning');
+                    } else {
+                        bioCount.classList.remove('text-warning');
+                    }
+                }
+            }
+            
+            if (biographyTextarea) {
+                biographyTextarea.addEventListener('input', updateCharCount);
+                updateCharCount(); // Initial count
+            }
+
+            // Photo URL preview - Actualización en tiempo real
+            const photoUrlInput = document.getElementById('photoUrl');
+            const photoPreview = document.getElementById('photoPreview');
+            const fullNameInput = document.getElementById('fullName');
+            const photoLoading = document.getElementById('photoLoading');
+            const photoStatus = document.getElementById('photoStatus');
+            
+            function updatePhotoPreview() {
+                if (photoUrlInput && photoPreview) {
+                    const url = photoUrlInput.value.trim();
+                    
+                    if (url) {
+                        // Mostrar loading
+                        if (photoLoading) {
+                            photoLoading.classList.remove('d-none');
+                        }
+                        if (photoStatus) {
+                            photoStatus.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Cargando imagen...';
+                            photoStatus.className = 'text-muted';
+                        }
+                        
+                        // Cambiar borde a gris mientras carga
+                        photoPreview.className = 'rounded-circle border border-3 border-secondary';
+                        
+                        // Intentar cargar la URL
+                        photoPreview.src = url;
+                    } else {
+                        // Si no hay URL, usar avatar generado con el nombre
+                        const name = fullNameInput ? fullNameInput.value.trim() : 'Autor';
+                        const avatarName = name || 'Autor';
+                        photoPreview.src = 'https://ui-avatars.com/api/?name=' + 
+                                          encodeURIComponent(avatarName.replace(/ /g, '+')) + 
+                                          '&size=150&background=3498db&color=fff';
+                        
+                        if (photoStatus) {
+                            photoStatus.innerHTML = '<i class="bi bi-person-circle me-1"></i>Avatar generado automáticamente';
+                            photoStatus.className = 'text-info';
+                        }
+                        
+                        // Avatar siempre carga bien
+                        photoPreview.className = 'rounded-circle border border-3 border-info';
+                        if (photoLoading) {
+                            photoLoading.classList.add('d-none');
+                        }
+                    }
+                }
+            }
+            
+            if (photoUrlInput && photoPreview) {
+                // Actualizar preview al escribir en el campo de URL (en tiempo real)
+                photoUrlInput.addEventListener('input', updatePhotoPreview);
+                
+                // También actualizar si cambia el nombre (para el avatar)
+                if (fullNameInput) {
+                    fullNameInput.addEventListener('input', function() {
+                        // Solo actualizar si no hay URL de foto personalizada
+                        if (!photoUrlInput.value.trim()) {
+                            updatePhotoPreview();
+                        }
+                    });
+                }
+                
+                // Cuando la imagen carga exitosamente
+                photoPreview.addEventListener('load', function() {
+                    if (photoLoading) {
+                        photoLoading.classList.add('d-none');
+                    }
+                    
+                    const url = photoUrlInput.value.trim();
+                    if (url) {
+                        if (photoStatus) {
+                            photoStatus.innerHTML = '<i class="bi bi-check-circle me-1"></i>Imagen cargada correctamente';
+                            photoStatus.className = 'text-success';
+                        }
+                        photoPreview.className = 'rounded-circle border border-3 border-success';
+                    }
+                });
+                
+                // Manejar error de carga de imagen
+                photoPreview.addEventListener('error', function() {
+                    if (photoLoading) {
+                        photoLoading.classList.add('d-none');
+                    }
+                    
+                    const url = photoUrlInput.value.trim();
+                    if (url) {
+                        // Solo mostrar error si hay una URL
+                        if (photoStatus) {
+                            photoStatus.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Error al cargar la imagen. Usando avatar...';
+                            photoStatus.className = 'text-warning';
+                        }
+                        photoPreview.className = 'rounded-circle border border-3 border-warning';
+                    }
+                    
+                    // Fallback al avatar
+                    const name = fullNameInput ? fullNameInput.value.trim() : 'Autor';
+                    const avatarName = name || 'Autor';
+                    this.src = 'https://ui-avatars.com/api/?name=' + 
+                              encodeURIComponent(avatarName.replace(/ /g, '+')) + 
+                              '&size=150&background=3498db&color=fff';
+                });
+                
+                // Inicializar el estado al cargar la página
+                setTimeout(function() {
+                    const url = photoUrlInput.value.trim();
+                    if (url) {
+                        if (photoStatus) {
+                            photoStatus.innerHTML = '<i class="bi bi-check-circle me-1"></i>Imagen cargada correctamente';
+                            photoStatus.className = 'text-success';
+                        }
+                        photoPreview.className = 'rounded-circle border border-3 border-success';
+                    } else {
+                        if (photoStatus) {
+                            photoStatus.innerHTML = '<i class="bi bi-person-circle me-1"></i>Avatar generado automáticamente';
+                            photoStatus.className = 'text-info';
+                        }
+                        photoPreview.className = 'rounded-circle border border-3 border-info';
+                    }
+                }, 100);
+            }
+
+            // Form validation
+            const form = document.getElementById('authorForm');
+            
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            }
+
+            // Year validation
+            const birthYearInput = document.getElementById('birthYear');
+            const deathYearInput = document.getElementById('deathYear');
+            
+            if (birthYearInput && deathYearInput) {
+                deathYearInput.addEventListener('change', function() {
+                    const birthYear = parseInt(birthYearInput.value) || 0;
+                    const deathYear = parseInt(this.value) || 0;
+                    
+                    if (birthYear && deathYear) {
+                        // Para años positivos (d.C.)
+                        if (birthYear > 0 && deathYear > 0 && deathYear <= birthYear) {
+                            alert('El año de fallecimiento debe ser posterior al año de nacimiento');
+                            this.value = '';
+                        }
+                        // Para años negativos (a.C.) - el menor número es más reciente
+                        else if (birthYear < 0 && deathYear < 0 && deathYear <= birthYear) {
+                            alert('El año de fallecimiento debe ser posterior al año de nacimiento (en a.C. -200 es posterior a -300)');
+                            this.value = '';
+                        }
+                        // Caso mixto: nacido a.C., muerto d.C. es válido automáticamente
+                    }
+                });
+            }
+
+            // Unsaved changes warning
+            let formChanged = false;
+            const isReadOnly = /*[[${isReadOnly}]]*/ false;
+            
+            if (form && !isReadOnly) {
+                const formInputs = form.querySelectorAll('input, select, textarea');
+                formInputs.forEach(input => {
+                    input.addEventListener('change', function() {
+                        formChanged = true;
+                    });
+                });
+
+                window.addEventListener('beforeunload', function(e) {
+                    if (formChanged) {
+                        e.preventDefault();
+                        e.returnValue = '';
+                        return '';
+                    }
+                });
+
+                form.addEventListener('submit', function() {
+                    formChanged = false;
+                });
+            }
+            /*]]>*/
+        </script>
+    </div>
+</body>
+</html>

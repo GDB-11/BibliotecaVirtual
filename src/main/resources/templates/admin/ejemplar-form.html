@@ -1,0 +1,529 @@
+<!-- src/main/resources/templates/admin/ejemplar-form.html -->
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="${isReadOnly ? 'Ver Detalles de Ejemplar' : (isEdit ? 'Editar Ejemplar' : 'Agregar Ejemplares')} + ' - Biblioteca Virtual'">Formulario Ejemplar</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/admin/ejemplares}">Ejemplares</a></li>
+            <li class="breadcrumb-item active" aria-current="page" 
+                th:text="${isNew} ? 'Nuevo' : (${isReadOnly} ? 'Ver' : 'Editar')">Acción</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="content-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-0">
+                    <i th:class="${isReadOnly ? 'bi bi-eye me-2' : (isEdit ? 'bi bi-pencil-square me-2' : 'bi bi-plus-circle me-2')}"></i>
+                    <span th:text="${isReadOnly ? 'Ver Detalles de Ejemplar' : (isEdit ? 'Editar Ejemplar' : 'Agregar Ejemplares')}">Formulario</span>
+                </h2>
+                <p class="text-muted mb-0" th:if="${isEdit or isReadOnly}">
+                    <span th:if="${isReadOnly}">Información del ejemplar:</span>
+                    <span th:if="${isEdit and !isReadOnly}">Modificar información del ejemplar:</span>
+                    <strong th:text="${bookCopy.book != null ? bookCopy.book.title : 'N/A'}">Libro</strong>
+                </p>
+                <p class="text-muted mb-0" th:unless="${isEdit or isReadOnly}">
+                    Crear múltiples ejemplares de un mismo libro
+                </p>
+            </div>
+            <div>
+                <a th:href="@{/admin/ejemplares}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Form -->
+    <div class="row">
+        <!-- Vista de SOLO LECTURA -->
+        <div th:if="${isReadOnly}" class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-eye me-2"></i>
+                        Detalles del Ejemplar
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Información del Libro -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-book-fill me-2"></i>Información del Libro
+                            </h6>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold text-muted small">ID del Ejemplar</label>
+                            <p class="mb-0" th:text="${bookCopy.bookCopyId}">ID</p>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold text-muted small">Título del Libro</label>
+                            <p class="mb-0 fs-5" th:text="${bookCopy.book != null ? bookCopy.book.title : 'N/A'}">Título</p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">ISBN</label>
+                            <p class="mb-0" th:text="${bookCopy.book != null ? bookCopy.book.isbn : 'N/A'}">ISBN</p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">Autor</label>
+                            <p class="mb-0" 
+                               th:text="${bookCopy.book != null and bookCopy.book.author != null ? bookCopy.book.author.fullName : 'N/A'}">
+                               Autor
+                            </p>
+                        </div>
+
+                        <div class="col-md-6" th:if="${bookCopy.book != null and bookCopy.book.category != null}">
+                            <label class="form-label fw-bold text-muted small">Categoría</label>
+                            <p class="mb-0" th:text="${bookCopy.book.category.categoryName}">Categoría</p>
+                        </div>
+
+                        <div class="col-md-6" th:if="${bookCopy.book != null}">
+                            <label class="form-label fw-bold text-muted small">Año de Publicación</label>
+                            <p class="mb-0" th:text="${bookCopy.book.publicationYear}">Año</p>
+                        </div>
+                    </div>
+
+                    <!-- Datos del Ejemplar -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-collection me-2"></i>Datos del Ejemplar
+                            </h6>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold text-muted small">Estado</label>
+                            <div>
+                                <span th:if="${bookCopy.bookCopyStatus != null}" 
+                                      th:class="${'badge fs-6 ' + 
+                                          (bookCopy.bookCopyStatus.bookCopyStatusName == 'Disponible' ? 'bg-success' :
+                                           bookCopy.bookCopyStatus.bookCopyStatusName == 'Alquilado' ? 'bg-primary' :
+                                           bookCopy.bookCopyStatus.bookCopyStatusName == 'Mantenimiento' ? 'bg-warning text-dark' : 'bg-secondary')}"
+                                      th:text="${bookCopy.bookCopyStatus.bookCopyStatusName}">
+                                    Estado
+                                </span>
+                                <span th:unless="${bookCopy.bookCopyStatus != null}" class="badge bg-secondary fs-6">
+                                    Sin estado
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold text-muted small">Notas</label>
+                            <p class="mb-0" th:if="${bookCopy.notes != null and !#strings.isEmpty(bookCopy.notes)}"
+                               th:text="${bookCopy.notes}" style="white-space: pre-wrap;">
+                                Notas
+                            </p>
+                            <p class="mb-0 text-muted fst-italic" 
+                               th:unless="${bookCopy.notes != null and !#strings.isEmpty(bookCopy.notes)}">
+                                Sin notas registradas
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Información de Auditoría -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-clock-history me-2"></i>Información de Auditoría
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">Fecha de Creación</label>
+                            <p class="mb-0" th:text="${#temporals.format(bookCopy.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                Fecha
+                            </p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">Última Actualización</label>
+                            <p class="mb-0" th:text="${#temporals.format(bookCopy.updatedAt, 'dd/MM/yyyy HH:mm')}">
+                                Fecha
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a th:href="@{/admin/ejemplares}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver al Listado
+                        </a>
+                        <a th:href="@{/admin/ejemplares/editar/{id}(id=${bookCopy.bookCopyId})}" 
+                           th:if="${bookCopy.bookCopyStatus != null and bookCopy.bookCopyStatus.bookCopyStatusName != 'Alquilado'}"
+                           class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Editar Ejemplar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario para EDITAR un ejemplar existente -->
+        <div th:if="${isEdit and !isReadOnly}" class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>
+                        Editar Ejemplar
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/admin/ejemplares/actualizar}" method="post" id="editBookCopyForm">
+                        <input type="hidden" name="bookCopyId" th:value="${bookCopy.bookCopyId}">
+
+                        <!-- Información del Libro (Solo Lectura) -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">
+                                    <i class="bi bi-book-fill me-2"></i>Información del Libro
+                                </h6>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">ID del Ejemplar</label>
+                                <input type="text" class="form-control-plaintext" th:value="${bookCopy.bookCopyId}"
+                                       readonly>
+                                <small class="text-muted">Este campo no se puede modificar</small>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Libro</label>
+                                <input type="text" class="form-control-plaintext"
+                                       th:value="${bookCopy.book != null ? bookCopy.book.title : 'N/A'}" readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">ISBN</label>
+                                <input type="text" class="form-control-plaintext"
+                                       th:value="${bookCopy.book != null ? bookCopy.book.isbn : 'N/A'}" readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Autor</label>
+                                <input type="text" class="form-control-plaintext"
+                                       th:value="${bookCopy.book != null and bookCopy.book.author != null ? bookCopy.book.author.fullName : 'N/A'}"
+                                       readonly>
+                            </div>
+                        </div>
+
+                        <!-- Datos Editables del Ejemplar -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">
+                                    <i class="bi bi-pencil-fill me-2"></i>Datos del Ejemplar
+                                </h6>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label for="bookCopyStatusId" class="form-label">
+                                    Estado <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="bookCopyStatusId" name="bookCopyStatusId" required>
+                                    <option value="">Seleccionar estado...</option>
+                                    <option th:each="status : ${bookCopyStatuses}"
+                                            th:if="${status.bookCopyStatusName != 'Alquilado'}"
+                                            th:value="${status.bookCopyStatusId}"
+                                            th:text="${status.bookCopyStatusName}"
+                                            th:selected="${bookCopy.bookCopyStatus != null and status.bookCopyStatusId == bookCopy.bookCopyStatus.bookCopyStatusId}">
+                                    </option>
+                                </select>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle"></i>
+                                    No se puede cambiar a estado "Alquilado" desde este formulario
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label for="notes" class="form-label">Notas</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="4"
+                                          placeholder="Observaciones adicionales sobre el estado físico del ejemplar..."
+                                          th:text="${bookCopy.notes}"></textarea>
+                                <div class="form-text">
+                                    Información adicional sobre el ejemplar (opcional)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información de Auditoría -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">
+                                    <i class="bi bi-clock-history me-2"></i>Información de Auditoría
+                                </h6>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Fecha de Creación</label>
+                                <input type="text" class="form-control-plaintext" 
+                                       th:value="${#temporals.format(bookCopy.createdAt, 'dd/MM/yyyy HH:mm')}"
+                                       readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Última Actualización</label>
+                                <input type="text" class="form-control-plaintext" 
+                                       th:value="${#temporals.format(bookCopy.updatedAt, 'dd/MM/yyyy HH:mm')}"
+                                       readonly>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a th:href="@{/admin/ejemplares}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario para CREAR ejemplares en batch -->
+        <div th:unless="${isEdit or isReadOnly}" class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevos Ejemplares</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/admin/ejemplares/crear-batch}" method="post" id="addBookCopyForm">
+                        <div class="alert alert-info" role="alert">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Los ejemplares se crearán con estado <strong>Disponible</strong>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="bookId" class="form-label">
+                                    Libro <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="bookId" name="bookId" required>
+                                    <option value="">Seleccione un libro...</option>
+                                    <option th:each="book : ${books}"
+                                            th:value="${book.bookId}"
+                                            th:text="${book.title + ' - ' + book.isbn}">
+                                    </option>
+                                </select>
+                                <div class="form-text">
+                                    Seleccione el libro del cual desea crear ejemplares
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label for="quantity" class="form-label">
+                                    Cantidad <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="quantity" name="quantity"
+                                       min="1" max="100" value="1" required>
+                                <div class="form-text">
+                                    Número de ejemplares a crear (máximo 100 por operación)
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label for="batchNotes" class="form-label">Notas (Opcional)</label>
+                                <textarea class="form-control" id="batchNotes" name="notes" rows="3"
+                                          placeholder="Observaciones adicionales que se aplicarán a todos los ejemplares..."></textarea>
+                                <div class="form-text">
+                                    Estas notas se aplicarán a todos los ejemplares creados
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a th:href="@{/admin/ejemplares}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Crear Ejemplares
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Card (para todos los casos) -->
+        <div class="col-lg-4">
+            <!-- Info Card para Solo Lectura -->
+            <div th:if="${isReadOnly}" class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <i class="bi bi-eye me-2"></i>
+                        Está viendo los detalles del ejemplar en modo de solo lectura.
+                    </p>
+                    <p class="mb-0" th:if="${bookCopy.bookCopyStatus != null and bookCopy.bookCopyStatus.bookCopyStatusName != 'Alquilado'}">
+                        <i class="bi bi-pencil me-2"></i>
+                        Puede editar este ejemplar usando el botón "Editar Ejemplar".
+                    </p>
+                    <p class="mb-0 text-warning" th:if="${bookCopy.bookCopyStatus != null and bookCopy.bookCopyStatus.bookCopyStatusName == 'Alquilado'}">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Este ejemplar está alquilado y no puede ser editado.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Info Card para Edición -->
+            <div th:if="${isEdit and !isReadOnly}" class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información Importante</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li class="mb-2">El ID del ejemplar y la información del libro no pueden ser modificados.</li>
+                        <li class="mb-2">No se puede cambiar el estado a <strong>"Alquilado"</strong> desde este
+                            formulario.
+                        </li>
+                        <li class="mb-2">Los ejemplares alquilados no pueden ser editados hasta que sean devueltos.
+                        </li>
+                        <li class="mb-0">Utilice las notas para agregar información adicional sobre el estado físico
+                            del ejemplar.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Info Card para Creación -->
+            <div th:unless="${isEdit or isReadOnly}" class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información Importante</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li class="mb-2">Puede crear hasta 100 ejemplares en una sola operación.</li>
+                        <li class="mb-2">Todos los ejemplares se crearán con estado <strong>Disponible</strong>.</li>
+                        <li class="mb-2">Cada ejemplar tendrá un ID único generado automáticamente.</li>
+                        <li class="mb-0">Las notas se aplicarán a todos los ejemplares creados.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Status Guide (para edición y solo lectura) -->
+            <div th:if="${isEdit or isReadOnly}" class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-list-check me-2"></i>Estados Disponibles</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <span class="badge bg-success">Disponible</span>
+                        <small class="d-block text-muted">Ejemplar listo para alquilar</small>
+                    </div>
+                    <div class="mb-2">
+                        <span class="badge bg-warning text-dark">Mantenimiento</span>
+                        <small class="d-block text-muted">En reparación o revisión</small>
+                    </div>
+                    <div class="mb-0">
+                        <span class="badge bg-secondary">Descontinuado</span>
+                        <small class="d-block text-muted">Dado de baja permanentemente</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats (solo para creación) -->
+            <div th:unless="${isEdit or isReadOnly}" class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-graph-up me-2"></i>Consejos</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0 small">
+                        <li class="mb-2">Revise que el libro seleccionado sea el correcto antes de crear los
+                            ejemplares.
+                        </li>
+                        <li class="mb-2">Considere crear ejemplares adicionales para libros de alta demanda.</li>
+                        <li class="mb-0">Use las notas para registrar información como el proveedor o el estado de
+                            adquisición.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // Validación del formulario de edición
+            const editForm = document.getElementById('editBookCopyForm');
+            if (editForm) {
+                editForm.addEventListener('submit', function (e) {
+                    const statusSelect = document.getElementById('bookCopyStatusId');
+                    if (!statusSelect.value) {
+                        e.preventDefault();
+                        alert('Por favor, seleccione un estado para el ejemplar');
+                        statusSelect.focus();
+                        return false;
+                    }
+                    return true;
+                });
+            }
+
+            // Validación del formulario de creación batch
+            const addForm = document.getElementById('addBookCopyForm');
+            if (addForm) {
+                addForm.addEventListener('submit', function (e) {
+                    const bookSelect = document.getElementById('bookId');
+                    const quantityInput = document.getElementById('quantity');
+
+                    if (!bookSelect.value) {
+                        e.preventDefault();
+                        alert('Por favor, seleccione un libro');
+                        bookSelect.focus();
+                        return false;
+                    }
+
+                    const quantity = parseInt(quantityInput.value);
+                    if (quantity < 1 || quantity > 100) {
+                        e.preventDefault();
+                        alert('La cantidad debe estar entre 1 y 100');
+                        quantityInput.focus();
+                        return false;
+                    }
+
+                    // Confirmación para cantidades grandes
+                    if (quantity > 20) {
+                        if (!confirm('Está a punto de crear ' + quantity + ' ejemplares. ¿Desea continuar?')) {
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+
+                    return true;
+                });
+            }
+        });
+    </script>
+</div>
+</body>
+</html>
