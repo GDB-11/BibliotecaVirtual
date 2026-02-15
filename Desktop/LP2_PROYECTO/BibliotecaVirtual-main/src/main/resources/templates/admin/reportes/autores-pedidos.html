@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Autores Más Pedidos</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .rank-1 { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; }
+            .rank-2 { background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%); color: white; }
+            .rank-3 { background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%); color: white; }
+            .author-card { transition: transform 0.3s; }
+            .author-card:hover { transform: translateY(-5px); }
+            .author-mini-avatar {
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-people me-2"></i>Autores Más Pedidos</h2>
+                    <p class="text-muted mb-0">Estadísticas de los autores con mayor demanda</p>
+                </div>
+                <div>
+                    <div class="btn-group">
+                        <a th:href="@{/admin/reportes/autores-pedidos(limite=5)}" class="btn btn-outline-primary">Top 5</a>
+                        <a th:href="@{/admin/reportes/autores-pedidos(limite=10)}" class="btn btn-outline-primary">Top 10</a>
+                        <a th:href="@{/admin/reportes/autores-pedidos(limite=20)}" class="btn btn-outline-primary">Top 20</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Info Message -->
+        <div th:if="${#lists.isEmpty(topAutores)}" class="alert alert-info mb-4">
+            <i class="bi bi-info-circle me-2"></i>
+            No hay datos suficientes para mostrar estadísticas de autores. Mostrando datos de ejemplo.
+        </div>
+
+        <!-- Authors Grid -->
+        <div th:if="${!#lists.isEmpty(topAutores)}" class="row g-4">
+            <div th:each="author, stat : ${topAutores}" class="col-md-6 col-lg-4">
+                <div class="card author-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div th:if="${stat.index == 0}" class="rank-1 rounded-circle d-flex align-items-center justify-content-center me-3"
+                                 style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                <i class="bi bi-trophy-fill"></i>
+                            </div>
+                            <div th:if="${stat.index == 1}" class="rank-2 rounded-circle d-flex align-items-center justify-content-center me-3"
+                                 style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                <i class="bi bi-trophy-fill"></i>
+                            </div>
+                            <div th:if="${stat.index == 2}" class="rank-3 rounded-circle d-flex align-items-center justify-content-center me-3"
+                                 style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                <i class="bi bi-trophy-fill"></i>
+                            </div>
+                            <div th:if="${stat.index > 2}" class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                 style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                <span th:text="${stat.index + 1}">4</span>
+                            </div>
+                            <div>
+                                <h5 class="mb-0" th:text="${author.fullName}">Nombre del autor</h5>
+                                <small class="text-muted" th:text="${author.countryName}">País</small>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total alquileres:</span>
+                                <span class="badge bg-primary fs-6" th:text="${author.totalRentals}">10</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" 
+                                     role="progressbar" 
+                                     th:style="'width: ' + (${author.totalRentals} * 100 / ${topAutores[0].totalRentals}) + '%'"
+                                     th:attr="aria-valuenow=${author.totalRentals * 100 / topAutores[0].totalRentals}, 
+                                              aria-valuemin=0, 
+                                              aria-valuemax=100">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 text-center">
+                            <a th:href="@{/admin/mantenimiento/autores/{id}(id=${author.authorId})}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Ver detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State (no debería mostrarse porque tenemos datos de ejemplo) -->
+        <div th:if="${#lists.isEmpty(topAutores)}" class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-people display-1 text-muted"></i>
+            </div>
+            <h4 class="text-muted">No hay datos de autores</h4>
+            <p class="text-muted">Cuando haya alquileres registrados, podrás ver las estadísticas aquí.</p>
+        </div>
+    </div>
+</body>
+</html>

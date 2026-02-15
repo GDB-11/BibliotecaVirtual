@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Gestión de Alquileres</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .badge-activo { background-color: #28a745; color: white; }
+            .badge-devuelto { background-color: #6c757d; color: white; }
+            .badge-cancelado { background-color: #dc3545; color: white; }
+            .badge-vencido { background-color: #ffc107; color: #212529; }
+            .table th { font-weight: 600; color: #495057; }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Gestión de Alquileres</h2>
+                    <p class="text-muted mb-0">Administra todos los alquileres del sistema</p>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-secondary" onclick="location.reload()">
+                        <i class="bi bi-arrow-clockwise"></i> Recargar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Total Alquileres</small>
+                                <h4 class="mb-0" th:text="${totalAlquileres}">0</h4>
+                            </div>
+                            <i class="bi bi-calendar-check fs-2 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-start border-success border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Activos</small>
+                                <h4 class="mb-0" th:text="${activos}">0</h4>
+                            </div>
+                            <i class="bi bi-play-circle-fill fs-2 text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-start border-warning border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Por Vencer</small>
+                                <h4 class="mb-0" th:text="${porVencer}">0</h4>
+                            </div>
+                            <i class="bi bi-exclamation-triangle-fill fs-2 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+		<!-- Filters -->
+		<div class="card mb-4">
+		    <div class="card-body">
+		        <form method="get" th:action="@{/admin/alquileres}">
+		            <div class="row g-3">
+		                <div class="col-md-4">
+		                    <label class="form-label">Buscar</label>
+		                    <div class="input-group">
+		                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+		                        <input type="text" name="search" class="form-control" 
+		                               placeholder="Usuario o libro..." 
+		                               th:value="${searchValue}">
+		                    </div>
+		                </div>
+		                <div class="col-md-3">
+		                    <label class="form-label">Estado</label>
+		                    <select name="estado" class="form-select">
+		                        <option value="" th:selected="${estadoValue == ''}">Todos</option>
+		                        <option value="activo" th:selected="${estadoValue == 'activo'}">Activo</option>
+		                        <option value="devuelto" th:selected="${estadoValue == 'devuelto'}">Devuelto</option>
+		                        <option value="cancelado" th:selected="${estadoValue == 'cancelado'}">Cancelado</option>
+		                    </select>
+		                </div>
+		                <div class="col-md-3">
+		                    <label class="form-label">Fecha desde</label>
+		                    <input type="date" name="fechaDesde" class="form-control" 
+		                           th:value="${fechaDesdeValue}">
+		                </div>
+		                <div class="col-md-2">
+		                    <label class="form-label">&nbsp;</label>
+		                    <div class="d-grid gap-2">
+		                        <button type="submit" class="btn btn-primary">
+		                            <i class="bi bi-funnel"></i> Filtrar
+		                        </button>
+		                    </div>
+		                </div>
+		            </div>
+		        </form>
+		    </div>
+		</div>
+
+        <!-- Rentals Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Listado de Alquileres</h5>
+                <span class="text-muted">Mostrando <span th:text="${#lists.size(alquileres)}">0</span> registros</span>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(alquileres)}" class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3">No hay alquileres registrados</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(alquileres)}" class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuario</th>
+                                <th>Libro</th>
+                                <th>Fecha Alquiler</th>
+                                <th>Fecha Vencimiento</th>
+                                <th>Fecha Devolución</th>
+                                <th>Costo</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="rental : ${alquileres}">
+                                <td>
+								    <code th:text="${rental.rentalId}">ID del alquiler</code>
+								</td>
+                                <td th:text="${rental.usuario}">usuario@email.com</td>
+                                <td th:text="${rental.libro}">Nombre del libro</td>
+                                <td th:text="${#temporals.format(rental.fechaAlquiler, 'dd/MM/yyyy HH:mm')}">01/01/2024 00:00</td>
+                                <td th:text="${#temporals.format(rental.fechaVencimiento, 'dd/MM/yyyy HH:mm')}">01/01/2024 00:00</td>
+                                <td>
+                                    <span th:if="${rental.fechaDevolucion != null}" 
+                                          th:text="${#temporals.format(rental.fechaDevolucion, 'dd/MM/yyyy HH:mm')}">01/01/2024 00:00</span>
+                                    <span th:if="${rental.fechaDevolucion == null}" class="text-muted">—</span>
+                                </td>
+                                <td th:text="${rental.costoTotal} + ' €'">10.00 €</td>
+                                <td>
+                                    <span th:if="${rental.estadoAlquiler == 'En Proceso'}" class="badge bg-success">Activo</span>
+                                    <span th:if="${rental.estadoAlquiler == 'Devuelto'}" class="badge bg-secondary">Devuelto</span>
+                                    <span th:if="${rental.estadoAlquiler == 'Cancelado'}" class="badge bg-danger">Cancelado</span>
+                                    <span th:if="${rental.estadoAlquiler != 'En Proceso' and rental.estadoAlquiler != 'Devuelto' and rental.estadoAlquiler != 'Cancelado'}" 
+                                          class="badge bg-info" th:text="${rental.estadoAlquiler}">Estado</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/admin/alquileres/{id}(id=${rental.rentalId})}" 
+                                           class="btn btn-info" title="Ver detalles">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a th:if="${rental.estadoAlquiler == 'En Proceso'}" 
+                                           th:href="@{/admin/alquileres/{id}/devolver(id=${rental.rentalId})}" 
+                                           class="btn btn-success" title="Registrar devolución">
+                                            <i class="bi bi-arrow-return-left"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

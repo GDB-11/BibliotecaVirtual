@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Libros en Alquiler</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            .days-urgent { color: #dc3545; font-weight: bold; }
+            .days-warning { color: #ffc107; font-weight: bold; }
+            .days-normal { color: #28a745; }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-book me-2"></i>Libros en Alquiler</h2>
+                    <p class="text-muted mb-0">Reporte de libros actualmente alquilados</p>
+                </div>
+                <div>
+                    <button class="btn btn-success" onclick="window.print()">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Resumen</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <h3 th:text="${totalActivos}">0</h3>
+                                <small class="text-muted">Total alquileres activos</small>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <h3 th:text="${#lists.size(alquileresActivos)}">0</h3>
+                                <small class="text-muted">Libros diferentes</small>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <h3 th:text="${alquileresActivos.![diasParaVencer].?[#this < 0].size()}">0</h3>
+                                <small class="text-muted">Vencidos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Rentals Table -->
+        <div class="card">
+            <div class="card-header text-white">
+                <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Alquileres Activos</h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(alquileresActivos)}" class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3">No hay alquileres activos</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(alquileresActivos)}" class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Libro</th>
+                                <th>Fecha Alquiler</th>
+                                <th>Fecha Vencimiento</th>
+                                <th>Días para Vencer</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="rental : ${alquileresActivos}">
+                                <td th:text="${rental.usuario}">usuario@email.com</td>
+                                <td>
+                                    <strong th:text="${rental.libro}">Nombre del libro</strong>
+                                </td>
+                                <td th:text="${#temporals.format(rental.fechaAlquiler, 'dd/MM/yyyy')}">01/01/2024</td>
+                                <td th:text="${#temporals.format(rental.fechaVencimiento, 'dd/MM/yyyy')}">01/01/2024</td>
+                                <td>
+                                    <span th:if="${rental.diasParaVencer < 0}" 
+                                          class="days-urgent" 
+                                          th:text="${rental.diasParaVencer} + ' días (vencido)'">-5 días</span>
+                                    <span th:if="${rental.diasParaVencer >= 0 and rental.diasParaVencer <= 2}" 
+                                          class="days-warning" 
+                                          th:text="${rental.diasParaVencer} + ' días'">2 días</span>
+                                    <span th:if="${rental.diasParaVencer > 2}" 
+                                          class="days-normal" 
+                                          th:text="${rental.diasParaVencer} + ' días'">5 días</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">Activo</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

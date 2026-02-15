@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Ver Libro</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .detail-label {
+                font-weight: 600;
+                color: #495057;
+                width: 150px;
+            }
+            .book-cover-large {
+                width: 200px;
+                height: 280px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 4rem;
+                margin: 0 auto;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/mantenimiento/libros}">Libros</a></li>
+                <li class="breadcrumb-item active">Ver Detalles</li>
+            </ol>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-eye me-2"></i>Detalles del Libro</h2>
+                    <p class="text-muted mb-0" th:text="${libro.title}">Título del libro</p>
+                </div>
+                <div>
+                    <a th:href="@{/admin/mantenimiento/libros}" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                    <a th:href="@{/admin/mantenimiento/libros/{id}/editar(id=${libro.bookId})}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <div class="col-lg-4">
+                <!-- Book Cover -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="bi bi-image me-2"></i>Portada</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="book-cover-large mb-3">
+                            <i class="bi bi-book"></i>
+                        </div>
+                        <p class="small text-muted mb-0">ISBN: <span th:text="${libro.isbn}">978-3-16-148410-0</span></p>
+                    </div>
+                </div>
+
+                <!-- Stats Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Estadísticas</h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td>Total ejemplares:</td>
+                                <td class="text-end"><strong>0</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Disponibles:</td>
+                                <td class="text-end"><strong class="text-success">0</strong></td>
+                            </tr>
+                            <tr>
+                                <td>En alquiler:</td>
+                                <td class="text-end"><strong class="text-warning">0</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Total alquileres:</td>
+                                <td class="text-end"><strong>0</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <!-- Book Details -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información del Libro</h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="detail-label">ID:</td>
+                                <td><code th:text="${libro.bookId}">12345678-1234-1234-1234-123456789012</code></td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Título:</td>
+                                <td class="fw-bold" th:text="${libro.title}">Título del libro</td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">ISBN:</td>
+                                <td><code th:text="${libro.isbn}">978-3-16-148410-0</code></td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Año publicación:</td>
+                                <td th:text="${libro.publicationYear}">2024</td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Autor:</td>
+                                <td th:text="${libro.author != null ? libro.author.fullName : 'Sin autor'}">Autor</td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Categoría:</td>
+                                <td th:text="${libro.category != null ? libro.category.categoryName : 'Sin categoría'}">Categoría</td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Estado:</td>
+                                <td>
+                                    <span th:if="${libro.bookStatusId == 1}" class="badge bg-success">Activo</span>
+                                    <span th:if="${libro.bookStatusId != 1}" class="badge bg-secondary">Inactivo</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Fecha creación:</td>
+                                <td th:text="${#temporals.format(libro.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 00:00</td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Última actualización:</td>
+                                <td th:text="${#temporals.format(libro.updatedAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 00:00</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Sinopsis -->
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="mb-0"><i class="bi bi-file-text me-2"></i>Sinopsis</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0" th:text="${libro.synopsis ?: 'No hay sinopsis disponible'}">
+                            Descripción detallada del libro...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Ejemplares Section -->
+                <div class="card">
+                    <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0"><i class="bi bi-files me-2"></i>Ejemplares</h6>
+                        <a th:href="@{/admin/mantenimiento/ejemplares/nuevo?bookId=${libro.bookId}}" class="btn btn-sm btn-light">
+                            <i class="bi bi-plus-circle"></i> Agregar ejemplar
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">
+                                            <i class="bi bi-inbox me-2"></i>No hay ejemplares registrados
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

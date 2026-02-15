@@ -1,0 +1,61 @@
+<!-- src/main/resources/templates/admin/shared/header.html -->
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Header</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm" 
+         style="height: var(--topbar-height);" 
+         th:fragment="header">
+        <div class="container-fluid">
+            <!-- Sidebar Toggle Button (Mobile) -->
+            <button class="btn btn-dark sidebar-toggle me-3" type="button" id="sidebarToggle">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+            
+            <!-- Brand/Logo -->
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/admin/dashboard}">
+                <i class="bi bi-book-fill me-2 fs-4"></i>
+                <span class="fw-bold">BiblioAdmin</span>
+            </a>
+            
+            <!-- Navbar Items -->
+            <div class="d-flex align-items-center ms-auto">
+                <!-- User Profile -->
+                <div class="dropdown">
+                    <button class="btn btn-dark d-flex align-items-center" 
+                            type="button" 
+                            id="userDropdown" 
+                            data-bs-toggle="dropdown">
+                        <img th:src="'https://ui-avatars.com/api/?name=' + ${#strings.substring(#authentication.name, 0, 1)} + '&background=3498db&color=fff'" 
+                             class="rounded-circle me-2" 
+                             width="35" 
+                             height="35" 
+                             th:alt="${#authentication.name}">
+                        <span class="d-none d-md-inline" sec:authentication="name"></span>
+                        <i class="bi bi-chevron-down ms-2"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-person me-2"></i>Mi Perfil
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/admin/logout}" method="post" class="d-inline">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+</body>
+</html>

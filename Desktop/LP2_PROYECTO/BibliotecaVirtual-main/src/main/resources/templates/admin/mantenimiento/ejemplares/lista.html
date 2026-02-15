@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Gestión de Ejemplares</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .badge-disponible { background-color: #28a745; color: white; }
+            .badge-alquilado { background-color: #ffc107; color: #212529; }
+            .badge-mantenimiento { background-color: #dc3545; color: white; }
+            .badge-perdido { background-color: #6c757d; color: white; }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-files me-2"></i>Mantenimiento de Ejemplares</h2>
+                    <p class="text-muted mb-0">Administra los ejemplares físicos de los libros</p>
+                </div>
+                <div>
+                    <a th:href="@{/admin/mantenimiento/ejemplares/nuevo}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Nuevo Ejemplar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Total Ejemplares</small>
+                                <h4 class="mb-0" th:text="${totalItems}">0</h4>
+                            </div>
+                            <i class="bi bi-files fs-2 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-success border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Disponibles</small>
+                                <h4 class="mb-0" th:text="${disponibles}">0</h4>
+                            </div>
+                            <i class="bi bi-check-circle-fill fs-2 text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-warning border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Alquilados</small>
+                                <h4 class="mb-0" th:text="${alquilados}">0</h4>
+                            </div>
+                            <i class="bi bi-play-circle-fill fs-2 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-danger border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">En esta página</small>
+                                <h4 class="mb-0" th:text="${#lists.size(ejemplares)}">0</h4>
+                            </div>
+                            <i class="bi bi-list-ul fs-2 text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+			<!-- Filters -->
+			<div class="card mb-4">
+			    <div class="card-body">
+			        <form method="get" th:action="@{/admin/mantenimiento/ejemplares}">
+			            <div class="row g-3">
+			                <div class="col-md-4">
+			                    <label for="searchInput" class="form-label">Buscar</label>
+			                    <div class="input-group">
+			                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+			                        <input type="text" id="searchInput" name="search" class="form-control" 
+			                               placeholder="Libro, código o notas..." 
+			                               th:value="${searchValue}">
+			                    </div>
+			                </div>
+			                <div class="col-md-3">
+			                    <label for="bookSelect" class="form-label">Libro</label>
+			                    <select id="bookSelect" name="bookId" class="form-select">
+			                        <option value="">Todos</option>
+			                        <option th:each="book : ${libros}" 
+			                                th:value="${book.bookId}" 
+			                                th:text="${book.title}"
+			                                th:selected="${bookIdValue != null and bookIdValue == book.bookId.toString()}">
+			                        </option>
+			                    </select>
+			                </div>
+			                <div class="col-md-3">
+			                    <label for="statusSelect" class="form-label">Estado</label>
+			                    <select id="statusSelect" name="statusId" class="form-select">
+			                        <option value="">Todos</option>
+			                        <option value="disponible" th:selected="${statusIdValue == 'disponible'}">Disponible</option>
+			                        <option value="alquilado" th:selected="${statusIdValue == 'alquilado'}">Alquilado</option>
+			                        <option value="mantenimiento" th:selected="${statusIdValue == 'mantenimiento'}">Mantenimiento</option>
+			                        <option value="perdido" th:selected="${statusIdValue == 'perdido'}">Perdido</option>
+			                    </select>
+			                </div>
+			                <div class="col-md-2">
+			                    <label class="form-label">&nbsp;</label>
+			                    <div class="d-grid gap-2">
+			                        <button type="submit" class="btn btn-primary">
+			                            <i class="bi bi-funnel"></i> Filtrar
+			                        </button>
+			                        <a th:href="@{/admin/mantenimiento/ejemplares}" class="btn btn-outline-secondary">
+			                            <i class="bi bi-eraser"></i> Limpiar
+			                        </a>
+			                    </div>
+			                </div>
+			            </div>
+			        </form>
+			    </div>
+			</div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Copies Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Listado de Ejemplares</h5>
+                <div>
+                    <span class="text-muted">Página <span th:text="${paginaActual}">1</span> de <span th:text="${totalPaginas}">1</span></span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(ejemplares)}" class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3">No hay ejemplares registrados</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(ejemplares)}" class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Código</th>
+                                <th>Libro</th>
+                                <th>ISBN</th>
+                                <th>Estado</th>
+                                <th>Notas / Ubicación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="copy : ${ejemplares}">
+                                <td>
+                                    <code th:text="${copy.bookCopyId}">CPY-001</code>
+                                </td>
+                                <td>
+                                    <strong th:text="${copy.book.title}">Título del libro</strong>
+                                </td>
+                                <td>
+                                    <small class="text-muted" th:text="${copy.book.isbn}">978-3-16-148410-0</small>
+                                </td>
+                                <td>
+                                    <span th:if="${copy.bookCopyStatus != null and copy.bookCopyStatus.bookCopyStatusName == 'Disponible'}" 
+                                          class="badge bg-success">Disponible</span>
+                                    <span th:if="${copy.bookCopyStatus != null and copy.bookCopyStatus.bookCopyStatusName == 'Alquilado'}" 
+                                          class="badge bg-warning text-dark">Alquilado</span>
+                                    <span th:if="${copy.bookCopyStatus != null and copy.bookCopyStatus.bookCopyStatusName == 'Mantenimiento'}" 
+                                          class="badge bg-danger">Mantenimiento</span>
+                                    <span th:if="${copy.bookCopyStatus != null and copy.bookCopyStatus.bookCopyStatusName == 'Perdido'}" 
+                                          class="badge bg-secondary">Perdido</span>
+                                    <span th:if="${copy.bookCopyStatus == null}" 
+                                          class="badge bg-secondary">Sin estado</span>
+                                </td>
+                                <td th:text="${copy.notes ?: 'Sin notas'}">Estante A1</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/admin/mantenimiento/ejemplares/{id}(id=${copy.bookCopyId})}" 
+                                           class="btn btn-info" title="Ver detalles">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a th:href="@{/admin/mantenimiento/ejemplares/{id}/editar(id=${copy.bookCopyId})}" 
+                                           class="btn btn-warning" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                th:data-bs-target="'#deleteModal' + ${copy.bookCopyId}"
+                                                title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" th:id="'deleteModal' + ${copy.bookCopyId}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>¿Eliminar ejemplar <strong th:text="${copy.bookCopyId}"></strong>?</p>
+                                                    <p class="text-danger mb-0">Esta acción no se puede deshacer.</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                    <form th:action="@{/admin/mantenimiento/ejemplares/{id}/eliminar(id=${copy.bookCopyId})}" method="post">
+                                                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav th:if="${totalPaginas > 1}" aria-label="Paginación" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${paginaActual == 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/mantenimiento/ejemplares(p=${paginaActual - 1})}">
+                                <i class="bi bi-chevron-left"></i> Anterior
+                            </a>
+                        </li>
+                        <li th:each="i : ${#numbers.sequence(1, totalPaginas)}" 
+                            class="page-item" th:classappend="${i == paginaActual} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/mantenimiento/ejemplares(p=${i})}" th:text="${i}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${paginaActual == totalPaginas} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/mantenimiento/ejemplares(p=${paginaActual + 1})}">
+                                Siguiente <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

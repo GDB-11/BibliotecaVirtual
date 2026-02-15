@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Ver Autor</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .detail-label {
+                font-weight: 600;
+                color: #495057;
+                width: 150px;
+            }
+            .author-photo-large {
+                width: 200px;
+                height: 200px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 5rem;
+                font-weight: bold;
+                margin: 0 auto;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            }
+            .stat-box {
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 15px;
+                text-align: center;
+                transition: transform 0.3s;
+            }
+            .stat-box:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/mantenimiento/autores}">Autores</a></li>
+                <li class="breadcrumb-item active">Ver Detalles</li>
+            </ol>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-eye me-2"></i>Detalles del Autor</h2>
+                    <p class="text-muted mb-0" th:text="${autor.fullName}">Nombre del autor</p>
+                </div>
+                <div>
+                    <a th:href="@{/admin/mantenimiento/autores}" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                    <a th:href="@{/admin/mantenimiento/autores/{id}/editar(id=${autor.authorId})}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <div class="col-lg-4">
+                <!-- Author Photo -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="bi bi-person-badge me-2"></i>Foto</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <div th:if="${autor.photoUrl}" class="mb-3">
+                            <img th:src="${autor.photoUrl}" class="img-fluid rounded-circle" style="max-width: 180px;">
+                        </div>
+                        <div th:unless="${autor.photoUrl}" class="author-photo-large mb-3">
+                            <span th:text="${#strings.substring(autor.fullName, 0, 1)}">A</span>
+                        </div>
+                        <p class="small text-muted mb-0" th:if="${autor.pseudonym}">
+                            <i class="bi bi-pencil me-1"></i> <span th:text="${autor.pseudonym}">Seudónimo</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Estadísticas</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="stat-box">
+                                    <h3 class="mb-0" th:text="${autor.bookCount ?: 0}">0</h3>
+                                    <small class="text-muted">Libros</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-box">
+                                    <h3 class="mb-0" th:text="${autor.totalRentals ?: 0}">0</h3>
+                                    <small class="text-muted">Alquileres</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-box">
+                                    <h3 class="mb-0" th:text="${autor.activeRentals ?: 0}">0</h3>
+                                    <small class="text-muted">Activos</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-box">
+                                    <h3 class="mb-0" th:text="${autor.availableCopies ?: 0}">0</h3>
+                                    <small class="text-muted">Disponibles</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <!-- Author Details -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información del Autor</h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="detail-label">ID:</td>
+                                <td><code th:text="${autor.authorId}">12345678-1234-1234-1234-123456789012</code></td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Nombre:</td>
+                                <td class="fw-bold" th:text="${autor.fullName}">Nombre del autor</td>
+                            </tr>
+                            <tr th:if="${autor.pseudonym}">
+                                <td class="detail-label">Seudónimo:</td>
+                                <td th:text="${autor.pseudonym}">Seudónimo</td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">País:</td>
+                                <td th:text="${autor.country != null ? autor.country.countryName : 'Desconocido'}">País</td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Nacimiento:</td>
+                                <td th:text="${autor.birthYear ?: 'Desconocido'}">1900</td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Fallecimiento:</td>
+                                <td th:text="${autor.deathYear ?: 'Presente'}">Presente</td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Estado:</td>
+                                <td>
+                                    <span th:if="${autor.status.statusName == 'Active'}" class="badge bg-success">Activo</span>
+                                    <span th:unless="${autor.status.statusName == 'Active'}" class="badge bg-secondary">Inactivo</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Fecha creación:</td>
+                                <td th:text="${#temporals.format(autor.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 00:00</td>
+                            </tr>
+                            <tr>
+                                <td class="detail-label">Última actualización:</td>
+                                <td th:text="${#temporals.format(autor.updatedAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 00:00</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Biography -->
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="mb-0"><i class="bi bi-file-text me-2"></i>Biografía</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0" th:text="${autor.biography ?: 'No hay biografía disponible'}">
+                            Biografía del autor...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Books Section -->
+                <div class="card">
+                    <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0"><i class="bi bi-book me-2"></i>Libros del Autor</h6>
+                        <a th:href="@{/admin/mantenimiento/libros/nuevo?authorId=${autor.authorId}}" class="btn btn-sm btn-light">
+                            <i class="bi bi-plus-circle"></i> Agregar libro
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(autor.books)}" class="text-center py-4">
+                            <i class="bi bi-inbox fs-1 text-muted"></i>
+                            <p class="text-muted mt-2">Este autor no tiene libros registrados</p>
+                            <a th:href="@{/admin/mantenimiento/libros/nuevo?authorId=${autor.authorId}}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-plus-circle"></i> Agregar primer libro
+                            </a>
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(autor.books)}" class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Título</th>
+                                        <th>ISBN</th>
+                                        <th>Año</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="book : ${autor.books}">
+                                        <td th:text="${book.title}">Título del libro</td>
+                                        <td><small th:text="${book.isbn}">978-3-16-148410-0</small></td>
+                                        <td th:text="${book.publicationYear}">2024</td>
+                                        <td>
+                                            <span th:if="${book.bookStatusId == 1}" class="badge bg-success">Activo</span>
+                                            <span th:if="${book.bookStatusId != 1}" class="badge bg-secondary">Inactivo</span>
+                                        </td>
+                                        <td>
+                                            <a th:href="@{/admin/mantenimiento/libros/{id}(id=${book.bookId})}" 
+                                               class="btn btn-sm btn-outline-info">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal (if accessed directly) -->
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">Confirmar Eliminación</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Eliminar autor <strong th:text="${autor.fullName}"></strong>?</p>
+                        <p class="text-danger mb-0">Esta acción no se puede deshacer.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <form th:action="@{/admin/mantenimiento/autores/{id}/eliminar(id=${autor.authorId})}" method="post">
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

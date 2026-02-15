@@ -1,0 +1,446 @@
+<!-- src/main/resources/templates/admin/usuario-form.html -->
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="${isNew} ? 'Nuevo Usuario' : (${isReadOnly} ? 'Ver Usuario' : 'Editar Usuario')">Usuario</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/usuarios}">Usuarios</a></li>
+                <li class="breadcrumb-item active" aria-current="page" 
+                    th:text="${isNew} ? 'Nuevo' : (${isReadOnly} ? 'Ver' : 'Editar')">Acción</li>
+            </ol>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0">
+                        <i class="bi" th:classappend="${isNew} ? 'bi-plus-circle' : (${isReadOnly} ? 'bi-eye' : 'bi-pencil-square')"></i>
+                        <span th:text="${isNew} ? 'Nuevo Usuario' : (${isReadOnly} ? 'Ver Usuario' : 'Editar Usuario')">Usuario</span>
+                    </h2>
+                    <p class="text-muted mb-0" th:if="${not isNew}">
+                        Usuario: <strong th:text="${user.email}"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a1c4ccc0c8cde1c4d9c0ccd1cdc48fc2cecc">[email&#160;protected]</a></strong>
+                    </p>
+                </div>
+                <div>
+                    <a th:href="@{/admin/usuarios}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Formulario Principal -->
+                <div class="card">
+                    <div class="card-header text-white" 
+                         th:classappend="${isNew} ? 'bg-success' : (${isReadOnly} ? 'bg-info' : 'bg-warning')">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person me-2"></i>Información del Usuario
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="${isNew} ? @{/admin/usuarios} : @{/admin/usuarios/{id}(id=${user.userId})}" 
+                              method="post" id="userForm">
+                            
+                            <!-- Datos Básicos -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-envelope-fill me-2"></i>Datos Básicos
+                                    </h6>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <label for="email" class="form-label">Email *</label>
+                                    <input type="email" 
+                                           class="form-control" 
+                                           id="email" 
+                                           name="email" 
+                                           th:value="${user.email}"
+                                           placeholder="usuario@example.com" 
+                                           th:readonly="${isReadOnly}"
+                                           required>
+                                    <div class="form-text" th:unless="${isReadOnly}">
+                                        El email será el nombre de usuario
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="statusId" class="form-label">Estado *</label>
+                                    <select class="form-select" 
+                                            id="statusId" 
+                                            name="statusId" 
+                                            th:disabled="${isReadOnly}"
+                                            required>
+                                        <option value="">Seleccionar...</option>
+                                        <option th:each="status : ${statuses}" 
+                                                th:value="${status.statusId}" 
+                                                th:text="${status.statusName}"
+                                                th:selected="${!isNew && status.statusId.toString() == user.statusId}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Contraseña (solo para nuevo usuario) -->
+                                <div th:if="${isNew}" class="col-12">
+                                    <label for="password" class="form-label">Contraseña *</label>
+                                    <div class="input-group">
+                                        <input type="password" 
+                                               class="form-control" 
+                                               id="password" 
+                                               name="password" 
+                                               placeholder="Mínimo 6 caracteres" 
+                                               required 
+                                               minlength="6">
+                                        <button class="btn btn-outline-secondary" 
+                                                type="button" 
+                                                onclick="togglePassword('password')">
+                                            <i class="bi bi-eye" id="password-icon"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">
+                                        La contraseña debe tener al menos 6 caracteres
+                                    </div>
+                                </div>
+
+                                <div th:if="${isNew}" class="col-12">
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        El usuario se creará con el estado seleccionado. 
+                                        Los roles se asignan después de la creación.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones de Acción -->
+                            <div th:unless="${isReadOnly}" class="row">
+                                <div class="col-12">
+                                    <hr class="my-4">
+                                    <div class="d-flex justify-content-between">
+                                        <a th:href="@{/admin/usuarios}" class="btn btn-secondary">
+                                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                                        </a>
+                                        <div>
+                                            <button type="reset" class="btn btn-outline-secondary me-2">
+                                                <i class="bi bi-arrow-counterclockwise me-1"></i> Restablecer
+                                            </button>
+                                            <button type="submit" 
+                                                    class="btn" 
+                                                    th:classappend="${isNew} ? 'btn-success' : 'btn-warning'">
+                                                <i class="bi bi-save me-1"></i>
+                                                <span th:text="${isNew} ? 'Crear Usuario' : 'Guardar Cambios'">Guardar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Gestión de Roles (solo para edición) -->
+                <div th:if="${not isNew}" class="card mt-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-shield-check me-2"></i>Gestión de Roles
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Roles Asignados -->
+                        <h6 class="mb-3">Roles Asignados</h6>
+                        <div th:if="${#lists.isEmpty(assignedRoleIds)}" class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Este usuario no tiene roles asignados
+                        </div>
+                        
+                        <div th:unless="${#lists.isEmpty(assignedRoleIds)}" class="mb-4">
+                            <div th:each="role : ${roles}" th:if="${#lists.contains(assignedRoleIds, role.roleId)}">
+                                <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                    <div>
+                                        <span class="badge" 
+                                              th:classappend="${role.roleName == 'Admin'} ? 'bg-danger' : 'bg-primary'">
+                                            <i th:if="${role.roleName == 'Admin'}" class="bi bi-shield-fill-check me-1"></i>
+                                            <span th:text="${role.roleName}">Role</span>
+                                        </span>
+                                    </div>
+                                    <div th:unless="${isReadOnly}">
+                                        <form th:action="@{/admin/usuarios/{id}/remover-rol(id=${user.userId})}" 
+                                              method="post" style="display: inline;">
+                                            <input type="hidden" name="roleId" th:value="${role.roleId}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i> Remover
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Asignar Nuevo Rol -->
+                        <div th:unless="${isReadOnly}">
+                            <h6 class="mb-3 mt-4">Asignar Nuevo Rol</h6>
+                            <form th:action="@{/admin/usuarios/{id}/asignar-rol(id=${user.userId})}" 
+                                  method="post" class="row g-2 align-items-end">
+                                <div class="col-md-8">
+                                    <label for="roleId" class="form-label">Seleccionar Rol</label>
+                                    <select class="form-select" id="roleId" name="roleId" required>
+                                        <option value="">Seleccionar...</option>
+                                        <option th:each="role : ${roles}" 
+                                                th:if="${not #lists.contains(assignedRoleIds, role.roleId)}"
+                                                th:value="${role.roleId}" 
+                                                th:text="${role.roleName}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-plus-circle"></i> Asignar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cambiar Contraseña (solo para edición) -->
+                <div th:if="${not isNew and not isReadOnly}" class="card mt-4">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-key me-2"></i>Cambiar Contraseña
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/usuarios/{id}/cambiar-password(id=${user.userId})}" 
+                              method="post" class="row g-3">
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Como administrador, puedes cambiar la contraseña directamente sin conocer la actual.
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="newPassword" class="form-label">Nueva Contraseña</label>
+                                <div class="input-group">
+                                    <input type="password" 
+                                           class="form-control" 
+                                           id="newPassword" 
+                                           name="newPassword" 
+                                           placeholder="Mínimo 6 caracteres" 
+                                           required 
+                                           minlength="6">
+                                    <button class="btn btn-outline-secondary" 
+                                            type="button" 
+                                            onclick="togglePassword('newPassword')">
+                                        <i class="bi bi-eye" id="newPassword-icon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="bi bi-key"></i> Cambiar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Información del Registro -->
+                <div th:if="${not isNew}" class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>Información del Registro
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr>
+                                <th style="width: 40%">ID:</th>
+                                <td><code class="small" th:text="${#strings.substring(user.userId, 0, 13) + '...'}"></code></td>
+                            </tr>
+                            <tr>
+                                <th>Creado:</th>
+                                <td class="small" th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024</td>
+                            </tr>
+                            <tr>
+                                <th>Actualizado:</th>
+                                <td class="small" th:text="${#temporals.format(user.updatedAt, 'dd/MM/yyyy HH:mm')}">01/01/2024</td>
+                            </tr>
+                            <tr>
+                                <th>Estado:</th>
+                                <td>
+                                    <span th:if="${user.statusName == 'Active'}" class="badge bg-success">Activo</span>
+                                    <span th:unless="${user.statusName == 'Active'}" class="badge bg-secondary">Inactivo</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Ayuda -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-question-circle me-2"></i>Ayuda
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="fw-bold">Campos obligatorios</h6>
+                        <ul class="small">
+                            <li>Email</li>
+                            <li th:if="${isNew}">Contraseña (solo creación)</li>
+                            <li>Estado</li>
+                        </ul>
+
+                        <h6 class="fw-bold mt-3">Consejos</h6>
+                        <ul class="small mb-0">
+                            <li>El email debe ser único en el sistema</li>
+                            <li>La contraseña debe tener mínimo 6 caracteres</li>
+                            <li>Los roles determinan los permisos del usuario</li>
+                            <li>Solo usuarios activos pueden acceder al sistema</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Acciones Rápidas -->
+                <div th:if="${not isNew}" class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-lightning me-2"></i>Acciones Rápidas
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a th:if="${isReadOnly}" 
+                               th:href="@{/admin/usuarios/{id}/editar(id=${user.userId})}" 
+                               class="btn btn-outline-warning btn-sm">
+                                <i class="bi bi-pencil me-1"></i> Editar Usuario
+                            </a>
+                            <button th:unless="${isReadOnly}" 
+                                    type="button" 
+                                    class="btn btn-outline-danger btn-sm"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal">
+                                <i class="bi bi-trash me-1"></i> Eliminar Usuario
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div th:if="${not isNew}" class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminación
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Está seguro de que desea eliminar al usuario <strong th:text="${user.email}"></strong>?</p>
+                        <p class="text-danger mb-0">
+                            <i class="bi bi-exclamation-circle me-1"></i>
+                            Esta acción no se puede deshacer y se eliminarán todos los datos relacionados.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <form th:action="@{/admin/usuarios/{id}/eliminar(id=${user.userId})}" method="post">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <th:block layout:fragment="extra-js">
+            <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+                // Toggle password visibility
+                function togglePassword(fieldId) {
+                    const field = document.getElementById(fieldId);
+                    const icon = document.getElementById(fieldId + '-icon');
+                    
+                    if (field.type === 'password') {
+                        field.type = 'text';
+                        icon.classList.remove('bi-eye');
+                        icon.classList.add('bi-eye-slash');
+                    } else {
+                        field.type = 'password';
+                        icon.classList.remove('bi-eye-slash');
+                        icon.classList.add('bi-eye');
+                    }
+                }
+
+                // Form validation
+                const form = document.getElementById('userForm');
+                if (form) {
+                    form.addEventListener('submit', function(event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                }
+
+                // Unsaved changes warning
+                let formChanged = false;
+                if (form) {
+                    const formInputs = form.querySelectorAll('input, select, textarea');
+                    formInputs.forEach(input => {
+                        input.addEventListener('change', function() {
+                            formChanged = true;
+                        });
+                    });
+
+                    window.addEventListener('beforeunload', function(e) {
+                        if (formChanged) {
+                            e.preventDefault();
+                            e.returnValue = '';
+                            return '';
+                        }
+                    });
+
+                    form.addEventListener('submit', function() {
+                        formChanged = false;
+                    });
+                }
+            </script>
+        </th:block>
+    </div>
+</body>
+</html>
