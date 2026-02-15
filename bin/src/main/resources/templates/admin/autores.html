@@ -1,0 +1,370 @@
+<!-- src/main/resources/templates/admin/autores.html -->
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Gestión de Autores</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-person-badge me-2"></i>Mantenimiento de Autores</h2>
+                    <p class="text-muted mb-0">Gestión completa de autores de la biblioteca</p>
+                </div>
+                <div>
+                    <a th:href="@{/admin/autores/nuevo}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Nuevo Autor
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Total Autores</small>
+                                <h4 class="mb-0" th:text="${totalAuthors}">0</h4>
+                            </div>
+                            <i class="bi bi-people-fill fs-2 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-success border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Con Obras</small>
+                                <h4 class="mb-0" th:text="${authorsWithBooksCount}">0</h4>
+                            </div>
+                            <i class="bi bi-check-circle-fill fs-2 text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-info border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Activos</small>
+                                <h4 class="mb-0" th:text="${activeAuthorsCount}">0</h4>
+                            </div>
+                            <i class="bi bi-flag-fill fs-2 text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-warning border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">En Página</small>
+                                <h4 class="mb-0" th:text="${#lists.size(authorsResult.items)}">0</h4>
+                            </div>
+                            <i class="bi bi-list-ul fs-2 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" th:action="@{/admin/autores}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Buscar</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" name="search" class="form-control" 
+                                       placeholder="Nombre o pseudónimo del autor..." 
+                                       th:value="${searchValue}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Nacionalidad</label>
+                            <select name="countryId" class="form-select">
+                                <option value="">Todas</option>
+                                <option th:each="country : ${countries}" 
+                                        th:value="${country.countryId}" 
+                                        th:text="${country.countryName}"
+                                        th:selected="${country.countryId.toString() == countryIdValue}">
+                                    País
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Estado</label>
+                            <select name="statusId" class="form-select">
+                                <option value="">Todos</option>
+                                <option th:each="status : ${statuses}" 
+                                        th:value="${status.statusId}" 
+                                        th:text="${status.statusName}"
+                                        th:selected="${status.statusId.toString() == statusIdValue}">
+                                    Estado
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-funnel"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Authors Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Listado de Autores</h5>
+                <div>
+                    <span class="text-muted me-3">
+                        Mostrando <span th:text="${authorsResult.startItem}">1</span> - 
+                        <span th:text="${authorsResult.endItem}">10</span> de 
+                        <span th:text="${authorsResult.totalItems}">100</span>
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(authorsResult.items)}" class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3">No se encontraron autores</p>
+                    <div th:if="${not #strings.isEmpty(searchValue) or not #strings.isEmpty(countryIdValue) or not #strings.isEmpty(statusIdValue)}">
+                        <a th:href="@{/admin/autores}" class="btn btn-outline-primary">
+                            <i class="bi bi-x-circle"></i> Limpiar filtros
+                        </a>
+                    </div>
+                </div>
+                
+                <div th:if="${not #lists.isEmpty(authorsResult.items)}" class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Autor</th>
+                                <th>Pseudónimo</th>
+                                <th>Nacionalidad</th>
+                                <th>Años</th>
+                                <th>Email</th>
+                                <th>Estado</th>
+                                <th style="width: 150px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="author : ${authorsResult.items}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:if="${not #strings.isEmpty(author.photoUrl)}" 
+                                             th:src="${author.photoUrl}" 
+                                             class="rounded-circle me-2" 
+                                             width="40" height="40"
+                                             th:alt="${author.fullName}"
+                                             onerror="this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent(this.alt) + '&size=40&background=3498db&color=fff'">
+                                        <img th:unless="${not #strings.isEmpty(author.photoUrl)}"
+                                             th:src="${'https://ui-avatars.com/api/?name=' + #strings.replace(author.fullName, ' ', '+') + '&size=40&background=3498db&color=fff'}" 
+                                             class="rounded-circle me-2" 
+                                             width="40" height="40"
+                                             th:alt="${author.fullName}">
+                                        <div>
+                                            <strong th:text="${author.fullName}">Nombre Autor</strong>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <em th:if="${not #strings.isEmpty(author.pseudonym)}" 
+                                        th:text="${author.pseudonym}">Pseudónimo</em>
+                                    <span th:unless="${not #strings.isEmpty(author.pseudonym)}" 
+                                          class="text-muted">-</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">
+                                        <i class="bi bi-flag-fill me-1"></i>
+                                        <span th:text="${author.countryName}">País</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span th:if="${author.birthYear != null}">
+                                        <span th:text="${author.birthYear < 0 ? (-author.birthYear + ' a.C.') : author.birthYear}">1950</span>
+                                        <span th:if="${author.deathYear != null}">
+                                            - <span th:text="${author.deathYear < 0 ? (-author.deathYear + ' a.C.') : author.deathYear}">2020</span>
+                                        </span>
+                                        <span th:unless="${author.deathYear != null}"> - actualidad</span>
+                                    </span>
+                                    <span th:unless="${author.birthYear != null}" class="text-muted">-</span>
+                                </td>
+                                <td>
+                                    <a th:if="${not #strings.isEmpty(author.email)}" 
+                                       th:href="${'mailto:' + author.email}" 
+                                       class="text-decoration-none"
+                                       th:text="${author.email}">email</a>
+                                    <span th:unless="${not #strings.isEmpty(author.email)}" 
+                                          class="text-muted">-</span>
+                                </td>
+                                <td>
+                                    <span th:if="${author.statusName == 'Active'}" 
+                                          class="badge bg-success">Activo</span>
+                                    <span th:unless="${author.statusName == 'Active'}" 
+                                          class="badge bg-secondary">Inactivo</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/admin/autores/{id}(id=${author.authorId})}" 
+                                           class="btn btn-info" 
+                                           data-bs-toggle="tooltip" 
+                                           title="Ver detalles">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a th:href="@{/admin/autores/{id}/editar(id=${author.authorId})}" 
+                                           class="btn btn-warning" 
+                                           data-bs-toggle="tooltip" 
+                                           title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                th:data-bs-target="${'#deleteModal-' + author.authorId}"
+                                                title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Delete Confirmation Modal -->
+                                    <div class="modal fade" th:id="${'deleteModal-' + author.authorId}" 
+                                         tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title">
+                                                        <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminación
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white" 
+                                                            data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>¿Está seguro de que desea eliminar al autor 
+                                                       <strong th:text="${author.fullName}">Nombre</strong>?</p>
+                                                    <p class="text-danger mb-0">
+                                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                                        Esta acción no se puede deshacer.
+                                                    </p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" 
+                                                            data-bs-dismiss="modal">
+                                                        <i class="bi bi-x-circle"></i> Cancelar
+                                                    </button>
+                                                    <form th:action="@{/admin/autores/{id}/eliminar(id=${author.authorId})}" 
+                                                          method="post" style="display: inline;">
+                                                        <button type="submit" class="btn btn-danger">
+                                                            <i class="bi bi-trash"></i> Eliminar
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <nav th:if="${authorsResult.totalPages > 1}" 
+                     aria-label="Paginación de autores" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <!-- Botón Anterior -->
+                        <li class="page-item" 
+                            th:classappend="${not authorsResult.hasPreviousPage()} ? 'disabled'">
+                            <a class="page-link" 
+                               th:href="@{/admin/autores(p=${authorsResult.previousPage},search=${searchValue},countryId=${countryIdValue},statusId=${statusIdValue})}">
+                                <i class="bi bi-chevron-left"></i> Anterior
+                            </a>
+                        </li>
+                        
+                        <!-- Primera página -->
+                        <li th:if="${authorsResult.getPageRange(itemsPerPage)[0] > 1}" class="page-item">
+                            <a class="page-link" 
+                               th:href="@{/admin/autores(p=1,search=${searchValue},countryId=${countryIdValue},statusId=${statusIdValue})}">1</a>
+                        </li>
+                        <li th:if="${authorsResult.getPageRange(itemsPerPage)[0] > 2}" class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        
+                        <!-- Páginas del rango -->
+                        <li th:each="i : ${#numbers.sequence(authorsResult.getPageRange(itemsPerPage)[0], authorsResult.getPageRange(itemsPerPage)[1])}" 
+                            class="page-item" th:classappend="${i == authorsResult.currentPage} ? 'active'">
+                            <a class="page-link" 
+                               th:href="@{/admin/autores(p=${i},search=${searchValue},countryId=${countryIdValue},statusId=${statusIdValue})}"
+                               th:text="${i}">1</a>
+                        </li>
+                        
+                        <!-- Última página -->
+                        <li th:if="${authorsResult.getPageRange(itemsPerPage)[1] < authorsResult.totalPages - 1}" 
+                            class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        <li th:if="${authorsResult.getPageRange(itemsPerPage)[1] < authorsResult.totalPages}" 
+                            class="page-item">
+                            <a class="page-link" 
+                               th:href="@{/admin/autores(p=${authorsResult.totalPages},search=${searchValue},countryId=${countryIdValue},statusId=${statusIdValue})}"
+                               th:text="${authorsResult.totalPages}">10</a>
+                        </li>
+                        
+                        <!-- Botón Siguiente -->
+                        <li class="page-item" 
+                            th:classappend="${not authorsResult.hasNextPage()} ? 'disabled'">
+                            <a class="page-link" 
+                               th:href="@{/admin/autores(p=${authorsResult.nextPage},search=${searchValue},countryId=${countryIdValue},statusId=${statusIdValue})}">
+                                Siguiente <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <div layout:fragment="scripts">
+        <script>
+            // Inicializar tooltips
+            document.addEventListener('DOMContentLoaded', function() {
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>

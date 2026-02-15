@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout}">
+<head>
+    <title>Catálogo de Libros - Biblioteca Virtual</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="container">
+                <h1 class="display-4"><i class="bi bi-grid me-2"></i>Catálogo de Libros</h1>
+                <p class="lead">Explora todos los libros disponibles en nuestra biblioteca</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Filtros -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="get" th:action="@{/user/catalogo}">
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label for="search" class="form-label">Buscar</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       placeholder="Título del libro..." th:value="${search}">
+                            </div>
+                            <div class="col-md-5">
+                                <label for="categoryId" class="form-label">Categoría</label>
+                                <select class="form-select" id="categoryId" name="categoryId">
+                                    <option value="">Todas las categorías</option>
+                                    <option th:each="cat : ${categorias}" 
+                                            th:value="${cat.categoryId}" 
+                                            th:text="${cat.categoryName}"
+                                            th:selected="${categoryId == cat.categoryId}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-funnel"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            <div class="row g-4">
+                <div th:if="${libros == null or #lists.isEmpty(libros)}" class="col-12">
+                    <div class="text-center py-5">
+                        <i class="bi bi-emoji-frown display-1 text-muted"></i>
+                        <h3 class="mt-3">No se encontraron libros</h3>
+                        <p class="text-muted">Prueba con otros filtros de búsqueda</p>
+                    </div>
+                </div>
+
+                <div th:each="libro : ${libros}" class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${libro.title}">Título del libro</h5>
+                            <h6 class="card-subtitle mb-2 text-muted" th:text="${libro.author != null ? libro.author.fullName : 'Autor desconocido'}">
+                                Autor
+                            </h6>
+                            <p class="card-text small">
+                                <span class="badge bg-info me-1" th:text="${libro.category != null ? libro.category.categoryName : 'Sin categoría'}">
+                                    Categoría
+                                </span>
+                                <span class="badge bg-secondary" th:text="${libro.isbn}">ISBN</span>
+                            </p>
+                            <p class="card-text" th:text="${#strings.abbreviate(libro.description, 100)}">
+                                Descripción...
+                            </p>
+                        </div>
+                        <div class="card-footer bg-white border-0">
+                            <a th:href="@{/user/catalogo/{id}(id=${libro.bookId})}" 
+                               class="btn btn-primary w-100">
+                                <i class="bi bi-info-circle"></i> Ver detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paginación -->
+            <nav th:if="${totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/user/catalogo(page=${currentPage - 1}, search=${search}, categoryId=${categoryId})}">
+                            Anterior
+                        </a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(1, totalPages)}" 
+                        class="page-item" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/user/catalogo(page=${i}, search=${search}, categoryId=${categoryId})}" 
+                           th:text="${i}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/user/catalogo(page=${currentPage + 1}, search=${search}, categoryId=${categoryId})}">
+                            Siguiente
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <p class="text-center text-muted mt-3" th:if="${totalItems > 0}">
+                Mostrando <span th:text="${#lists.size(libros)}"></span> de <span th:text="${totalItems}"></span> libros
+            </p>
+        </div>
+    </div>
+</body>
+</html>

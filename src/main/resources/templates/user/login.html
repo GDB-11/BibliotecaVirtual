@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Usuario - Biblioteca Virtual</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+
+    <style>
+        :root {
+            --primary-start: #2ecc71;
+            --primary-end: #1abc9c;
+            --secondary-start: #3498db;
+            --secondary-end: #2980b9;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8f0fe 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(46, 204, 113, 0.3);
+            max-width: 1000px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-left {
+            background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%);
+            color: white;
+            padding: 80px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .login-left i {
+            font-size: 100px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .login-left h2 {
+            font-weight: bold;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .login-left p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-right {
+            padding: 60px 50px;
+            background: white;
+        }
+
+        .login-right h3 {
+            color: #2c3e50;
+            font-weight: bold;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .login-right h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+            border-radius: 2px;
+        }
+
+        .form-label {
+            color: #34495e;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border: 2px solid #ecf0f1;
+            border-radius: 12px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-start);
+            box-shadow: 0 0 0 0.2rem rgba(46, 204, 113, 0.25);
+            outline: none;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%);
+            border: none;
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(46, 204, 113, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-login i {
+            margin-right: 8px;
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 15px;
+            margin-bottom: 20px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            color: #dc2626;
+            border-left: 4px solid #dc2626;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            color: #16a34a;
+            border-left: 4px solid #16a34a;
+        }
+
+        .input-group-text {
+            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+            color: white;
+            border: none;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .footer-links {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .footer-links a {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-start);
+        }
+
+        .footer-links .separator {
+            color: #cbd5e1;
+            margin: 0 10px;
+        }
+
+        @media (max-width: 768px) {
+            .login-left {
+                padding: 40px 20px;
+            }
+            
+            .login-right {
+                padding: 40px 30px;
+            }
+            
+            .login-left i {
+                font-size: 60px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="login-container row g-0">
+
+        <!-- Branding Usuarios - Estilo verde aguamarina -->
+        <div class="col-md-5 login-left">
+            <i class="bi bi-book-half"></i>
+            <h2>Biblioteca Virtual</h2>
+            <p>Acceso para usuarios</p>
+            <div class="mt-4">
+                <small class="opacity-75">
+                    <i class="bi bi-check-circle"></i> Alquila tus libros favoritos
+                </small>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="col-md-7 login-right">
+            <h3>Iniciar Sesión</h3>
+
+            <!-- Mensajes de error -->
+            <div th:if="${param.error}" class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Credenciales incorrectas. Por favor, inténtalo de nuevo.
+            </div>
+
+            <!-- Mensaje de logout -->
+            <div th:if="${param.logout}" class="alert alert-success">
+                <i class="bi bi-check-circle me-2"></i>
+                Sesión cerrada correctamente. ¡Hasta pronto!
+            </div>
+
+            <!-- Formulario de login -->
+            <form th:action="@{/login}" method="post">
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="bi bi-envelope me-2"></i>Email
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email"
+                               class="form-control"
+                               name="email"
+                               placeholder="usuario@email.com"
+                               required>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="bi bi-lock me-2"></i>Contraseña
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                        <input type="password"
+                               class="form-control"
+                               name="password"
+                               placeholder="••••••••"
+                               required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-login w-100">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    Ingresar a mi cuenta
+                </button>
+
+                <div class="footer-links">
+                    <a th:href="@{/registro}">
+                        <i class="bi bi-person-plus"></i> Crear cuenta
+                    </a>
+                    <span class="separator">|</span>
+                    <a th:href="@{/recuperar-password}">
+                        <i class="bi bi-question-circle"></i> ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+            </form>
+
+
+			
+			<div class="register-link mt-3 text-center">
+			    <p class="mb-0">
+			        ¿No tienes cuenta? 
+			        <a th:href="@{/user/registro}" class="text-decoration-none fw-bold" 
+			           style="color: var(--primary-start);">
+			            Regístrate aquí
+			        </a>
+			    </p>
+			</div>
+
+            <!-- Enlace para administradores -->
+            <div class="mt-4 text-center">
+                <small class="text-muted">
+                    <i class="bi bi-shield-lock"></i>
+                    ¿Eres administrador? <a th:href="@{/admin/login}" class="text-decoration-none">Accede aquí</a>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para animaciones adicionales -->
+<script>
+    // Efecto de escritura en el placeholder (opcional)
+    const emailInput = document.querySelector('input[name="email"]');
+    if (emailInput) {
+        emailInput.addEventListener('focus', function() {
+            this.placeholder = '';
+        });
+        emailInput.addEventListener('blur', function() {
+            if (!this.value) {
+                this.placeholder = 'usuario@email.com';
+            }
+        });
+    }
+</script>
+</body>
+</html>

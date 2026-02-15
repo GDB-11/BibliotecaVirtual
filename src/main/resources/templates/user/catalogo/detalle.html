@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout}">
+<head>
+    <title th:text="${libro.title}">Detalle del Libro</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container py-4">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/user/dashboard}">Inicio</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/user/catalogo}">Catálogo</a></li>
+                    <li class="breadcrumb-item active" th:text="${libro.title}">Libro</li>
+                </ol>
+            </nav>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <!-- Portada del libro (placeholder) -->
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-book display-1 text-primary"></i>
+                            <p class="text-muted mt-3">Portada no disponible</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h1 class="card-title" th:text="${libro.title}">Título</h1>
+                            <h5 class="card-subtitle mb-3 text-muted" th:text="${libro.author != null ? libro.author.fullName : 'Autor desconocido'}">
+                                Autor
+                            </h5>
+
+                            <hr>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>ISBN:</strong></div>
+                                <div class="col-sm-9" th:text="${libro.isbn}">978-3-16-148410-0</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Categoría:</strong></div>
+                                <div class="col-sm-9" th:text="${libro.category != null ? libro.category.categoryName : 'Sin categoría'}">
+                                    Novela
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Año:</strong></div>
+                                <div class="col-sm-9" th:text="${libro.publicationYear}">2020</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Editorial:</strong></div>
+                                <div class="col-sm-9" th:text="${libro.publisher}">Editorial</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Páginas:</strong></div>
+                                <div class="col-sm-9" th:text="${libro.pages}">300</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Ejemplares disponibles:</strong></div>
+                                <div class="col-sm-9">
+                                    <span class="badge bg-success fs-6" th:text="${ejemplaresDisponibles}">5</span>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <h6>Descripción:</h6>
+                            <p class="text-muted" th:text="${libro.description ?: 'No hay descripción disponible'}">
+                                Descripción del libro...
+                            </p>
+
+                            <div class="mt-4">
+                                <a th:if="${ejemplaresDisponibles > 0}" 
+                                   th:href="@{/user/alquiler/nuevo/{id}(id=${libro.bookId})}" 
+                                   class="btn btn-success btn-lg">
+                                    <i class="bi bi-cart-plus"></i> Alquilar este libro
+                                </a>
+                                <button th:unless="${ejemplaresDisponibles > 0}" 
+                                        class="btn btn-secondary btn-lg" disabled>
+                                    <i class="bi bi-x-circle"></i> No disponible
+                                </button>
+                                <a th:href="@{/user/catalogo}" class="btn btn-outline-secondary btn-lg ms-2">
+                                    <i class="bi bi-arrow-left"></i> Volver al catálogo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

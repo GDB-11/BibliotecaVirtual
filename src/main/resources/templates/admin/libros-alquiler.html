@@ -1,0 +1,332 @@
+<!-- src/main/resources/templates/admin/libros-alquiler.html -->
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Libros en Alquiler - BiblioAdmin</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-bookmark-check me-2"></i>Libros en Alquiler</h2>
+                    <p class="text-muted mb-0">Reporte de libros actualmente alquilados</p>
+                </div>
+                <div>
+                    <button class="btn btn-success" data-bs-toggle="tooltip" title="Exportar a Excel">
+                        <i class="bi bi-file-earmark-excel"></i> Exportar
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="tooltip" title="Imprimir reporte">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h6>Total Alquilados</h6>
+                        <h3 class="mb-0" th:text="${totalActiveRentals}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h6>Al Dia</h6>
+                        <h3 class="mb-0" th:text="${onTimeRentals}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <h6>Por Vencer</h6>
+                        <h3 class="mb-0" th:text="${dueSoonRentals}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h6>Vencidos</h6>
+                        <h3 class="mb-0" th:text="${overdueRentals}">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="GET" th:action="@{/admin/libros-alquiler}">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Buscar</label>
+                            <input type="text" class="form-control" name="search" 
+                                   th:value="${searchValue}"
+                                   placeholder="Libro, usuario o codigo...">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" name="status">
+                                <option value="" th:selected="${statusValue == ''}">Todos</option>
+                                <option value="vencer" th:selected="${statusValue == 'vencer'}">Por vencer</option>
+                                <option value="vencido" th:selected="${statusValue == 'vencido'}">Vencido</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Fecha de alquiler desde</label>
+                            <input type="date" class="form-control" name="dateFrom" 
+                                   th:value="${dateFromValue}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Fecha de alquiler hasta</label>
+                            <input type="date" class="form-control" name="dateTo" 
+                                   th:value="${dateToValue}">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                        <a th:href="@{/admin/libros-alquiler}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Report Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Listado de Alquileres Activos</h5>
+                <span class="badge bg-secondary" th:text="${activeRentals.totalItems} + ' resultado(s)'">
+                    0 resultado(s)
+                </span>
+            </div>
+            <div class="card-body">
+                <div th:if="${activeRentals.totalItems == 0}" class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <span th:if="${searchValue != '' or statusValue != '' or dateFromValue != '' or dateToValue != ''}">
+                        No se encontraron alquileres con los filtros aplicados.
+                    </span>
+                    <span th:unless="${searchValue != '' or statusValue != '' or dateFromValue != '' or dateToValue != ''}">
+                        No hay alquileres activos en este momento.
+                    </span>
+                </div>
+
+                <div th:if="${activeRentals.totalItems > 0}">
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            Mostrando 
+                            <span th:text="${activeRentals.startItem}">1</span> - 
+                            <span th:text="${activeRentals.endItem}">10</span> de 
+                            <span th:text="${activeRentals.totalItems}">100</span> resultados
+                        </small>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Codigo</th>
+                                    <th>Libro</th>
+                                    <th>Autor</th>
+                                    <th>Usuario</th>
+                                    <th>Fecha Alquiler</th>
+                                    <th>Fecha Vencimiento</th>
+                                    <th>Dias Restantes</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="rental : ${activeRentals.items}">
+                                    <td>
+                                        <code class="small" th:text="${rental.rentalId}">ID</code>
+                                    </td>
+                                    <td>
+                                        <strong th:text="${rental.bookCopy?.book?.title ?: 'N/A'}">Libro</strong>
+                                    </td>
+                                    <td th:text="${rental.bookCopy?.book?.author?.fullName ?: 'N/A'}">Autor</td>
+                                    <td th:text="${rental.user?.email ?: 'N/A'}">Usuario</td>
+                                    <td th:text="${#temporals.format(rental.rentalDate, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                                    <td th:text="${#temporals.format(rental.dueDate, 'dd/MM/yyyy HH:mm')}">Vencimiento</td>
+                                    <td>
+                                        <span th:with="
+                                            now=${T(java.time.LocalDateTime).now()},
+                                            dueDate=${rental.dueDate},
+                                            nowDate=${now.toLocalDate()},
+                                            dueDateOnly=${dueDate.toLocalDate()},
+                                            daysRemaining=${T(java.time.temporal.ChronoUnit).DAYS.between(nowDate, dueDateOnly)},
+                                            isOverdue=${now.isAfter(dueDate)},
+                                            isDueToday=${daysRemaining == 0 and !isOverdue},
+                                            isDueSoon=${daysRemaining > 0 and daysRemaining <= dueSoonDays},
+                                            daysOverdue=${isOverdue ? T(java.time.temporal.ChronoUnit).DAYS.between(dueDateOnly, nowDate) : 0},
+                                            badgeClass=${isOverdue ? 'bg-danger' : (isDueToday ? 'bg-warning' : (isDueSoon ? 'bg-warning' : 'bg-success'))},
+                                            badgeText=${isOverdue ? (daysOverdue > 1 ? daysOverdue + ' dias atrasado' : '1 dia atrasado') : (isDueToday ? 'Hoy' : (daysRemaining > 1 ? daysRemaining + ' dias' : '1 dia'))}"
+                                            class="badge" 
+                                            th:classappend="${badgeClass}"
+                                            th:text="${badgeText}">
+                                            Estado
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span th:with="
+                                            now=${T(java.time.LocalDateTime).now()},
+                                            dueDate=${rental.dueDate},
+                                            isOverdue=${now.isAfter(dueDate)},
+                                            statusLabel=${isOverdue ? 'Vencido' : 'En Proceso'},
+                                            statusClass=${isOverdue ? 'bg-danger' : 'bg-success'}"
+                                            class="badge" 
+                                            th:classappend="${statusClass}"
+                                            th:text="${statusLabel}">
+                                            Estado
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info view-rental-btn" 
+                                                th:data-rental-id="${rental.rentalId}"
+                                                data-bs-toggle="tooltip" 
+                                                title="Ver detalles">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav th:if="${activeRentals.totalPages > 1}" aria-label="Paginacion de alquileres activos" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <!-- Boton Anterior -->
+                            <li class="page-item" th:classappend="${!activeRentals.hasPreviousPage() ? 'disabled' : ''}">
+                                <a class="page-link" 
+                                   th:href="@{/admin/libros-alquiler(p=${activeRentals.previousPage},search=${searchValue},status=${statusValue},dateFrom=${dateFromValue},dateTo=${dateToValue})}">
+                                    <i class="bi bi-chevron-left"></i> Anterior
+                                </a>
+                            </li>
+                            
+                            <!-- Numeros de pagina -->
+                            <th:block th:with="pageRange=${activeRentals.getPageRange(5)}">
+                                <li th:if="${pageRange[0] > 1}" class="page-item">
+                                    <a class="page-link" 
+                                       th:href="@{/admin/libros-alquiler(p=1,search=${searchValue},status=${statusValue},dateFrom=${dateFromValue},dateTo=${dateToValue})}">
+                                        1
+                                    </a>
+                                </li>
+                                <li th:if="${pageRange[0] > 2}" class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                                
+                                <th:block th:each="i : ${#numbers.sequence(pageRange[0], pageRange[1])}">
+                                    <li class="page-item" th:classappend="${i == activeRentals.currentPage ? 'active' : ''}">
+                                        <a class="page-link" 
+                                           th:href="@{/admin/libros-alquiler(p=${i},search=${searchValue},status=${statusValue},dateFrom=${dateFromValue},dateTo=${dateToValue})}"
+                                           th:text="${i}">
+                                            1
+                                        </a>
+                                    </li>
+                                </th:block>
+                                
+                                <li th:if="${pageRange[1] < activeRentals.totalPages - 1}" class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                                <li th:if="${pageRange[1] < activeRentals.totalPages}" class="page-item">
+                                    <a class="page-link" 
+                                       th:href="@{/admin/libros-alquiler(p=${activeRentals.totalPages},search=${searchValue},status=${statusValue},dateFrom=${dateFromValue},dateTo=${dateToValue})}"
+                                       th:text="${activeRentals.totalPages}">
+                                        10
+                                    </a>
+                                </li>
+                            </th:block>
+                            
+                            <!-- Boton Siguiente -->
+                            <li class="page-item" th:classappend="${!activeRentals.hasNextPage() ? 'disabled' : ''}">
+                                <a class="page-link" 
+                                   th:href="@{/admin/libros-alquiler(p=${activeRentals.nextPage},search=${searchValue},status=${statusValue},dateFrom=${dateFromValue},dateTo=${dateToValue})}">
+                                    Siguiente <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para ver detalles del alquiler -->
+        <div class="modal fade" id="viewRentalModal" tabindex="-1" aria-labelledby="viewRentalModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewRentalModalLabel">Detalles del Alquiler</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="rentalDetailsContent">
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-scripts">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            document.addEventListener('DOMContentLoaded', function() {
+                const viewButtons = document.querySelectorAll('.view-rental-btn');
+                const modal = new bootstrap.Modal(document.getElementById('viewRentalModal'));
+                const modalContent = document.getElementById('rentalDetailsContent');
+                
+                viewButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const rentalId = this.getAttribute('data-rental-id');
+                        
+                        modalContent.innerHTML = `
+                            <div class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                            </div>
+                        `;
+                        
+                        modal.show();
+                        
+                        // Aqui se puede implementar la carga de detalles via AJAX
+                        // Por ahora, mostramos informacion basica
+                        setTimeout(() => {
+                            modalContent.innerHTML = `
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Detalles del alquiler: ${rentalId}
+                                    <br><br>
+                                    <em>Funcionalidad de detalles completa pendiente de implementacion.</em>
+                                </div>
+                            `;
+                        }, 500);
+                    });
+                });
+                
+                // Inicializar tooltips
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            });
+            /*]]>*/
+        </script>
+    </th:block>
+</body>
+</html>

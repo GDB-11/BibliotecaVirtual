@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout}">
+<head>
+    <title>Dashboard - Biblioteca Virtual</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            :root {
+                --primary-gradient: linear-gradient(135deg, #2ecc71 0%, #1abc9c 100%);
+                --secondary-gradient: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+                --warning-gradient: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+                --danger-gradient: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            }
+
+            .page-header {
+                background: var(--primary-gradient);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .page-header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+                animation: rotate 30s linear infinite;
+            }
+
+            @keyframes rotate {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+
+            .stat-card {
+                background: white;
+                border-radius: 20px;
+                padding: 1.8rem;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .stat-card::after {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(46, 204, 113, 0.05) 0%, transparent 50%);
+                transition: all 0.5s ease;
+            }
+
+            .stat-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 20px 60px rgba(46, 204, 113, 0.15);
+            }
+
+            .stat-icon {
+                width: 70px;
+                height: 70px;
+                border-radius: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                color: white;
+                position: relative;
+                z-index: 1;
+            }
+
+            .stat-icon.primary {
+                background: var(--primary-gradient);
+            }
+
+            .stat-icon.secondary {
+                background: var(--secondary-gradient);
+            }
+
+            .stat-icon.warning {
+                background: var(--warning-gradient);
+            }
+
+            .stat-icon.danger {
+                background: var(--danger-gradient);
+            }
+
+            .stat-content {
+                position: relative;
+                z-index: 1;
+            }
+
+            .stat-label {
+                color: #7f8c8d;
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .stat-value {
+                font-size: 2.5rem;
+                font-weight: bold;
+                line-height: 1.2;
+            }
+
+            .trend-badge {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.4rem 1rem;
+                border-radius: 50px;
+                font-size: 0.8rem;
+                font-weight: 600;
+            }
+
+            .trend-up {
+                background: rgba(46, 204, 113, 0.1);
+                color: #2ecc71;
+            }
+
+            .trend-down {
+                background: rgba(231, 76, 60, 0.1);
+                color: #e74c3c;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 1.5rem;
+                position: relative;
+                padding-left: 1rem;
+            }
+
+            .section-title::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                height: 100%;
+                width: 4px;
+                background: var(--primary-gradient);
+                border-radius: 2px;
+            }
+
+            .book-card {
+                background: white;
+                border-radius: 15px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                height: 100%;
+                border: none;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            }
+
+            .book-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 15px 40px rgba(46, 204, 113, 0.15);
+            }
+
+            .book-cover {
+                height: 180px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 3rem;
+            }
+
+            .book-body {
+                padding: 1.5rem;
+            }
+
+            .book-title {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 0.5rem;
+            }
+
+            .book-author {
+                font-size: 0.9rem;
+                color: #7f8c8d;
+                margin-bottom: 1rem;
+            }
+
+            .table-custom {
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            }
+
+            .table-custom thead th {
+                background: var(--primary-gradient);
+                color: white;
+                font-weight: 500;
+                text-transform: uppercase;
+                font-size: 0.8rem;
+                letter-spacing: 1px;
+                padding: 1rem;
+                border: none;
+            }
+
+            .table-custom tbody tr {
+                transition: all 0.3s ease;
+            }
+
+            .table-custom tbody tr:hover {
+                background: rgba(46, 204, 113, 0.05);
+                transform: scale(1.01);
+            }
+
+            .badge-status {
+                padding: 0.5rem 1rem;
+                border-radius: 50px;
+                font-weight: 500;
+                font-size: 0.8rem;
+            }
+
+            .badge-active {
+                background: rgba(46, 204, 113, 0.15);
+                color: #2ecc71;
+            }
+
+            .badge-completed {
+                background: rgba(52, 152, 219, 0.15);
+                color: #3498db;
+            }
+
+            .badge-cancelled {
+                background: rgba(149, 165, 166, 0.15);
+                color: #95a5a6;
+            }
+
+            .badge-overdue {
+                background: rgba(231, 76, 60, 0.15);
+                color: #e74c3c;
+            }
+
+            .action-card {
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                border-radius: 15px;
+                padding: 2rem;
+                text-align: center;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                height: 100%;
+                border: none;
+            }
+
+            .action-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 15px 40px rgba(46, 204, 113, 0.15);
+            }
+
+            .action-icon {
+                width: 80px;
+                height: 80px;
+                border-radius: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.5rem;
+                margin: 0 auto 1.5rem;
+                color: white;
+            }
+
+            .action-title {
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 0.5rem;
+            }
+
+            .action-desc {
+                color: #7f8c8d;
+                font-size: 0.9rem;
+            }
+
+            .welcome-message {
+                background: white;
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            }
+
+            .welcome-greeting {
+                font-size: 1.8rem;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 0.5rem;
+            }
+
+            .welcome-date {
+                color: #7f8c8d;
+                font-size: 1rem;
+            }
+
+            .progress-rental {
+                height: 8px;
+                border-radius: 4px;
+                background: #ecf0f1;
+            }
+
+            .progress-bar-rental {
+                background: var(--primary-gradient);
+                border-radius: 4px;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header con efecto parallax -->
+        <div class="page-header">
+            <div class="container position-relative">
+                <h1 class="display-4 fw-bold"><i class="bi bi-house-door me-2"></i>Dashboard</h1>
+                <p class="lead mb-0">Bienvenido a tu espacio personal en la biblioteca</p>
+            </div>
+        </div>
+
+        <div class="container py-4">
+            <!-- Welcome Section -->
+            <div class="welcome-message">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="welcome-greeting">
+                            <i class="bi bi-hand-thumbs-up text-primary me-2"></i>
+                            ¡Hola de nuevo!
+                        </div>
+                        <div class="welcome-date">
+                            <i class="bi bi-calendar3 me-2"></i>
+                            <span th:text="${#temporals.format(#temporals.createNow(), 'EEEE, d MMMM yyyy')}">Lunes, 15 Febrero 2026</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <span class="trend-badge trend-up">
+                            <i class="bi bi-graph-up-arrow me-2"></i>
+                            <span th:text="${alquileresActivos} + ' alquileres activos'">3 alquileres activos</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats Cards -->
+            <div class="row g-4 mb-5">
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="stat-icon primary me-3">
+                                <i class="bi bi-journal-bookmark-fill"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">Total Alquileres</div>
+                                <div class="stat-value" th:text="${totalAlquileres}">0</div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="trend-badge trend-up">
+                                <i class="bi bi-arrow-up"></i> +12%
+                            </span>
+                            <small class="text-muted">vs mes anterior</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="stat-icon secondary me-3">
+                                <i class="bi bi-play-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">Alquileres Activos</div>
+                                <div class="stat-value" th:text="${alquileresActivos}">0</div>
+                            </div>
+                        </div>
+                        <div class="progress-rental mt-2">
+                            <div class="progress-bar-rental" role="progressbar" 
+                                 th:style="'width: ' + (${totalAlquileres} > 0 ? (${alquileresActivos} * 100 / ${totalAlquileres}) : 0) + '%'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="stat-icon warning me-3">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">Por Devolver</div>
+                                <div class="stat-value" th:text="${alquileresVencidos}">0</div>
+                            </div>
+                        </div>
+                        <div th:if="${alquileresVencidos > 0}" class="trend-badge trend-down">
+                            <i class="bi bi-exclamation-circle"></i> Requiere atención
+                        </div>
+                        <div th:unless="${alquileresVencidos > 0}" class="trend-badge trend-up">
+                            <i class="bi bi-check-circle"></i> Todo al día
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="stat-icon danger me-3">
+                                <i class="bi bi-book"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">Libros Disponibles</div>
+                                <div class="stat-value" th:text="${librosPopulares != null ? #lists.size(librosPopulares) : 0}">0</div>
+                            </div>
+                        </div>
+                        <a th:href="@{/user/catalogo}" class="text-decoration-none small">
+                            Explorar catálogo <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Últimos Alquileres Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="section-title mb-0">Últimos Alquileres</h3>
+                        <a th:href="@{/user/historial}" class="btn btn-outline-primary btn-sm">
+                            Ver todos <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div th:if="${ultimosAlquileres == null or #lists.isEmpty(ultimosAlquileres)}" 
+                         class="text-center py-5 bg-white rounded-3">
+                        <i class="bi bi-inbox display-1 text-muted"></i>
+                        <h4 class="mt-3">No tienes alquileres aún</h4>
+                        <p class="text-muted">Explora nuestro catálogo y comienza a leer</p>
+                        <a th:href="@{/user/catalogo}" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Explorar catálogo
+                        </a>
+                    </div>
+
+                    <div th:unless="${ultimosAlquileres == null or #lists.isEmpty(ultimosAlquileres)}" 
+                         class="table-responsive">
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Libro</th>
+                                    <th>Fecha Alquiler</th>
+                                    <th>Fecha Devolución</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="rental : ${ultimosAlquileres}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-book text-primary me-2"></i>
+                                            <span th:text="${rental.bookCopy.book.title}">Título del libro</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <i class="bi bi-calendar me-2 text-muted"></i>
+                                        <span th:text="${#temporals.format(rental.rentalDate, 'dd/MM/yyyy')}">01/01/2024</span>
+                                    </td>
+                                    <td>
+                                        <i class="bi bi-calendar-x me-2 text-muted"></i>
+                                        <span th:text="${rental.dueDate != null ? #temporals.format(rental.dueDate, 'dd/MM/yyyy') : '-'}">-</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${rental.rentalStatus.rentalStatusName == 'En Proceso'}" 
+                                              class="badge-status badge-active">
+                                            <i class="bi bi-play-circle me-1"></i> Activo
+                                        </span>
+                                        <span th:if="${rental.rentalStatus.rentalStatusName == 'Completado'}" 
+                                              class="badge-status badge-completed">
+                                            <i class="bi bi-check-circle me-1"></i> Completado
+                                        </span>
+                                        <span th:if="${rental.rentalStatus.rentalStatusName == 'Cancelado'}" 
+                                              class="badge-status badge-cancelled">
+                                            <i class="bi bi-x-circle me-1"></i> Cancelado
+                                        </span>
+                                        <span th:if="${rental.rentalStatus.rentalStatusName == 'En Proceso' and rental.dueDate < #temporals.createNow()}" 
+                                              class="badge-status badge-overdue ms-1">
+                                            <i class="bi bi-exclamation-triangle me-1"></i> Vencido
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/user/historial/{id}(id=${rental.rentalId})}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> Detalles
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Libros Populares y Acciones Rápidas -->
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    <h3 class="section-title mb-4">Libros Populares</h3>
+                    <div class="row g-4">
+                        <div th:each="libro : ${librosPopulares}" class="col-md-6">
+                            <div class="book-card">
+                                <div class="book-cover">
+                                    <i class="bi bi-journal-bookmark-fill"></i>
+                                </div>
+                                <div class="book-body">
+                                    <div class="book-title" th:text="${libro.title}">Título</div>
+                                    <div class="book-author" th:text="${libro.author != null ? libro.author.fullName : 'Autor desconocido'}">
+                                        Autor
+                                    </div>
+                                    <a th:href="@{/user/catalogo/{id}(id=${libro.bookId})}" 
+                                       class="btn btn-outline-primary btn-sm w-100">
+                                        Ver detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <h3 class="section-title mb-4">Acciones Rápidas</h3>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="action-card" onclick="window.location.href='/user/catalogo'">
+                                <div class="action-icon" style="background: var(--primary-gradient);">
+                                    <i class="bi bi-search"></i>
+                                </div>
+                                <div class="action-title">Explorar Catálogo</div>
+                                <div class="action-desc">Descubre nuevos libros y autores</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="action-card" onclick="window.location.href='/user/historial'">
+                                <div class="action-icon" style="background: var(--secondary-gradient);">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                <div class="action-title">Mi Historial</div>
+                                <div class="action-desc">Revisa tus alquileres anteriores</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="action-card" onclick="window.location.href='/user/perfil'">
+                                <div class="action-icon" style="background: var(--warning-gradient);">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <div class="action-title">Mi Perfil</div>
+                                <div class="action-desc">Actualiza tus datos personales</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
