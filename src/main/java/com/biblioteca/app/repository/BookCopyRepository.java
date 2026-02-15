@@ -3,6 +3,8 @@ package com.biblioteca.app.repository;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,14 +16,51 @@ import com.biblioteca.app.entity.BookCopy;
 public interface BookCopyRepository extends JpaRepository<BookCopy, UUID> {
 
     /**
-     * Busca todos los ejemplares de un libro específico
+     * Encuentra ejemplares por libro
      */
     List<BookCopy> findByBook_BookId(UUID bookId);
 
     /**
-     * Busca ejemplares por estado
+     * Encuentra ejemplares por libro con paginación
+     */
+    Page<BookCopy> findByBook_BookId(UUID bookId, Pageable pageable);
+
+    /**
+     * Encuentra ejemplares por estado
      */
     List<BookCopy> findByBookCopyStatus_BookCopyStatusId(UUID statusId);
+
+    /**
+     * Encuentra ejemplares por estado con paginación
+     */
+    Page<BookCopy> findByBookCopyStatus_BookCopyStatusId(UUID statusId, Pageable pageable);
+
+    /**
+     * Encuentra ejemplares por libro y estado
+     */
+    Page<BookCopy> findByBook_BookIdAndBookCopyStatus_BookCopyStatusId(UUID bookId, UUID statusId, Pageable pageable);
+
+    /**
+     * Encuentra ejemplares disponibles de un libro específico
+     */
+    @Query("SELECT bc FROM BookCopy bc WHERE bc.book.bookId = :bookId AND bc.bookCopyStatus.bookCopyStatusName = 'Disponible'")
+    List<BookCopy> findAvailableCopiesByBookId(@Param("bookId") UUID bookId);
+
+    /**
+     * Búsqueda de ejemplares por título o ISBN del libro
+     */
+    @Query("SELECT bc FROM BookCopy bc WHERE " +
+           "LOWER(bc.book.title) LIKE LOWER(:search) OR " +
+           "LOWER(bc.book.isbn) LIKE LOWER(:search)")
+    Page<BookCopy> findBySearch(@Param("search") String search, Pageable pageable);
+
+    /**
+     * Búsqueda de ejemplares por título o ISBN del libro y estado
+     */
+    @Query("SELECT bc FROM BookCopy bc WHERE " +
+           "(LOWER(bc.book.title) LIKE LOWER(:search) OR LOWER(bc.book.isbn) LIKE LOWER(:search)) " +
+           "AND bc.bookCopyStatus.bookCopyStatusId = :statusId")
+    Page<BookCopy> findBySearchAndStatus(@Param("search") String search, @Param("statusId") UUID statusId, Pageable pageable);
 
     /**
      * Cuenta ejemplares disponibles
@@ -36,14 +75,8 @@ public interface BookCopyRepository extends JpaRepository<BookCopy, UUID> {
     long countRentedCopies();
 
     /**
-     * Cuenta ejemplares de un libro específico que están disponibles
+     * Cuenta ejemplares disponibles de un libro específico
      */
     @Query("SELECT COUNT(bc) FROM BookCopy bc WHERE bc.book.bookId = :bookId AND bc.bookCopyStatus.bookCopyStatusName = 'Disponible'")
     long countAvailableCopiesByBookId(@Param("bookId") UUID bookId);
-
-    /**
-     * Busca ejemplares disponibles de un libro
-     */
-    @Query("SELECT bc FROM BookCopy bc WHERE bc.book.bookId = :bookId AND bc.bookCopyStatus.bookCopyStatusName = 'Disponible'")
-    List<BookCopy> findAvailableCopiesByBookId(@Param("bookId") UUID bookId);
 }
