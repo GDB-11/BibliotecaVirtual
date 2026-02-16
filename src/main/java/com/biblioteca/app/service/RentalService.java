@@ -1,9 +1,6 @@
 package com.biblioteca.app.service;
 
-<<<<<<< HEAD
 import java.math.BigDecimal;
-=======
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -14,16 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-<<<<<<< HEAD
 import org.springframework.data.domain.Sort;
-=======
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.biblioteca.app.dto.RentalActiveDTO;
 import com.biblioteca.app.dto.RentalCompleteDTO;
-<<<<<<< HEAD
+import com.biblioteca.app.dto.rental.BookMostRequestedDTO;
 import com.biblioteca.app.dto.rental.BookRentalStatsDTO;
 import com.biblioteca.app.dto.shared.PagedResult;
 import com.biblioteca.app.entity.BookCopy;
@@ -32,25 +26,13 @@ import com.biblioteca.app.entity.Rental;
 import com.biblioteca.app.entity.RentalStatus;
 import com.biblioteca.app.entity.User;
 import com.biblioteca.app.helper.PageMapper;
-import com.biblioteca.app.repository.BookCopyRepository;  // ✅ AGREGADO
+import com.biblioteca.app.repository.BookCopyRepository;
 import com.biblioteca.app.repository.RentalRepository;
 import com.biblioteca.app.repository.RentalStatusRepository;
-import com.biblioteca.app.repository.projection.BookRentalStatsProjection;
 import com.biblioteca.app.repository.UserRepository;
-=======
-import com.biblioteca.app.dto.rental.BookMostRequestedDTO;
-import com.biblioteca.app.dto.rental.BookRentalStatsDTO;
-import com.biblioteca.app.dto.shared.PagedResult;
-import com.biblioteca.app.entity.Rental;
-import com.biblioteca.app.repository.RentalRepository;
 import com.biblioteca.app.repository.projection.BookMostRequestedProjection;
 import com.biblioteca.app.repository.projection.BookRentalStatsProjection;
-import com.biblioteca.app.helper.PageMapper;
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 
-/**
- * Servicio para la gestión de alquileres
- */
 @Service
 @Transactional(readOnly = true)
 public class RentalService {
@@ -58,26 +40,21 @@ public class RentalService {
     @Autowired
     private RentalRepository rentalRepository;
 
-<<<<<<< HEAD
     @Autowired
     private RentalStatusRepository rentalStatusRepository;
-    
+
     @Autowired
     private BookCopyService bookCopyService;
-    
+
     @Autowired
     private BookCopyStatusService bookCopyStatusService;
-    
+
     @Autowired
-    private BookCopyRepository bookCopyRepository;  
-    
+    private BookCopyRepository bookCopyRepository;
+
     @Autowired
     private UserRepository userRepository;
-    
-    // ========== MÉTODOS EXISTENTES ==========
-    
-=======
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
+
     /**
      * Obtiene un alquiler por ID
      */
@@ -90,6 +67,13 @@ public class RentalService {
      */
     public List<Rental> findByUser(UUID userId) {
         return rentalRepository.findByUser_UserId(userId);
+    }
+
+    /**
+     * Obtiene alquileres por usuario con paginación
+     */
+    public Page<Rental> findByUser(UUID userId, Pageable pageable) {
+        return rentalRepository.findByUser_UserId(userId, pageable);
     }
 
     /**
@@ -130,14 +114,14 @@ public class RentalService {
     }
 
     /**
-     * Obtiene estadísticas de los libros más pedidos
+     * Obtiene estadísticas de los libros más pedidos (top N)
      */
     public List<BookRentalStatsDTO> getTopRequestedBooks(int limit) {
         List<BookRentalStatsProjection> projections = rentalRepository.getTopRequestedBooks(limit);
-        
+
         return projections.stream()
-            .map(this::toDTO)
-            .collect(Collectors.toList());
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -187,257 +171,204 @@ public class RentalService {
 
     /**
      * Busca alquileres activos con filtros y paginación
-<<<<<<< HEAD
-=======
-     * 
-     * @param page Número de página (1-indexed)
-     * @param size Tamaño de página
-     * @param search Término de búsqueda
-     * @param statusFilter Filtro de estado (vencer/vencido)
-     * @param dueSoonDays Días para considerar "por vencer"
-     * @param dateFrom Fecha desde (formato yyyy-MM-dd)
-     * @param dateTo Fecha hasta (formato yyyy-MM-dd)
-     * @return Resultado paginado de alquileres activos
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
      */
     public PagedResult<Rental> findActiveRentals(
-            int page, 
-            int size, 
-            String search, 
-            String statusFilter, 
+            int page,
+            int size,
+            String search,
+            String statusFilter,
             int dueSoonDays,
-            String dateFrom, 
+            String dateFrom,
             String dateTo) {
-        
+
         Pageable pageable = PageRequest.of(page - 1, size);
-        
+
         LocalDateTime dateFromParsed = null;
         LocalDateTime dateToParsed = null;
-        
+
         if (dateFrom != null && !dateFrom.isEmpty()) {
             dateFromParsed = LocalDateTime.parse(dateFrom + "T00:00:00");
         }
-        
+
         if (dateTo != null && !dateTo.isEmpty()) {
             dateToParsed = LocalDateTime.parse(dateTo + "T23:59:59");
         }
-        
+
         Page<Rental> rentalsPage = rentalRepository.findActiveRentalsWithFilters(
-            search, dateFromParsed, dateToParsed, pageable);
-        
+                search, dateFromParsed, dateToParsed, pageable);
+
         List<Rental> filteredRentals = rentalsPage.getContent();
-        
-<<<<<<< HEAD
-=======
+
         // Filtrar por estado si es necesario
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
         if (statusFilter != null && !statusFilter.isEmpty()) {
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime dueSoonThreshold = now.plusDays(dueSoonDays);
-            
+
             if ("vencer".equals(statusFilter)) {
                 filteredRentals = filteredRentals.stream()
-                    .filter(r -> r.getDueDate().isAfter(now) && r.getDueDate().isBefore(dueSoonThreshold))
-                    .collect(Collectors.toList());
+                        .filter(r -> r.getDueDate().isAfter(now) && r.getDueDate().isBefore(dueSoonThreshold))
+                        .collect(Collectors.toList());
             } else if ("vencido".equals(statusFilter)) {
                 filteredRentals = filteredRentals.stream()
-                    .filter(r -> r.getDueDate().isBefore(now))
-                    .collect(Collectors.toList());
+                        .filter(r -> r.getDueDate().isBefore(now))
+                        .collect(Collectors.toList());
             }
         }
-        
+
         return PageMapper.toPagedResult(filteredRentals, rentalsPage.getTotalElements(), page, size);
     }
 
-    /**
-     * Cuenta alquileres activos que estan al dia
-     */
     public int getOnTimeRentalsCount(int dueSoonDays) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime dueSoonThreshold = now.plusDays(dueSoonDays);
         return (int) rentalRepository.countOnTimeRentals(dueSoonThreshold);
     }
 
-    /**
-     * Cuenta alquileres que estan por vencer pronto
-     */
     public int getDueSoonRentalsCount(int dueSoonDays) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime dueSoonThreshold = now.plusDays(dueSoonDays);
         return (int) rentalRepository.countDueSoonRentals(now, dueSoonThreshold);
     }
 
-    /**
-     * Cuenta alquileres vencidos
-     */
     public int getOverdueRentalsCount() {
         LocalDateTime now = LocalDateTime.now();
         return (int) rentalRepository.countOverdueRentals(now);
     }
 
-    /**
-     * Obtiene el total de alquileres activos
-     */
     public int getActiveRentalsCount() {
         return (int) rentalRepository.countActiveRentals();
     }
 
-<<<<<<< HEAD
-    // ========== METODOS PRIVADOS DE CONVERSIÓN ==========
-
-=======
     /**
      * Obtiene libros más pedidos con paginación y filtro por categoría
      */
     public PagedResult<BookMostRequestedDTO> getMostRequestedBooks(
-            int currentPage, 
-            int pageSize, 
+            int currentPage,
+            int pageSize,
             String categoryId) {
-        
-        // Validar página
+
         if (currentPage < 1) {
             currentPage = 1;
         }
-        
-        // Calcular offset
+
         int offset = (currentPage - 1) * pageSize;
-        
-        // Obtener total de registros
+
         long totalItems = rentalRepository.countMostRequestedBooks(categoryId);
-        
-        // Obtener datos paginados
+
         List<BookMostRequestedProjection> projections = rentalRepository.findMostRequestedBooks(
-            categoryId, pageSize, offset);
-        
-        // Convertir a DTOs
+                categoryId, pageSize, offset);
+
         List<BookMostRequestedDTO> items = projections.stream()
-            .map(this::toMostRequestedDTO)
-            .collect(Collectors.toList());
-        
-        // Calcular porcentaje de popularidad
+                .map(this::toMostRequestedDTO)
+                .collect(Collectors.toList());
+
         if (!items.isEmpty()) {
             Integer maxRentals = items.get(0).getTotalRentals();
             items.forEach(item -> item.setPopularityPercentage(maxRentals));
         }
-        
-        // Crear resultado paginado
-        PagedResult<BookMostRequestedDTO> result = new PagedResult<>(items, currentPage, pageSize, (int) totalItems);
-        
-        return result;
+
+        return new PagedResult<>(items, currentPage, pageSize, (int) totalItems);
     }
 
-    // ========== METODOS PRIVADOS DE CONVERSIÓN ==========
+    // ========= CONVERSIÓN DTOs =========
 
-    /**
-     * Convierte una proyeccion a DTO
-     */
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
     private BookRentalStatsDTO toDTO(BookRentalStatsProjection projection) {
         return new BookRentalStatsDTO(
-            projection.getBookId(),
-            projection.getTitle(),
-            projection.getIsbn(),
-            projection.getAuthorName(),
-            projection.getCategoryName(),
-            projection.getRentalCount(),
-            projection.getActiveRentals()
+                projection.getBookId(),
+                projection.getTitle(),
+                projection.getIsbn(),
+                projection.getAuthorName(),
+                projection.getCategoryName(),
+                projection.getRentalCount(),
+                projection.getActiveRentals()
         );
     }
-<<<<<<< HEAD
-    
-    // ========== MÉTODOS PARA MÓDULO DE USUARIO ==========
 
-    /**
-     * Busca alquileres por usuario con paginación
-     */
-    public Page<Rental> findByUser(UUID userId, Pageable pageable) {
-        return rentalRepository.findByUser_UserId(userId, pageable);
+    private BookMostRequestedDTO toMostRequestedDTO(BookMostRequestedProjection projection) {
+        return new BookMostRequestedDTO(
+                projection.getBookId(),
+                projection.getTitle(),
+                projection.getIsbn(),
+                projection.getAuthorName(),
+                projection.getCategoryName(),
+                projection.getTotalRentals(),
+                projection.getYesterdayRentals(),
+                projection.getTodayRentals()
+        );
     }
 
-    /**
-     * Crea un nuevo alquiler - VERSIÓN CORREGIDA CON BookCopyRepository
-     */
+    // ========= MÉTODOS PARA MÓDULO DE USUARIO =========
+
     @Transactional
     public Rental createRental(User user, BookCopy bookCopy) {
         System.out.println("=== CREANDO ALQUILER EN RENTALSERVICE ===");
-        
+
         try {
-            // 1. Verificar disponibilidad
             if (!"Disponible".equals(bookCopy.getBookCopyStatus().getBookCopyStatusName())) {
-                throw new IllegalStateException("El ejemplar no está disponible. Estado actual: " + 
-                    bookCopy.getBookCopyStatus().getBookCopyStatusName());
+                throw new IllegalStateException("El ejemplar no está disponible. Estado actual: "
+                        + bookCopy.getBookCopyStatus().getBookCopyStatusName());
             }
-            
-            // 2. Buscar estado "Alquilado"
+
             BookCopyStatus alquiladoStatus = bookCopyStatusService.findByName("Alquilado")
-                .orElseThrow(() -> new RuntimeException("Estado 'Alquilado' no encontrado"));
-            
-            // 3. PRIMERO: Actualizar el estado del ejemplar
+                    .orElseThrow(() -> new RuntimeException("Estado 'Alquilado' no encontrado"));
+
             BookCopy freshCopy = bookCopyRepository.findById(bookCopy.getBookCopyId())
-                .orElseThrow(() -> new RuntimeException("Ejemplar no encontrado"));
-            
+                    .orElseThrow(() -> new RuntimeException("Ejemplar no encontrado"));
+
             freshCopy.setBookCopyStatus(alquiladoStatus);
             BookCopy updatedCopy = bookCopyRepository.save(freshCopy);
             bookCopyRepository.flush();
             System.out.println("✓ Ejemplar actualizado a estado: Alquilado");
-            
-            // 4. Buscar estado "En Proceso" para el alquiler
+
             RentalStatus status = rentalStatusRepository.findByRentalStatusName("En Proceso")
-                .orElseThrow(() -> new RuntimeException("Estado de alquiler 'En Proceso' no encontrado"));
-            
-            // 5. DESPUÉS: Crear el alquiler con el ejemplar YA ACTUALIZADO
+                    .orElseThrow(() -> new RuntimeException("Estado de alquiler 'En Proceso' no encontrado"));
+
             Rental rental = new Rental();
             rental.setRentalId(UUID.randomUUID());
             rental.setUser(user);
-            rental.setBookCopy(updatedCopy); // Usar el ejemplar ya actualizado
+            rental.setBookCopy(updatedCopy);
             rental.setRentalDate(LocalDateTime.now());
             rental.setDueDate(LocalDateTime.now().plusDays(7));
             rental.setRentalDays(7);
             rental.setDailyRate(BigDecimal.valueOf(5.00));
             rental.setTotalCost(BigDecimal.valueOf(35.00));
             rental.setRentalStatus(status);
-            
-            // 6. Guardar el alquiler
+
             Rental savedRental = rentalRepository.save(rental);
             rentalRepository.flush();
             System.out.println("✓ Alquiler guardado con ID: " + savedRental.getRentalId());
-            
+
             return savedRental;
-            
+
         } catch (Exception e) {
             System.out.println("✗ ERROR en createRental: " + e.getMessage());
             e.printStackTrace();
             throw e;
         }
     }
-    
-    
-    
+
     @Transactional
     public Rental createRentalEmergency(UUID userId, UUID bookCopyId) {
         System.out.println("=== MÉTODO DE EMERGENCIA ===");
-        
+
         try {
-            // Buscar entidades usando los repositorios
-            User user = userRepository.findById(userId)  // ✅ AHORA SÍ FUNCIONA
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-            
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
             BookCopy bookCopy = bookCopyRepository.findById(bookCopyId)
-                .orElseThrow(() -> new RuntimeException("Ejemplar no encontrado"));
-            
+                    .orElseThrow(() -> new RuntimeException("Ejemplar no encontrado"));
+
             RentalStatus status = rentalStatusRepository.findByRentalStatusName("En Proceso")
-                .orElseThrow(() -> new RuntimeException("Estado 'En Proceso' no encontrado"));
-            
+                    .orElseThrow(() -> new RuntimeException("Estado 'En Proceso' no encontrado"));
+
             BookCopyStatus alquiladoStatus = bookCopyStatusService.findByName("Alquilado")
-                .orElseThrow(() -> new RuntimeException("Estado 'Alquilado' no encontrado"));
-            
-            // PRIMERO: Actualizar el ejemplar
+                    .orElseThrow(() -> new RuntimeException("Estado 'Alquilado' no encontrado"));
+
             bookCopy.setBookCopyStatus(alquiladoStatus);
             bookCopyRepository.save(bookCopy);
             bookCopyRepository.flush();
             System.out.println("✓ Ejemplar actualizado a Alquilado");
-            
-            // DESPUÉS: Crear el alquiler
+
             Rental rental = new Rental();
             rental.setRentalId(UUID.randomUUID());
             rental.setUser(user);
@@ -448,67 +379,34 @@ public class RentalService {
             rental.setDailyRate(BigDecimal.valueOf(5.00));
             rental.setTotalCost(BigDecimal.valueOf(35.00));
             rental.setRentalStatus(status);
-            
-            // Guardar alquiler
+
             Rental savedRental = rentalRepository.save(rental);
             rentalRepository.flush();
             System.out.println("✓ Alquiler guardado con ID: " + savedRental.getRentalId());
-            
+
             return savedRental;
-            
+
         } catch (Exception e) {
             System.out.println("✗ Error en método de emergencia: " + e.getMessage());
             e.printStackTrace();
             throw e;
         }
     }
-    
-    
-    
-    
-    /**
-     * Cuenta alquileres de un usuario
-     */
+
     public long countByUser(UUID userId) {
         return rentalRepository.countByUser_UserId(userId);
     }
 
-    /**
-     * Cuenta alquileres activos de un usuario (estado "En Proceso")
-     */
     public long countActiveByUser(UUID userId) {
         return rentalRepository.countActiveByUser(userId);
     }
 
-    /**
-     * Cuenta alquileres vencidos de un usuario (fecha vencimiento pasada y aún activos)
-     */
     public long countOverdueByUser(UUID userId) {
         return rentalRepository.countOverdueByUser(userId);
     }
 
-    /**
-     * Obtiene los últimos alquileres de un usuario
-     */
     public List<Rental> findLastByUser(UUID userId, int limit) {
         Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "rentalDate"));
         return rentalRepository.findByUser_UserId(userId, pageable).getContent();
-=======
-
-    /**
-     * Convierte una proyección de libros más pedidos a DTO
-     */
-    private BookMostRequestedDTO toMostRequestedDTO(BookMostRequestedProjection projection) {
-        return new BookMostRequestedDTO(
-            projection.getBookId(),
-            projection.getTitle(),
-            projection.getIsbn(),
-            projection.getAuthorName(),
-            projection.getCategoryName(),
-            projection.getTotalRentals(),
-            projection.getYesterdayRentals(),
-            projection.getTodayRentals()
-        );
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
     }
 }
