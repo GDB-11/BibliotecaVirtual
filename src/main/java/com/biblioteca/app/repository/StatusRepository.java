@@ -16,7 +16,7 @@ public interface StatusRepository extends JpaRepository<Status, UUID> {
 
     /**
      * Busca un estado por su nombre
-     * 
+     *
      * @param statusName Nombre del estado (Active, Inactive)
      * @return Optional con el estado si existe
      */
@@ -24,14 +24,9 @@ public interface StatusRepository extends JpaRepository<Status, UUID> {
 
     /**
      * Verifica si existe un estado con el nombre dado
-     * 
+     *
      * @param statusName Nombre del estado
      * @return true si existe, false si no
      */
     boolean existsByStatusName(String statusName);
-<<<<<<< HEAD
-    
-
-=======
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 }

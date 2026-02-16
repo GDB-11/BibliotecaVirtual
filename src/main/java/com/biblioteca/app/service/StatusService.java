@@ -171,23 +171,12 @@ public class StatusService {
     public void deleteBookStatus(UUID bookStatusId) {
         bookStatusRepository.deleteById(bookStatusId);
     }
-<<<<<<< HEAD
-    
-    
-    
-    
-    
-    //USUARIO
+    // ===== USUARIO =====
+
     /**
      * Busca un estado por nombre
      */
     public Optional<Status> findByStatusName(String statusName) {
         return statusRepository.findByStatusName(statusName);
     }
-    
-    
-    
-    
-=======
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 }

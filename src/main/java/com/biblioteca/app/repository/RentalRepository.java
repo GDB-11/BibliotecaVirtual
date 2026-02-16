@@ -4,10 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-<<<<<<< HEAD
 import org.springframework.data.domain.Page;
-=======
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,51 +13,35 @@ import org.springframework.data.repository.query.Param;
 import com.biblioteca.app.dto.RentalActiveDTO;
 import com.biblioteca.app.dto.RentalCompleteDTO;
 import com.biblioteca.app.entity.Rental;
-<<<<<<< HEAD
-=======
 import com.biblioteca.app.repository.projection.BookMostRequestedProjection;
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 import com.biblioteca.app.repository.projection.BookRentalStatsProjection;
 
 public interface RentalRepository extends JpaRepository<Rental, UUID> {
 
-    /**
-     * Busca alquileres por usuario
-     */
+    // ====== BÚSQUEDAS BÁSICAS ======
+
     List<Rental> findByUser_UserId(UUID userId);
 
-    /**
-     * Busca alquileres por estado
-     */
+    Page<Rental> findByUser_UserId(UUID userId, Pageable pageable);
+
     List<Rental> findByRentalStatus_RentalStatusId(UUID statusId);
 
-    /**
-     * Busca alquileres activos (en proceso) de un usuario
-     */
     @Query("SELECT r FROM Rental r WHERE r.user.userId = :userId AND r.rentalStatus.rentalStatusName = 'En Proceso'")
     List<Rental> findActiveRentalsByUserId(@Param("userId") UUID userId);
 
-    /**
-     * Obtiene los alquileres más recientes
-     */
     @Query("SELECT r FROM Rental r ORDER BY r.rentalDate DESC")
     List<Rental> findRecentRentals(Pageable pageable);
 
-    /**
-     * Obtiene alquileres con fecha de vencimiento próxima
-     */
     @Query("SELECT r FROM Rental r WHERE r.rentalStatus.rentalStatusName = 'En Proceso' AND r.dueDate BETWEEN :startDate AND :endDate ORDER BY r.dueDate ASC")
-    List<Rental> findUpcomingDueRentals(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+    List<Rental> findUpcomingDueRentals(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 
-    /**
-     * Obtiene alquileres vencidos
-     */
     @Query("SELECT r FROM Rental r WHERE r.rentalStatus.rentalStatusName = 'En Proceso' AND r.dueDate < :currentDate ORDER BY r.dueDate ASC")
     List<Rental> findOverdueRentals(@Param("currentDate") LocalDateTime currentDate);
 
-    /**
-     * Obtiene estadísticas de los libros más pedidos
-     */
+    // ====== TOP REQUESTED (STATS) ======
+
     @Query(value = """
         SELECT 
             BIN_TO_UUID(b.BookId) as bookId,
@@ -82,17 +63,16 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
     """, nativeQuery = true)
     List<BookRentalStatsProjection> getTopRequestedBooks(@Param("limit") int limit);
 
-    /**
-     * Cuenta alquileres activos
-     */
+    // ====== COUNTS GENERALES ======
+
     @Query("SELECT COUNT(r) FROM Rental r WHERE r.rentalStatus.rentalStatusName = 'En Proceso'")
     long countActiveRentals();
 
-    /**
-     * Cuenta total de alquileres
-     */
+    // (count() ya viene de JpaRepository, pero tenerlo no rompe)
     long count();
-    
+
+    // ====== LISTADOS PARA DTOs ======
+
     @Query(value = """
         SELECT 
             r.RentalId AS rentalId,
@@ -132,9 +112,8 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
     """, nativeQuery = true)
     List<RentalCompleteDTO> findAllRentals();
 
-    /**
-     * Busca alquileres activos con filtros de búsqueda y paginación
-     */
+    // ====== FILTROS ACTIVOS CON PAGINACIÓN ======
+
     @Query(value = """
         SELECT r FROM Rental r
         WHERE r.rentalStatus.rentalStatusName = 'En Proceso'
@@ -148,16 +127,15 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
         AND (:dateTo IS NULL OR r.rentalDate <= :dateTo)
         ORDER BY r.dueDate ASC
     """)
-    org.springframework.data.domain.Page<Rental> findActiveRentalsWithFilters(
-        @Param("search") String search,
-        @Param("dateFrom") LocalDateTime dateFrom,
-        @Param("dateTo") LocalDateTime dateTo,
-        org.springframework.data.domain.Pageable pageable
+    Page<Rental> findActiveRentalsWithFilters(
+            @Param("search") String search,
+            @Param("dateFrom") LocalDateTime dateFrom,
+            @Param("dateTo") LocalDateTime dateTo,
+            Pageable pageable
     );
 
-    /**
-     * Cuenta alquileres activos que están al día (no vencidos ni por vencer pronto)
-     */
+    // ====== COUNTS PARA DASHBOARD (ACTIVOS) ======
+
     @Query(value = """
         SELECT COUNT(r) FROM Rental r
         WHERE r.rentalStatus.rentalStatusName = 'En Proceso'
@@ -166,9 +144,6 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
     """)
     long countOnTimeRentals(@Param("dueSoonThreshold") LocalDateTime dueSoonThreshold);
 
-    /**
-     * Cuenta alquileres activos que están por vencer pronto
-     */
     @Query(value = """
         SELECT COUNT(r) FROM Rental r
         WHERE r.rentalStatus.rentalStatusName = 'En Proceso'
@@ -177,13 +152,10 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
         AND r.dueDate <= :dueSoonThreshold
     """)
     long countDueSoonRentals(
-        @Param("now") LocalDateTime now,
-        @Param("dueSoonThreshold") LocalDateTime dueSoonThreshold
+            @Param("now") LocalDateTime now,
+            @Param("dueSoonThreshold") LocalDateTime dueSoonThreshold
     );
 
-    /**
-     * Cuenta alquileres vencidos
-     */
     @Query(value = """
         SELECT COUNT(r) FROM Rental r
         WHERE r.rentalStatus.rentalStatusName = 'En Proceso'
@@ -191,43 +163,19 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
         AND r.dueDate < :now
     """)
     long countOverdueRentals(@Param("now") LocalDateTime now);
-<<<<<<< HEAD
-    
-    
-    
-    // Busca alquileres por usuario con paginación
-    Page<Rental> findByUser_UserId(UUID userId, Pageable pageable);
-    
-    
-    
-    
-    
-    //USUARIO
-    
-    /**
-     * Cuenta alquileres de un usuario
-     */
+
+    // ====== MÉTRICAS USUARIO ======
+
     long countByUser_UserId(UUID userId);
 
-    /**
-     * Cuenta alquileres activos de un usuario
-     */
     @Query("SELECT COUNT(r) FROM Rental r WHERE r.user.userId = :userId AND r.rentalStatus.rentalStatusName = 'En Proceso'")
     long countActiveByUser(@Param("userId") UUID userId);
 
-    /**
-     * Cuenta alquileres vencidos de un usuario
-     */
     @Query("SELECT COUNT(r) FROM Rental r WHERE r.user.userId = :userId AND r.rentalStatus.rentalStatusName = 'En Proceso' AND r.dueDate < CURRENT_TIMESTAMP")
     long countOverdueByUser(@Param("userId") UUID userId);
-    
-    
-    
-=======
 
-    /**
-     * Cuenta libros más pedidos con filtro opcional por categoría
-     */
+    // ====== MOST REQUESTED (PAGINADO) ======
+
     @Query(value = """
         SELECT COUNT(DISTINCT b.BookId) 
         FROM Book b
@@ -239,9 +187,6 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
     """, nativeQuery = true)
     long countMostRequestedBooks(@Param("categoryId") String categoryId);
 
-    /**
-     * Obtiene libros más pedidos con paginación y filtro por categoría
-     */
     @Query(value = """
         SELECT 
             BIN_TO_UUID(b.BookId) as bookId,
@@ -269,9 +214,8 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
         LIMIT :limit OFFSET :offset
     """, nativeQuery = true)
     List<BookMostRequestedProjection> findMostRequestedBooks(
-        @Param("categoryId") String categoryId,
-        @Param("limit") int limit,
-        @Param("offset") int offset
+            @Param("categoryId") String categoryId,
+            @Param("limit") int limit,
+            @Param("offset") int offset
     );
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 }

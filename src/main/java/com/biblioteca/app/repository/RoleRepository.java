@@ -16,7 +16,7 @@ public interface RoleRepository extends JpaRepository<Role, UUID> {
 
     /**
      * Busca un rol por su nombre
-     * 
+     *
      * @param roleName Nombre del rol (Admin, User, etc.)
      * @return Optional con el rol si existe
      */
@@ -24,19 +24,9 @@ public interface RoleRepository extends JpaRepository<Role, UUID> {
 
     /**
      * Verifica si existe un rol con el nombre dado
-     * 
+     *
      * @param roleName Nombre del rol
      * @return true si existe, false si no
      */
     boolean existsByRoleName(String roleName);
-<<<<<<< HEAD
 }
-=======
-}
-
-
-
-
-
-
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d

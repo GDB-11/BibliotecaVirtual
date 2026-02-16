@@ -43,15 +43,9 @@ public interface BookCopyRepository extends JpaRepository<BookCopy, UUID> {
     /**
      * Encuentra ejemplares disponibles de un libro específico
      */
-<<<<<<< HEAD
-    @Query("SELECT bc FROM BookCopy bc " +
-    	       "WHERE bc.book.bookId = :bookId " +
-    	       "AND bc.bookCopyStatus.bookCopyStatusName = 'Disponible'")
-    	List<BookCopy> findAvailableCopiesByBookId(@Param("bookId") UUID bookId);
-=======
     @Query("SELECT bc FROM BookCopy bc WHERE bc.book.bookId = :bookId AND bc.bookCopyStatus.bookCopyStatusName = 'Disponible'")
     List<BookCopy> findAvailableCopiesByBookId(@Param("bookId") UUID bookId);
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
+
 
     /**
      * Búsqueda de ejemplares por título o ISBN del libro

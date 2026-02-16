@@ -17,7 +17,7 @@ import com.biblioteca.app.entity.Book;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificationExecutor<Book> {
-    
+
     /**
      * Busca un libro por ISBN
      */
@@ -69,11 +69,11 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
         ORDER BY b.title ASC
     """)
     Page<Book> findAllWithFilters(
-        @Param("search") String search,
-        @Param("authorId") UUID authorId,
-        @Param("categoryId") UUID categoryId,
-        @Param("bookStatusId") UUID bookStatusId,
-        Pageable pageable
+            @Param("search") String search,
+            @Param("authorId") UUID authorId,
+            @Param("categoryId") UUID categoryId,
+            @Param("bookStatusId") UUID bookStatusId,
+            Pageable pageable
     );
 
     /**
@@ -89,10 +89,10 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
         AND (:bookStatusId IS NULL OR b.bookStatus.bookStatusId = :bookStatusId)
     """)
     long countWithFilters(
-        @Param("search") String search,
-        @Param("authorId") UUID authorId,
-        @Param("categoryId") UUID categoryId,
-        @Param("bookStatusId") UUID bookStatusId
+            @Param("search") String search,
+            @Param("authorId") UUID authorId,
+            @Param("categoryId") UUID categoryId,
+            @Param("bookStatusId") UUID bookStatusId
     );
 
     /**
@@ -121,13 +121,9 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
         ORDER BY b.Title
     """, nativeQuery = true)
     List<BookActiveDTO> findActiveBooks();
-<<<<<<< HEAD
-    
-    
-    
-    
+
     //USUARIO
-    
+
     /**
      * Busca libros por categoría
      */
@@ -137,10 +133,4 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
      * Busca libros por título (búsqueda parcial)
      */
     Page<Book> findByTitleContainingIgnoreCase(String title, Pageable pageable);
-    
-    
-    
-    
-=======
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 }

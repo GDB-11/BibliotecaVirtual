@@ -299,30 +299,17 @@ public class BookCopyService {
     public String getDiscontinuedStatusId() {
         return bookCopyStatusService.getDiscontinuedStatusId().toString();
     }
-<<<<<<< HEAD
-    
-    
-    
-    
-    
-    
-    //USUARIO
-    
+    // ===== USUARIO =====
+
     /**
      * Busca ejemplares disponibles de un libro
      */
     public List<BookCopy> findAvailableByBookId(UUID bookId) {
-        // Esta línea debe estar funcionando
         return bookCopyRepository.findAvailableCopiesByBookId(bookId);
     }
-    
+
     @Transactional
     public void flush() {
         bookCopyRepository.flush();
     }
-    
-    
-    
-=======
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 }

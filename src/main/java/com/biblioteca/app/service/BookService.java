@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,12 +24,16 @@ import com.biblioteca.app.repository.BookRepository;
 @Transactional(readOnly = true)
 public class BookService {
 
-    @Autowired
-    private BookRepository bookRepository;
+    private final BookRepository bookRepository;
+
+    // ✅ Solo una forma de inyección (constructor): más limpio y testeable
+    public BookService(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
 
     /**
      * Búsqueda paginada de libros con filtros.
-     * 
+     *
      * @param page Número de página (base 1, primera página = 1)
      * @param size Tamaño de página
      * @param search Texto de búsqueda (título o ISBN)
@@ -39,16 +42,16 @@ public class BookService {
      * @param bookStatusId Filtro por estado del libro (opcional)
      * @return PagedResult con libros
      */
-    public PagedResult<Book> findAllPaginated(int page, int size, String search, 
-                                               UUID authorId, UUID categoryId, UUID bookStatusId) {
+    public PagedResult<Book> findAllPaginated(int page, int size, String search,
+                                              UUID authorId, UUID categoryId, UUID bookStatusId) {
+
         int springPage = PageMapper.toSpringPageNumber(page);
-        
         Pageable pageable = PageRequest.of(springPage, size, Sort.by("title").ascending());
-        
+
         Page<Book> springPageResult = bookRepository.findAllWithFilters(
-            search, authorId, categoryId, bookStatusId, pageable
+                search, authorId, categoryId, bookStatusId, pageable
         );
-        
+
         return PageMapper.toPagedResult(springPageResult, page);
     }
 
@@ -145,31 +148,17 @@ public class BookService {
         return bookRepository.countBooksWithActiveRentals();
     }
 
-    public BookService(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
-    }
-
     public List<BookActiveDTO> getActiveBooks() {
         return bookRepository.findActiveBooks();
     }
-<<<<<<< HEAD
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
- // ========== MÉTODOS PARA MÓDULO DE USUARIO ==========
+
+    // ========== MÉTODOS PARA MÓDULO DE USUARIO ==========
 
     /**
      * Obtiene los libros más solicitados (para dashboard)
+     * Nota: implementación temporal.
      */
     public List<Book> getMostRequestedBooks(int limit) {
-        // Implementación temporal - reemplazar con consulta real
         Pageable pageable = PageRequest.of(0, limit);
         return bookRepository.findAll(pageable).getContent();
     }
@@ -184,9 +173,9 @@ public class BookService {
 
     /**
      * Busca libros disponibles con filtros (para catálogo)
+     * Nota: implementación temporal.
      */
     public Page<Book> findAvailableBooks(String search, UUID categoryId, Pageable pageable) {
-        // Implementación temporal - filtrar solo por categoría si existe
         if (categoryId != null) {
             return bookRepository.findByCategory_CategoryId(categoryId, pageable);
         }
@@ -198,20 +187,9 @@ public class BookService {
 
     /**
      * Cuenta ejemplares disponibles de un libro
+     * Nota: implementación temporal.
      */
     public long countAvailableCopies(UUID bookId) {
-        // Implementación temporal - reemplazar con consulta real
-        return 5; // Valor por defecto
+        return 5; // Placeholder
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-=======
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 }
