@@ -5,7 +5,7 @@ package com.biblioteca.app.dto.author;
  * Contiene información agregada sobre libros, copias y alquileres
  */
 public class AuthorStatsDTO {
-    
+
     private String authorId;
     private String fullName;
     private String pseudonym;
@@ -22,8 +22,8 @@ public class AuthorStatsDTO {
 
     // Constructor completo
     public AuthorStatsDTO(String authorId, String fullName, String pseudonym, String photoUrl,
-                         String countryName, Integer totalBooks, Integer totalCopies,
-                         Integer availableCopies, Integer totalRentals) {
+                          String countryName, Integer totalBooks, Integer totalCopies,
+                          Integer availableCopies, Integer totalRentals) {
         this.authorId = authorId;
         this.fullName = fullName;
         this.pseudonym = pseudonym;
@@ -109,8 +109,6 @@ public class AuthorStatsDTO {
     }
 
     /**
-<<<<<<< HEAD
-=======
      * Calcula el promedio de alquileres por libro
      */
     public Double getAvgRentalsPerBook() {
@@ -137,13 +135,12 @@ public class AuthorStatsDTO {
     }
 
     /**
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
      * Nombre a mostrar (pseudónimo si existe, sino nombre completo)
      */
     public String getDisplayName() {
-        return (pseudonym != null && !pseudonym.trim().isEmpty()) 
-            ? pseudonym 
-            : fullName;
+        return (pseudonym != null && !pseudonym.trim().isEmpty())
+                ? pseudonym
+                : fullName;
     }
 
     @Override
