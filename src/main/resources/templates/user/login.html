@@ -2,17 +2,12 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-<<<<<<< HEAD
     <title>Login Usuario - Biblioteca Virtual</title>
-=======
-    <title>Login Usuario - Biblioteca</title>
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 
     <style>
-<<<<<<< HEAD
         :root {
             --primary-start: #2ecc71;
             --primary-end: #1abc9c;
@@ -22,24 +17,16 @@
 
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #e8f0fe 100%);
-=======
-        body {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-<<<<<<< HEAD
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-=======
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
         }
 
         .login-container {
             background: white;
             border-radius: 20px;
-<<<<<<< HEAD
             box-shadow: 0 20px 60px rgba(46, 204, 113, 0.3);
             max-width: 1000px;
             width: 100%;
@@ -173,37 +160,10 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-=======
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            max-width: 900px;
-            width: 100%;
-        }
-
-        .login-left {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
-            padding: 60px 40px;
-            text-align: center;
-        }
-
-        .login-left i {
-            font-size: 80px;
-        }
-
-        .login-right {
-            padding: 60px 40px;
-        }
-
-        .btn-login {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            border: none;
-            color: white;
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
         }
 
         .btn-login:hover {
             transform: translateY(-2px);
-<<<<<<< HEAD
             box-shadow: 0 10px 30px rgba(46, 204, 113, 0.4);
         }
 
@@ -278,17 +238,14 @@
             .login-left {
                 padding: 40px 20px;
             }
-            
+
             .login-right {
                 padding: 40px 30px;
             }
-            
+
             .login-left i {
                 font-size: 60px;
             }
-=======
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
         }
     </style>
 </head>
@@ -297,43 +254,30 @@
 <div class="container">
     <div class="login-container row g-0">
 
-<<<<<<< HEAD
-        <!-- Branding Usuarios - Estilo verde aguamarina -->
-=======
-        <!-- Branding Usuarios -->
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
         <div class="col-md-5 login-left">
             <i class="bi bi-book-half"></i>
             <h2>Biblioteca Virtual</h2>
             <p>Acceso para usuarios</p>
-<<<<<<< HEAD
             <div class="mt-4">
                 <small class="opacity-75">
                     <i class="bi bi-check-circle"></i> Alquila tus libros favoritos
                 </small>
             </div>
-=======
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
         </div>
 
-        <!-- Formulario -->
         <div class="col-md-7 login-right">
             <h3>Iniciar Sesión</h3>
 
-<<<<<<< HEAD
-            <!-- Mensajes de error -->
             <div th:if="${param.error}" class="alert alert-danger">
                 <i class="bi bi-exclamation-triangle me-2"></i>
                 Credenciales incorrectas. Por favor, inténtalo de nuevo.
             </div>
 
-            <!-- Mensaje de logout -->
             <div th:if="${param.logout}" class="alert alert-success">
                 <i class="bi bi-check-circle me-2"></i>
                 Sesión cerrada correctamente. ¡Hasta pronto!
             </div>
 
-            <!-- Formulario de login -->
             <form th:action="@{/login}" method="post">
                 <div class="mb-4">
                     <label class="form-label">
@@ -379,19 +323,16 @@
                 </div>
             </form>
 
+            <div class="register-link mt-3 text-center">
+                <p class="mb-0">
+                    ¿No tienes cuenta?
+                    <a th:href="@{/user/registro}" class="text-decoration-none fw-bold"
+                       style="color: var(--primary-start);">
+                        Regístrate aquí
+                    </a>
+                </p>
+            </div>
 
-			
-			<div class="register-link mt-3 text-center">
-			    <p class="mb-0">
-			        ¿No tienes cuenta? 
-			        <a th:href="@{/user/registro}" class="text-decoration-none fw-bold" 
-			           style="color: var(--primary-start);">
-			            Regístrate aquí
-			        </a>
-			    </p>
-			</div>
-
-            <!-- Enlace para administradores -->
             <div class="mt-4 text-center">
                 <small class="text-muted">
                     <i class="bi bi-shield-lock"></i>
@@ -402,9 +343,7 @@
     </div>
 </div>
 
-<!-- Script para animaciones adicionales -->
 <script>
-    // Efecto de escritura en el placeholder (opcional)
     const emailInput = document.querySelector('input[name="email"]');
     if (emailInput) {
         emailInput.addEventListener('focus', function() {
@@ -419,42 +358,3 @@
 </script>
 </body>
 </html>
-=======
-            <div th:if="${param.error}" class="alert alert-danger">
-                Credenciales incorrectas
-            </div>
-
-            <div th:if="${param.logout}" class="alert alert-success">
-                Sesión cerrada correctamente
-            </div>
-
-            <form th:action="@{/login}" method="post">
-
-                <div class="mb-3">
-                    <label>Email</label>
-                    <input type="email"
-                           class="form-control"
-                           name="email"
-                           required>
-                </div>
-
-                <div class="mb-3">
-                    <label>Contraseña</label>
-                    <input type="password"
-                           class="form-control"
-                           name="password"
-                           required>
-                </div>
-
-                <button class="btn btn-login w-100">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    Ingresar
-                </button>
-            </form>
-
-        </div>
-    </div>
-</div>
-</body>
-</html>
->>>>>>> 41bd2a27dfbd5dbd952243f53e161ae61b1b837d
