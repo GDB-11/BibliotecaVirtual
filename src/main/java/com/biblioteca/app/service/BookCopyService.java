@@ -312,4 +312,13 @@ public class BookCopyService {
     public void flush() {
         bookCopyRepository.flush();
     }
+
+    /**
+     * Busca libros que tienen ejemplares disponibles
+     * 
+     * @return Lista de libros con ejemplares disponibles
+     */
+    public List<Book> findAvailableBooks() {
+        return bookCopyRepository.findDistinctAvailableBooks();
+    }
 }

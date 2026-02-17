@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.biblioteca.app.entity.Book;
 import com.biblioteca.app.entity.BookCopy;
 
 @Repository
@@ -80,4 +81,16 @@ public interface BookCopyRepository extends JpaRepository<BookCopy, UUID> {
      */
     @Query("SELECT COUNT(bc) FROM BookCopy bc WHERE bc.book.bookId = :bookId AND bc.bookCopyStatus.bookCopyStatusName = 'Disponible'")
     long countAvailableCopiesByBookId(@Param("bookId") UUID bookId);
+
+    /**
+     * Busca ejemplares disponibles para un libro específico
+     */
+    @Query("SELECT bc FROM BookCopy bc WHERE bc.book.bookId = :bookId AND bc.bookCopyStatus.bookCopyStatusName = 'Disponible' ORDER BY bc.createdAt ASC")
+    List<BookCopy> findAvailableByBook(@Param("bookId") UUID bookId);
+    
+    /**
+     * Busca libros que tienen al menos un ejemplar disponible
+     */
+    @Query("SELECT DISTINCT bc.book FROM BookCopy bc WHERE bc.bookCopyStatus.bookCopyStatusName = 'Disponible' ORDER BY bc.book.title")
+    List<Book> findDistinctAvailableBooks();
 }

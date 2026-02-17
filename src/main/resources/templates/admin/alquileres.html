@@ -1,0 +1,523 @@
+<!-- src/main/resources/templates/admin/alquileres.html -->
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Gestión de Alquileres</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Gestión de Alquileres</h2>
+                    <p class="text-muted mb-0">Administración de alquileres de libros</p>
+                </div>
+                <div>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRentalModal">
+                        <i class="bi bi-plus-circle"></i> Nuevo Alquiler
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Total Alquileres</small>
+                                <h4 class="mb-0" th:text="${totalRentals}">0</h4>
+                            </div>
+                            <i class="bi bi-book fs-2 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-warning border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">En Proceso</small>
+                                <h4 class="mb-0" th:text="${activeRentals}">0</h4>
+                            </div>
+                            <i class="bi bi-hourglass-split fs-2 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-danger border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Vencidos</small>
+                                <h4 class="mb-0" th:text="${overdueRentals}">0</h4>
+                            </div>
+                            <i class="bi bi-exclamation-triangle fs-2 text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-info border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Registros en Página</small>
+                                <h4 class="mb-0" th:text="${rentalsResult.items.size()}">0</h4>
+                            </div>
+                            <i class="bi bi-list-ul fs-2 text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" th:action="@{/admin/alquileres}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Buscar</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" name="search" class="form-control" 
+                                       placeholder="Email, título o ISBN..." th:value="${searchValue}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Usuario</label>
+                            <select name="userId" class="form-select">
+                                <option value="">Todos</option>
+                                <option th:each="user : ${users}" 
+                                        th:value="${user.userId}" 
+                                        th:text="${user.email}"
+                                        th:selected="${user.userId.toString() == userIdValue}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Estado</label>
+                            <select name="rentalStatusId" class="form-select">
+                                <option value="">Todos</option>
+                                <option th:each="status : ${rentalStatuses}" 
+                                        th:value="${status.rentalStatusId}" 
+                                        th:text="${status.rentalStatusName}"
+                                        th:selected="${status.rentalStatusId.toString() == rentalStatusIdValue}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-funnel"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Rentals Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Listado de Alquileres</h5>
+                <div>
+                    <span class="text-muted me-3">
+                        Mostrando <span th:text="${rentalsResult.startItem}">0</span> - 
+                        <span th:text="${rentalsResult.endItem}">0</span> de 
+                        <span th:text="${rentalsResult.totalItems}">0</span>
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div th:if="${rentalsResult.items.empty}">
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox fs-1 text-muted"></i>
+                        <p class="text-muted mt-3">No se encontraron alquileres</p>
+                        <a th:if="${searchValue != '' or userIdValue != '' or rentalStatusIdValue != ''}" 
+                           th:href="@{/admin/alquileres}" 
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-x-circle"></i> Limpiar filtros
+                        </a>
+                    </div>
+                </div>
+
+                <div th:unless="${rentalsResult.items.empty}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Libro</th>
+                                    <th>Fecha Alquiler</th>
+                                    <th>Fecha Vencimiento</th>
+                                    <th>Días</th>
+                                    <th>Costo Total</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="rental : ${rentalsResult.items}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person-circle fs-4 text-muted me-2"></i>
+                                            <div>
+                                                <div class="fw-medium" th:text="${rental.user.email}"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e396909682918a8ca38689868e938f8ccd808c8e">[email&#160;protected]</a></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium" th:text="${rental.bookCopy.book.title}">Título del Libro</div>
+                                        <small class="text-muted" th:text="${rental.bookCopy.book.isbn}">ISBN</small>
+                                    </td>
+                                    <td th:text="${#temporals.format(rental.rentalDate, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</td>
+                                    <td>
+                                        <span th:text="${#temporals.format(rental.dueDate, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</span>
+                                        <th:block th:if="${rental.rentalStatus.rentalStatusName == 'En Proceso'}">
+                                            <br th:if="${rental.dueDate.isBefore(#temporals.createNow())}"/>
+                                            <span th:if="${rental.dueDate.isBefore(#temporals.createNow())}" class="badge bg-danger">Vencido</span>
+                                        </th:block>
+                                    </td>
+                                    <td><span th:text="${rental.rentalDays}">0</span> días</td>
+                                    <td>
+                                        <strong>S/ <span th:text="${#numbers.formatDecimal(rental.totalCost, 1, 2)}">0.00</span></strong>
+                                        <br><small class="text-muted">S/ <span th:text="${#numbers.formatDecimal(rental.dailyRate, 1, 2)}">0.00</span>/día</small>
+                                    </td>
+                                    <td>
+                                        <span th:if="${rental.rentalStatus.rentalStatusName == 'En Proceso'}" class="badge bg-warning">En Proceso</span>
+                                        <span th:if="${rental.rentalStatus.rentalStatusName == 'Devuelto'}" class="badge bg-success">Devuelto</span>
+                                        <span th:if="${rental.rentalStatus.rentalStatusName == 'Cancelado'}" class="badge bg-danger">Cancelado</span>
+                                        <span th:unless="${rental.rentalStatus.rentalStatusName == 'En Proceso' or rental.rentalStatus.rentalStatusName == 'Devuelto' or rental.rentalStatus.rentalStatusName == 'Cancelado'}" 
+                                              class="badge bg-secondary" th:text="${rental.rentalStatus.rentalStatusName}">Estado</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" class="btn btn-outline-info btn-ver-detalle" 
+                                                    th:data-id="${rental.rentalId}"
+                                                    title="Ver detalles">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <th:block th:if="${rental.rentalStatus.rentalStatusName == 'En Proceso'}">
+                                                <button type="button" class="btn btn-outline-success btn-devolver" 
+                                                        th:data-id="${rental.rentalId}"
+                                                        title="Marcar como devuelto">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-cancelar" 
+                                                        th:data-id="${rental.rentalId}"
+                                                        title="Cancelar">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </th:block>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav th:if="${rentalsResult.totalPages > 1}" aria-label="Paginación de alquileres" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <!-- Botón Anterior -->
+                            <li class="page-item" th:classappend="${not rentalsResult.hasPreviousPage()} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/admin/alquileres(p=${rentalsResult.previousPage},search=${searchValue},userId=${userIdValue},rentalStatusId=${rentalStatusIdValue})}">
+                                    <i class="bi bi-chevron-left"></i> Anterior
+                                </a>
+                            </li>
+
+                            <!-- Primera página -->
+                            <li th:if="${rentalsResult.getPageRange(itemsPerPage)[0] > 1}" class="page-item">
+                                <a class="page-link" 
+                                   th:href="@{/admin/alquileres(p=1,search=${searchValue},userId=${userIdValue},rentalStatusId=${rentalStatusIdValue})}">1</a>
+                            </li>
+                            <li th:if="${rentalsResult.getPageRange(itemsPerPage)[0] > 2}" class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+
+                            <!-- Páginas del rango -->
+                            <li th:each="i : ${#numbers.sequence(rentalsResult.getPageRange(itemsPerPage)[0], rentalsResult.getPageRange(itemsPerPage)[1])}"
+                                class="page-item" th:classappend="${i == rentalsResult.currentPage} ? 'active'">
+                                <a class="page-link"
+                                   th:href="@{/admin/alquileres(p=${i},search=${searchValue},userId=${userIdValue},rentalStatusId=${rentalStatusIdValue})}"
+                                   th:text="${i}">1</a>
+                            </li>
+
+                            <!-- Última página -->
+                            <li th:if="${rentalsResult.getPageRange(itemsPerPage)[1] < rentalsResult.totalPages - 1}" class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            <li th:if="${rentalsResult.getPageRange(itemsPerPage)[1] < rentalsResult.totalPages}" class="page-item">
+                                <a class="page-link"
+                                   th:href="@{/admin/alquileres(p=${rentalsResult.totalPages},search=${searchValue},userId=${userIdValue},rentalStatusId=${rentalStatusIdValue})}"
+                                   th:text="${rentalsResult.totalPages}">10</a>
+                            </li>
+
+                            <!-- Botón Siguiente -->
+                            <li class="page-item" th:classappend="${not rentalsResult.hasNextPage()} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/admin/alquileres(p=${rentalsResult.nextPage},search=${searchValue},userId=${userIdValue},rentalStatusId=${rentalStatusIdValue})}">
+                                    Siguiente <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Rental Modal -->
+        <div class="modal fade" id="addRentalModal" tabindex="-1" aria-labelledby="addRentalModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="addRentalModalLabel">
+                            <i class="bi bi-plus-circle me-2"></i>Crear Nuevo Alquiler
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form th:action="@{/admin/alquileres/crear}" method="post" id="addRentalForm">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Usuario *</label>
+                                <select name="userId" class="form-select" required>
+                                    <option value="">Seleccione un usuario</option>
+                                    <option th:each="user : ${users}" 
+                                            th:value="${user.userId}" 
+                                            th:text="${user.email}">
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Libro *</label>
+                                <select name="bookId" class="form-select" required>
+                                    <option value="">Seleccione un libro</option>
+                                    <option th:each="book : ${availableBooks}" 
+                                            th:value="${book.bookId}" 
+                                            th:text="${book.title} + ' - ' + ${book.isbn}">
+                                    </option>
+                                </select>
+                                <div class="form-text">Solo se muestran libros con ejemplares disponibles</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Días de Alquiler *</label>
+                                <input type="number" name="rentalDays" class="form-control" 
+                                       placeholder="Ej: 7" required min="1" max="365" value="7"
+                                       onchange="calculateTotal()">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Tarifa Diaria</label>
+                                <input type="text" class="form-control" th:value="'S/ ' + ${defaultDailyRate}" disabled>
+                                <input type="hidden" id="dailyRate" th:value="${defaultDailyRate}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Costo Total Estimado</label>
+                                <input type="text" id="totalCostDisplay" class="form-control fw-bold" value="S/ 0.00" disabled>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Notas (Opcional)</label>
+                                <textarea name="notes" class="form-control" rows="3" 
+                                          placeholder="Observaciones sobre el alquiler..."></textarea>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                El alquiler se creará con estado <strong>En Proceso</strong> y el ejemplar 
+                                será marcado como <strong>Alquilado</strong>.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Crear Alquiler
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Rental Modal -->
+        <div class="modal fade" id="rentalDetailModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-info-circle me-2"></i>Detalle del Alquiler
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="rentalDetailContent">
+                        <!-- Content loaded via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mark as Returned Modal -->
+        <div class="modal fade" id="markReturnedModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-check-circle me-2"></i>Marcar como Devuelto
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Está seguro de que desea marcar este alquiler como <strong>Devuelto</strong>?</p>
+                        <p class="text-muted mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            El ejemplar será marcado como Disponible nuevamente.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <form th:action="@{/admin/alquileres/{id}/devolver(id=${markReturnedRentalId})}" method="post" style="display: inline;" id="markReturnedForm">
+                            <input type="hidden" name="rentalId" id="markReturnedRentalId">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Confirmar Devolución
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cancel Rental Modal -->
+        <div class="modal fade" id="cancelRentalModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Cancelar Alquiler
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Está seguro de que desea <strong>cancelar</strong> este alquiler?</p>
+                        <p class="text-danger mb-0">
+                            <i class="bi bi-exclamation-circle me-1"></i>
+                            Esta acción marcará el alquiler como cancelado y el ejemplar quedará disponible.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> No, regresar
+                        </button>
+                        <form th:action="@{/admin/alquileres/{id}/cancelar(id=${cancelRentalId})}" method="post" style="display: inline;" id="cancelRentalForm">
+                            <input type="hidden" name="rentalId" id="cancelRentalId">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Sí, cancelar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            const contextPath = /*[[@{/}]]*/ '/';
+            
+            function calculateTotal() {
+                const rentalDays = parseInt(document.querySelector('[name="rentalDays"]').value) || 0;
+                const dailyRate = parseFloat(document.getElementById('dailyRate').value) || 0;
+                const totalCost = (rentalDays * dailyRate).toFixed(2);
+                document.getElementById('totalCostDisplay').value = 'S/ ' + totalCost;
+            }
+
+            function viewRental(rentalId) {
+                const modal = new bootstrap.Modal(document.getElementById('rentalDetailModal'));
+                document.getElementById('rentalDetailContent').innerHTML = 
+                    '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Cargando...</p></div>';
+                modal.show();
+                
+                fetch(contextPath + 'admin/alquileres/detalle?id=' + rentalId)
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('rentalDetailContent').innerHTML = html;
+                    })
+                    .catch(() => {
+                        document.getElementById('rentalDetailContent').innerHTML = 
+                            '<div class="alert alert-danger">Error al cargar los detalles</div>';
+                    });
+            }
+
+            function markAsReturned(rentalId) {
+                document.getElementById('markReturnedRentalId').value = rentalId;
+                document.getElementById('markReturnedForm').action = contextPath + 'admin/alquileres/' + rentalId + '/devolver';
+                new bootstrap.Modal(document.getElementById('markReturnedModal')).show();
+            }
+
+            function cancelRental(rentalId) {
+                document.getElementById('cancelRentalId').value = rentalId;
+                document.getElementById('cancelRentalForm').action = contextPath + 'admin/alquileres/' + rentalId + '/cancelar';
+                new bootstrap.Modal(document.getElementById('cancelRentalModal')).show();
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                calculateTotal();
+
+                // Event delegation para botones de la tabla
+                document.addEventListener('click', function(e) {
+                    const btnVer = e.target.closest('.btn-ver-detalle');
+                    if (btnVer) { viewRental(btnVer.dataset.id); return; }
+
+                    const btnDevolver = e.target.closest('.btn-devolver');
+                    if (btnDevolver) { markAsReturned(btnDevolver.dataset.id); return; }
+
+                    const btnCancelar = e.target.closest('.btn-cancelar');
+                    if (btnCancelar) { cancelRental(btnCancelar.dataset.id); return; }
+                });
+
+                // Validación del formulario de nuevo alquiler
+                const addRentalForm = document.getElementById('addRentalForm');
+                if (addRentalForm) {
+                    addRentalForm.addEventListener('submit', function(event) {
+                        if (!addRentalForm.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        addRentalForm.classList.add('was-validated');
+                    });
+                }
+            });
+            /*]]>*/
+        </script>
+    </div>
+</body>
+</html>

@@ -27,6 +27,7 @@ import com.biblioteca.app.entity.RentalStatus;
 import com.biblioteca.app.entity.User;
 import com.biblioteca.app.helper.PageMapper;
 import com.biblioteca.app.repository.BookCopyRepository;
+import com.biblioteca.app.repository.BookRepository;
 import com.biblioteca.app.repository.RentalRepository;
 import com.biblioteca.app.repository.RentalStatusRepository;
 import com.biblioteca.app.repository.UserRepository;
@@ -54,6 +55,12 @@ public class RentalService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ConfigurationService configurationService;
+    
+    @Autowired
+    private BookRepository bookRepository;
 
     /**
      * Obtiene un alquiler por ID
@@ -408,5 +415,177 @@ public class RentalService {
     public List<Rental> findLastByUser(UUID userId, int limit) {
         Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "rentalDate"));
         return rentalRepository.findByUser_UserId(userId, pageable).getContent();
+    }
+
+    /**
+     * Obtiene alquileres con paginación y filtros
+     */
+    public PagedResult<Rental> getRegisteredRentals(
+            int page, 
+            int pageSize, 
+            String search,
+            UUID userId, 
+            UUID rentalStatusId) {
+        
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+        if (pageSize > 100) pageSize = 100;
+        
+        Pageable pageable = PageRequest.of(page - 1, pageSize, 
+            Sort.by(Sort.Direction.DESC, "rentalDate"));
+        
+        Page<Rental> springPage = rentalRepository.findAllWithFilters(
+            search, userId, rentalStatusId, pageable);
+        
+        return new PagedResult<>(
+            springPage.getContent(),
+            page,
+            pageSize,
+            (int) springPage.getTotalElements()
+        );
+    }
+    
+    /**
+     * Obtiene todos los estados de alquiler
+     */
+    public List<RentalStatus> getAllRentalStatuses() {
+        return rentalStatusRepository.findAll(Sort.by("rentalStatusName"));
+    }
+    
+    /**
+     * Obtiene la tarifa diaria por defecto desde la configuración
+     */
+    public Double getDefaultDailyRate() {
+        try {
+            return configurationService.getDecimalValue("RentalDailyRate", Double.valueOf(10.0));
+        } catch (Exception e) {
+            return Double.valueOf(10.0);
+        }
+    }
+    
+    /**
+     * Obtiene la penalidad diaria por demora desde la configuración
+     */
+    public Double getDailyPenalty() {
+        try {
+            return configurationService.getDecimalValue("ReturnDelayDailyPenalty", Double.valueOf(12.5));
+        } catch (Exception e) {
+            return Double.valueOf(12.5);
+        }
+    }
+    
+    /**
+     * Crea un alquiler para el administrador
+     * 
+     * @param userId ID del usuario
+     * @param bookId ID del libro
+     * @param rentalDays Número de días de alquiler
+     * @param notes Notas opcionales
+     * @return Rental creado
+     */
+    @Transactional
+    public Rental createRentalForAdmin(UUID userId, UUID bookId, int rentalDays, String notes) {
+        
+        // Buscar usuario
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        
+        bookRepository.findById(bookId)
+            .orElseThrow(() -> new IllegalArgumentException("Libro no encontrado"));
+        
+        List<BookCopy> availableCopies = bookCopyRepository.findAvailableByBook(bookId);
+        if (availableCopies.isEmpty()) {
+            throw new IllegalStateException("No hay ejemplares disponibles para este libro");
+        }
+        
+        BookCopy bookCopy = availableCopies.get(0);
+        
+        if (!"Disponible".equals(bookCopy.getBookCopyStatus().getBookCopyStatusName())) {
+            throw new IllegalStateException("El ejemplar no está disponible");
+        }
+        
+        RentalStatus enProcesoStatus = rentalStatusRepository.findByRentalStatusName("En Proceso")
+            .orElseThrow(() -> new RuntimeException("Estado 'En Proceso' no encontrado"));
+        
+        BookCopyStatus alquiladoStatus = bookCopyStatusService.findByName("Alquilado")
+            .orElseThrow(() -> new RuntimeException("Estado 'Alquilado' no encontrado"));
+        
+        LocalDateTime rentalDate = LocalDateTime.now();
+        LocalDateTime dueDate = rentalDate.plusDays(rentalDays);
+        BigDecimal dailyRate = BigDecimal.valueOf(getDefaultDailyRate());
+        BigDecimal totalCost = dailyRate.multiply(BigDecimal.valueOf(rentalDays));
+        
+        Rental rental = new Rental();
+        rental.setUser(user);
+        rental.setBookCopy(bookCopy);
+        rental.setRentalDate(rentalDate);
+        rental.setDueDate(dueDate);
+        rental.setRentalDays(rentalDays);
+        rental.setDailyRate(dailyRate);
+        rental.setTotalCost(totalCost);
+        rental.setRentalStatus(enProcesoStatus);
+        rental.setNotes(notes);
+        
+        bookCopy.setBookCopyStatus(alquiladoStatus);
+        bookCopyRepository.save(bookCopy);
+        
+        return rentalRepository.save(rental);
+    }
+    
+    /**
+     * Marca un alquiler como devuelto
+     * 
+     * @param rentalId ID del alquiler
+     */
+    @Transactional
+    public void markAsReturned(UUID rentalId) {
+        Rental rental = rentalRepository.findById(rentalId)
+            .orElseThrow(() -> new IllegalArgumentException("Alquiler no encontrado"));
+        
+        if (!"En Proceso".equals(rental.getRentalStatus().getRentalStatusName())) {
+            throw new IllegalArgumentException("Solo se pueden marcar como devueltos los alquileres en proceso");
+        }
+        
+        RentalStatus devueltoStatus = rentalStatusRepository.findByRentalStatusName("Devuelto")
+            .orElseThrow(() -> new RuntimeException("Estado 'Devuelto' no encontrado"));
+        
+        BookCopyStatus disponibleStatus = bookCopyStatusService.findByName("Disponible")
+            .orElseThrow(() -> new RuntimeException("Estado 'Disponible' no encontrado"));
+        
+        rental.setRentalStatus(devueltoStatus);
+        rental.setReturnDate(LocalDateTime.now());
+        rentalRepository.save(rental);
+        
+        BookCopy bookCopy = rental.getBookCopy();
+        bookCopy.setBookCopyStatus(disponibleStatus);
+        bookCopyRepository.save(bookCopy);
+    }
+    
+    /**
+     * Cancela un alquiler
+     * 
+     * @param rentalId ID del alquiler
+     */
+    @Transactional
+    public void cancelRental(UUID rentalId) {
+        Rental rental = rentalRepository.findById(rentalId)
+            .orElseThrow(() -> new IllegalArgumentException("Alquiler no encontrado"));
+        
+        if (!"En Proceso".equals(rental.getRentalStatus().getRentalStatusName())) {
+            throw new IllegalArgumentException("Solo se pueden cancelar los alquileres en proceso");
+        }
+        
+        RentalStatus canceladoStatus = rentalStatusRepository.findByRentalStatusName("Cancelado")
+            .orElseThrow(() -> new RuntimeException("Estado 'Cancelado' no encontrado"));
+        
+        BookCopyStatus disponibleStatus = bookCopyStatusService.findByName("Disponible")
+            .orElseThrow(() -> new RuntimeException("Estado 'Disponible' no encontrado"));
+        
+        rental.setRentalStatus(canceladoStatus);
+        rentalRepository.save(rental);
+        
+        BookCopy bookCopy = rental.getBookCopy();
+        bookCopy.setBookCopyStatus(disponibleStatus);
+        bookCopyRepository.save(bookCopy);
     }
 }

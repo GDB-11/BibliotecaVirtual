@@ -218,4 +218,30 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
             @Param("limit") int limit,
             @Param("offset") int offset
     );
+
+    /**
+     * Busca alquileres con filtros para el panel de administración
+     */
+    @Query(value = """
+        SELECT r FROM Rental r
+        LEFT JOIN r.user u
+        LEFT JOIN r.bookCopy bc
+        LEFT JOIN bc.book b
+        LEFT JOIN b.author a
+        LEFT JOIN r.rentalStatus rs
+        WHERE (:search IS NULL OR :search = '' OR 
+               LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')) OR
+               LOWER(b.title) LIKE LOWER(CONCAT('%', :search, '%')) OR
+               LOWER(b.isbn) LIKE LOWER(CONCAT('%', :search, '%')) OR
+               LOWER(a.fullName) LIKE LOWER(CONCAT('%', :search, '%')))
+        AND (:userId IS NULL OR u.userId = :userId)
+        AND (:rentalStatusId IS NULL OR rs.rentalStatusId = :rentalStatusId)
+        ORDER BY r.rentalDate DESC
+    """)
+    Page<Rental> findAllWithFilters(
+            @Param("search") String search,
+            @Param("userId") UUID userId,
+            @Param("rentalStatusId") UUID rentalStatusId,
+            Pageable pageable
+    );
 }
