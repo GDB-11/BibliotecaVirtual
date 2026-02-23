@@ -1,90 +1,103 @@
-<!-- Quick Stats - Reemplaza los valores estáticos -->
-<div class="row g-4 mb-5">
-    <div class="col-md-4">
-        <div class="stat-card d-flex align-items-center">
-            <div class="stat-icon me-3">
-                <i class="bi bi-book"></i>
+<!DOCTYPE html>
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout}">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Quick Stats - Reemplaza los valores estáticos -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="stat-card d-flex align-items-center">
+                    <div class="stat-icon me-3">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted">Total Alquileres</small>
+                        <h3 class="mb-0" th:text="${totalAlquileres}">0</h3>
+                    </div>
+                </div>
             </div>
-            <div>
-                <small class="text-muted">Total Alquileres</small>
-                <h3 class="mb-0" th:text="${totalAlquileres}">0</h3>
+            <div class="col-md-4">
+                <div class="stat-card d-flex align-items-center">
+                    <div class="stat-icon me-3" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted">Alquileres Activos</small>
+                        <h3 class="mb-0" th:text="${alquileresActivos}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card d-flex align-items-center">
+                    <div class="stat-icon me-3" th:classappend="${alquileresVencidos > 0} ? 'bg-warning' : ''" 
+                        style="background: linear-gradient(135deg, #f1c40f, #f39c12);">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted">Por Devolver</small>
+                        <h3 class="mb-0" th:text="${alquileresVencidos}">0</h3>
+                        <small th:if="${alquileresVencidos > 0}" class="text-danger">¡Vencidos!</small>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-4">
-        <div class="stat-card d-flex align-items-center">
-            <div class="stat-icon me-3" style="background: linear-gradient(135deg, #3498db, #2980b9);">
-                <i class="bi bi-journal-bookmark-fill"></i>
-            </div>
-            <div>
-                <small class="text-muted">Alquileres Activos</small>
-                <h3 class="mb-0" th:text="${alquileresActivos}">0</h3>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="stat-card d-flex align-items-center">
-            <div class="stat-icon me-3" th:classappend="${alquileresVencidos > 0} ? 'bg-warning' : ''" 
-                 style="background: linear-gradient(135deg, #f1c40f, #f39c12);">
-                <i class="bi bi-exclamation-triangle"></i>
-            </div>
-            <div>
-                <small class="text-muted">Por Devolver</small>
-                <h3 class="mb-0" th:text="${alquileresVencidos}">0</h3>
-                <small th:if="${alquileresVencidos > 0}" class="text-danger">¡Vencidos!</small>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Agregar tabla de últimos alquileres después de libros populares -->
-<div class="row mb-5">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Últimos Alquileres</h5>
-                <a th:href="@{/user/historial}" class="btn btn-sm btn-outline-primary">
-                    Ver todos <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-            <div class="card-body">
-                <div th:if="${ultimosAlquileres == null or #lists.isEmpty(ultimosAlquileres)}" 
-                     class="text-center py-4">
-                    <i class="bi bi-inbox fs-1 text-muted"></i>
-                    <p class="text-muted mt-2">No tienes alquileres aún</p>
-                    <a th:href="@{/user/catalogo}" class="btn btn-primary">
-                        <i class="bi bi-search"></i> Explorar catálogo
-                    </a>
-                </div>
-                <div th:unless="${ultimosAlquileres == null or #lists.isEmpty(ultimosAlquileres)}" 
-                     class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Libro</th>
-                                <th>Fecha Alquiler</th>
-                                <th>Fecha Devolución</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="rental : ${ultimosAlquileres}">
-                                <td th:text="${rental.bookCopy.book.title}">Título del libro</td>
-                                <td th:text="${#temporals.format(rental.rentalDate, 'dd/MM/yyyy')}">01/01/2024</td>
-                                <td th:text="${rental.dueDate != null ? #temporals.format(rental.dueDate, 'dd/MM/yyyy') : '-'}">-</td>
-                                <td>
-                                    <span th:if="${rental.rentalStatus.rentalStatusName == 'En Proceso'}" 
-                                          class="badge bg-success">Activo</span>
-                                    <span th:if="${rental.rentalStatus.rentalStatusName == 'Completado'}" 
-                                          class="badge bg-info">Completado</span>
-                                    <span th:if="${rental.rentalStatus.rentalStatusName == 'Cancelado'}" 
-                                          class="badge bg-secondary">Cancelado</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <!-- Agregar tabla de últimos alquileres después de libros populares -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Últimos Alquileres</h5>
+                        <a th:href="@{/user/historial}" class="btn btn-sm btn-outline-primary">
+                            Ver todos <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${ultimosAlquileres == null or #lists.isEmpty(ultimosAlquileres)}" 
+                            class="text-center py-4">
+                            <i class="bi bi-inbox fs-1 text-muted"></i>
+                            <p class="text-muted mt-2">No tienes alquileres aún</p>
+                            <a th:href="@{/user/catalogo}" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Explorar catálogo
+                            </a>
+                        </div>
+                        <div th:unless="${ultimosAlquileres == null or #lists.isEmpty(ultimosAlquileres)}" 
+                            class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Libro</th>
+                                        <th>Fecha Alquiler</th>
+                                        <th>Fecha Devolución</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="rental : ${ultimosAlquileres}">
+                                        <td th:text="${rental.bookCopy.book.title}">Título del libro</td>
+                                        <td th:text="${#temporals.format(rental.rentalDate, 'dd/MM/yyyy')}">01/01/2024</td>
+                                        <td th:text="${rental.dueDate != null ? #temporals.format(rental.dueDate, 'dd/MM/yyyy') : '-'}">-</td>
+                                        <td>
+                                            <span th:if="${rental.rentalStatus.rentalStatusName == 'En Proceso'}" 
+                                                class="badge bg-success">Activo</span>
+                                            <span th:if="${rental.rentalStatus.rentalStatusName == 'Completado'}" 
+                                                class="badge bg-info">Completado</span>
+                                            <span th:if="${rental.rentalStatus.rentalStatusName == 'Cancelado'}" 
+                                                class="badge bg-secondary">Cancelado</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </div>    
+</body>
+</html>
