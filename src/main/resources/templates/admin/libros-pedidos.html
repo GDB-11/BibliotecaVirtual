@@ -52,10 +52,9 @@
                         <div class="col-md-4">
                             <label class="form-label">Resultados por página</label>
                             <select class="form-select" name="size">
+                                <option value="5" th:selected="${pageSizeValue == 5}">Top 5</option>
                                 <option value="10" th:selected="${pageSizeValue == 10}">Top 10</option>
                                 <option value="20" th:selected="${pageSizeValue == 20}">Top 20</option>
-                                <option value="50" th:selected="${pageSizeValue == 50}">Top 50</option>
-                                <option value="100" th:selected="${pageSizeValue == 100}">Top 100</option>
                             </select>
                         </div>
                         <div class="col-md-4">

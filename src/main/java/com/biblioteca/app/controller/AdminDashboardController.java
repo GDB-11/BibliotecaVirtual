@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.biblioteca.app.dto.author.AuthorStatsDTO;
 import com.biblioteca.app.dto.rental.BookMostRequestedDTO;
 import com.biblioteca.app.dto.rental.BookRentalStatsDTO;
 import com.biblioteca.app.dto.shared.PagedResult;
@@ -170,19 +171,19 @@ public class AdminDashboardController {
             Model model) {
 
         try {
-            int itemsPerPage = size != null ? size : configurationService.getIntValue("ItemsPerPage", 20);
+            page = 1;
 
             String categoryFilter = (categoryId != null && !categoryId.trim().isEmpty()) ? categoryId : null;
 
             PagedResult<BookMostRequestedDTO> booksStats = rentalService.getMostRequestedBooks(
-                    page, itemsPerPage, categoryFilter);
+                    page, size, categoryFilter);
 
             List<Category> categories = categoryService.findAll();
 
             model.addAttribute("booksStats", booksStats);
             model.addAttribute("categories", categories);
             model.addAttribute("categoryIdValue", categoryId != null ? categoryId : "");
-            model.addAttribute("pageSizeValue", itemsPerPage);
+            model.addAttribute("pageSizeValue", size);
 
             return "admin/libros-pedidos";
 
@@ -207,13 +208,11 @@ public class AdminDashboardController {
     public String showMostRequestedAuthorsReport(
             @RequestParam(value = "countryId", required = false) String countryId,
             @RequestParam(value = "statusId", required = false) String statusId,
-            @RequestParam(value = "top", defaultValue = "20") int top,
+            @RequestParam(value = "top", defaultValue = "10") int top,
             Model model) {
 
         try {
-            if (top < 10) top = 10;
-            if (top > 100) top = 100;
-
+            
             String countryFilter = (countryId != null && !countryId.trim().isEmpty()) ? countryId : null;
             String statusFilter = (statusId != null && !statusId.trim().isEmpty()) ? statusId : null;
 
@@ -227,7 +226,7 @@ public class AdminDashboardController {
                 statusUuid = UUID.fromString(statusFilter);
             }
 
-            List<com.biblioteca.app.dto.author.AuthorStatsDTO> topAuthors =
+            List<AuthorStatsDTO> topAuthors =
                     authorService.getMostRequestedAuthors(countryUuid, statusUuid, top);
 
             List<Country> countries = countryService.findAll();

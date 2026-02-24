@@ -1,9 +1,7 @@
 package com.biblioteca.app.service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,9 +43,6 @@ public class RentalService {
 
     @Autowired
     private RentalStatusRepository rentalStatusRepository;
-
-    @Autowired
-    private BookCopyService bookCopyService;
 
     @Autowired
     private BookCopyStatusService bookCopyStatusService;
@@ -244,7 +239,7 @@ public class RentalService {
 
         int offset = (currentPage - 1) * pageSize;
 
-        long totalItems = rentalRepository.countMostRequestedBooks(categoryId);
+        //long totalItems = rentalRepository.countMostRequestedBooks(categoryId);
 
         List<BookMostRequestedProjection> projections = rentalRepository.findMostRequestedBooks(
                 categoryId, pageSize, offset);
@@ -258,7 +253,7 @@ public class RentalService {
             items.forEach(item -> item.setPopularityPercentage(maxRentals));
         }
 
-        return new PagedResult<>(items, currentPage, pageSize, (int) totalItems);
+        return new PagedResult<>(items, currentPage, pageSize, pageSize);
     }
 
     // ========= CONVERSIÓN DTOs =========

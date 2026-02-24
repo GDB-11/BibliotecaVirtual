@@ -63,10 +63,9 @@
                         <div class="col-md-3">
                             <label class="form-label">Top</label>
                             <select class="form-select" name="top">
+                                <option value="5" th:selected="${topValue == 5}">Top 5</option>
                                 <option value="10" th:selected="${topValue == 10}">Top 10</option>
                                 <option value="20" th:selected="${topValue == 20}">Top 20</option>
-                                <option value="50" th:selected="${topValue == 50}">Top 50</option>
-                                <option value="100" th:selected="${topValue == 100}">Top 100</option>
                             </select>
                         </div>
                         <div class="col-md-3">
