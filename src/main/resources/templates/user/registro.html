@@ -1,176 +1,579 @@
+<!-- src/main/resources/templates/user/registro.html -->
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Registro Usuario - Biblioteca Virtual</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuenta — Biblioteca Virtual</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
+        /* ─── Tokens ──────────────────────────────────────── */
         :root {
-            --primary-start: #2ecc71;
-            --primary-end: #1abc9c;
+            --ink:       #1c1714;
+            --parchment: #f9f5ef;
+            --cream:     #f3ede3;
+            --sienna:    #8b4513;
+            --gold:      #c8941a;
+            --gold-lt:   #e8b84b;
+            --moss:      #3d6b4f;
+            --moss-lt:   #5a9e72;
+            --slate:     #5a6472;
+            --border:    rgba(139, 69, 19, 0.15);
+            --shadow-lg: 0 20px 60px rgba(28, 23, 20, 0.18);
         }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8f0fe 100%);
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--ink);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 2rem 1rem;
+            background-image:
+                radial-gradient(ellipse at 15% 25%, rgba(200, 148, 26, 0.12) 0%, transparent 45%),
+                radial-gradient(ellipse at 85% 75%, rgba(61, 107, 79, 0.10) 0%, transparent 45%);
+            position: relative;
+            overflow: hidden;
         }
-        .register-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(46, 204, 113, 0.3);
-            max-width: 500px;
+
+        /* Decorative quote marks */
+        body::before,
+        body::after {
+            font-family: 'Playfair Display', serif;
+            font-size: 28rem;
+            color: rgba(255,255,255,0.025);
+            position: absolute;
+            line-height: 1;
+            pointer-events: none;
+            user-select: none;
+        }
+        body::before { content: '\201C'; top: -4rem; left: -2rem; }
+        body::after  { content: '\201D'; bottom: -8rem; right: -2rem; }
+
+        /* ─── Card ───────────────────────────────────────── */
+        .register-card {
+            background: var(--parchment);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(200,148,26,0.12);
+            max-width: 980px;
             width: 100%;
-            padding: 40px;
-            animation: slideIn 0.5s ease-out;
+            overflow: hidden;
+            display: flex;
+            animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(24px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0)   scale(1); }
         }
-        .register-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .register-header i {
-            font-size: 60px;
-            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .register-header h2 {
-            color: #2c3e50;
-            font-weight: bold;
-        }
-        .form-label {
-            color: #34495e;
-            font-weight: 500;
-        }
-        .form-control {
-            border: 2px solid #ecf0f1;
-            border-radius: 12px;
-            padding: 12px 15px;
-            transition: all 0.3s ease;
-        }
-        .form-control:focus {
-            border-color: var(--primary-start);
-            box-shadow: 0 0 0 0.2rem rgba(46, 204, 113, 0.25);
-        }
-        .btn-register {
-            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
-            border: none;
+
+        /* ─── Left Panel ─────────────────────────────────── */
+        .register-left {
+            background: var(--ink);
             color: white;
-            padding: 14px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            width: 100%;
-            margin-top: 20px;
-            transition: all 0.3s ease;
+            width: 42%;
+            flex-shrink: 0;
+            padding: 3.5rem 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
         }
-        .btn-register:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(46, 204, 113, 0.4);
+
+        .register-left::before {
+            content: '';
+            position: absolute;
+            top: -80px; left: -80px;
+            width: 280px; height: 280px;
+            background: radial-gradient(circle, rgba(200,148,26,0.18) 0%, transparent 70%);
+            border-radius: 50%;
         }
+        .register-left::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; right: -60px;
+            width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(61,107,79,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .left-top  { position: relative; z-index: 1; }
+        .left-bottom { position: relative; z-index: 1; }
+
+        /* Brand */
+        .brand-mark {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 3rem;
+        }
+        .brand-icon {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, var(--gold), var(--sienna));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: white; flex-shrink: 0;
+        }
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem; font-weight: 700; color: var(--gold-lt); line-height: 1.1;
+        }
+        .brand-sub {
+            font-size: 0.7rem; color: rgba(255,255,255,0.35);
+            letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;
+        }
+
+        /* Headline */
+        .left-headline {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem; font-weight: 700; color: white;
+            line-height: 1.25; margin-bottom: 1rem;
+        }
+        .left-headline em { font-style: italic; color: var(--gold-lt); }
+        .left-desc {
+            font-size: 0.875rem; color: rgba(255,255,255,0.45);
+            line-height: 1.65; margin-bottom: 2rem;
+        }
+
+        /* Steps on the left */
+        .step-list {
+            list-style: none; padding: 0; margin: 0;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .step-list li {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.82rem; color: rgba(255,255,255,0.55);
+        }
+        .step-list .sl-num {
+            width: 26px; height: 26px;
+            background: rgba(200,148,26,0.15);
+            border: 1px solid rgba(200,148,26,0.3);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 700;
+            color: var(--gold-lt); flex-shrink: 0;
+        }
+
+        /* Login link */
         .login-link {
-            margin-top: 25px;
+            font-size: 0.75rem; color: rgba(255,255,255,0.25);
+            text-decoration: none; transition: color 0.2s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .login-link:hover { color: rgba(255,255,255,0.55); }
+
+        /* ─── Right Panel ────────────────────────────────── */
+        .register-right {
+            flex: 1;
+            padding: 3.5rem 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: var(--parchment);
+            overflow-y: auto;
+        }
+
+        .form-eyebrow {
+            font-size: 0.7rem; font-weight: 600;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--gold); margin-bottom: 0.5rem;
+        }
+        .form-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem; font-weight: 700;
+            color: var(--ink); margin-bottom: 0.35rem;
+        }
+        .form-subtitle {
+            font-size: 0.875rem; color: var(--slate); margin-bottom: 1.75rem;
+        }
+
+        /* ─── Alerts ─────────────────────────────────────── */
+        .bv-alert {
+            border-radius: 10px; border: none;
+            padding: 12px 16px; font-size: 0.85rem;
+            display: flex; align-items: center; gap: 9px;
+            margin-bottom: 1.5rem;
+            animation: slideDown 0.3s ease-out both;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .bv-alert.danger {
+            background: rgba(192,57,43,0.08);
+            border-left: 3px solid #c0392b; color: #c0392b;
+        }
+        .bv-alert.success {
+            background: rgba(61,107,79,0.08);
+            border-left: 3px solid var(--moss); color: var(--moss);
+        }
+
+        /* ─── Field ──────────────────────────────────────── */
+        .field-label {
+            font-size: 0.75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--slate); margin-bottom: 6px; display: block;
+        }
+        .input-wrap { margin-bottom: 1.1rem; }
+        .row-wrap {
+            position: relative;
+            display: flex; align-items: center;
+        }
+        .row-wrap input {
+            width: 100%;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 14px 11px 40px;
+            font-size: 0.9rem;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--ink);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .row-wrap input::placeholder { color: #b8aca0; }
+        .row-wrap input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(200,148,26,0.12);
+        }
+        .row-wrap input.is-invalid {
+            border-color: #c0392b;
+            box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
+        }
+        .row-wrap input.is-valid {
+            border-color: var(--moss);
+            box-shadow: 0 0 0 3px rgba(61,107,79,0.1);
+        }
+        .field-icon {
+            position: absolute; left: 14px;
+            color: var(--slate); font-size: 0.95rem;
+            transition: color 0.2s; pointer-events: none;
+        }
+        .row-wrap input:focus ~ .field-icon { color: var(--gold); }
+
+        /* Password strength bar */
+        .strength-bar-wrap {
+            height: 3px; background: var(--border);
+            border-radius: 2px; margin-top: 6px; overflow: hidden;
+        }
+        .strength-bar {
+            height: 100%; width: 0%;
+            border-radius: 2px;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+        .strength-hint {
+            font-size: 0.7rem; color: var(--slate); margin-top: 4px;
+        }
+
+        /* Password match indicator */
+        .match-hint {
+            font-size: 0.7rem; margin-top: 4px;
+            display: flex; align-items: center; gap: 5px;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .match-hint.show { opacity: 1; }
+        .match-hint.ok   { color: var(--moss); }
+        .match-hint.fail { color: #c0392b; }
+
+        /* Terms check */
+        .terms-row {
+            background: var(--cream); border: 1px solid var(--border);
+            border-radius: 10px; padding: 13px 16px;
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 1.25rem;
+        }
+        .terms-check { border-color: var(--border); cursor: pointer; flex-shrink: 0; }
+        .terms-check:checked { background-color: var(--gold); border-color: var(--gold); }
+        .terms-check:focus { box-shadow: 0 0 0 3px rgba(200,148,26,0.15); }
+        .terms-label {
+            font-size: 0.83rem; color: var(--slate); cursor: pointer; margin: 0;
+        }
+        .terms-label a {
+            color: var(--gold); font-weight: 600; text-decoration: none; transition: color 0.2s;
+        }
+        .terms-label a:hover { color: var(--sienna); }
+
+        /* ─── Submit ─────────────────────────────────────── */
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--gold), #a07010);
+            color: white; border: none; border-radius: 10px;
+            padding: 13px; font-size: 0.95rem; font-weight: 600;
+            font-family: 'DM Sans', sans-serif; letter-spacing: 0.02em;
+            cursor: pointer; transition: all 0.25s ease;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(200,148,26,0.4);
+        }
+        .btn-submit:disabled {
+            opacity: 0.4; cursor: not-allowed;
+            background: rgba(90,100,114,0.15); color: var(--slate);
+            box-shadow: none; transform: none;
+        }
+
+        /* ─── Form footer ────────────────────────────────── */
+        .form-footer {
+            margin-top: 1.5rem; padding-top: 1.25rem;
+            border-top: 1px solid var(--border);
             text-align: center;
+            font-size: 0.85rem; color: var(--slate);
         }
-        .login-link a {
-            color: var(--primary-start);
-            text-decoration: none;
-            font-weight: 500;
+        .form-footer a {
+            color: var(--sienna); font-weight: 600;
+            text-decoration: none; transition: color 0.2s;
         }
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-        .alert {
-            border-radius: 12px;
-            border: none;
-            padding: 15px;
-            margin-bottom: 20px;
+        .form-footer a:hover { color: var(--gold); }
+
+        /* ─── Responsive ─────────────────────────────────── */
+        @media (max-width: 768px) {
+            .register-card { flex-direction: column; }
+            .register-left { width: 100%; padding: 2.5rem 2rem; }
+            .left-headline { font-size: 1.5rem; }
+            .register-right { padding: 2.5rem 2rem; }
+            body::before, body::after { display: none; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="register-container">
-            <div class="register-header">
-                <i class="bi bi-person-plus"></i>
-                <h2>Crear Cuenta</h2>
-                <p class="text-muted">Regístrate para acceder a la biblioteca</p>
+
+<div class="register-card">
+
+    <!-- ── Left Panel ── -->
+    <div class="register-left">
+        <div class="left-top">
+            <div class="brand-mark">
+                <div class="brand-icon"><i class="bi bi-book-half"></i></div>
+                <div>
+                    <div class="brand-name">Biblioteca Virtual</div>
+                    <div class="brand-sub">Portal del Lector</div>
+                </div>
             </div>
 
-            <!-- Mensajes de error/success -->
-            <div th:if="${param.error}" class="alert alert-danger">
-                <i class="bi bi-exclamation-triangle me-2"></i>
-                Error en el registro. Intenta nuevamente.
-            </div>
+            <h2 class="left-headline">
+                Tu próxima<br>gran <em>lectura</em><br>te espera.
+            </h2>
+            <p class="left-desc">
+                Crea tu cuenta en segundos y accede al catálogo completo de nuestra biblioteca digital.
+            </p>
 
-            <div th:if="${param.success}" class="alert alert-success">
-                <i class="bi bi-check-circle me-2"></i>
-                Registro exitoso. Por favor inicia sesión.
-            </div>
+            <ul class="step-list">
+                <li>
+                    <span class="sl-num">1</span>
+                    Completa tus datos de registro
+                </li>
+                <li>
+                    <span class="sl-num">2</span>
+                    Inicia sesión con tu cuenta
+                </li>
+                <li>
+                    <span class="sl-num">3</span>
+                    Explora y alquila tus libros favoritos
+                </li>
+            </ul>
+        </div>
 
-            <!-- Formulario de registro -->
-            <form th:action="@{/user/registro}" method="post">
-                <div class="mb-3">
-                    <label class="form-label">
-                        <i class="bi bi-envelope me-2"></i>Email
-                    </label>
-                    <input type="email" class="form-control" name="email" 
-                           placeholder="usuario@email.com" required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">
-                        <i class="bi bi-lock me-2"></i>Contraseña
-                    </label>
-                    <input type="password" class="form-control" name="password" 
-                           placeholder="Mínimo 6 caracteres" required minlength="6">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">
-                        <i class="bi bi-lock me-2"></i>Confirmar Contraseña
-                    </label>
-                    <input type="password" class="form-control" name="confirmPassword" 
-                           placeholder="Repite tu contraseña" required minlength="6">
-                </div>
-
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="terms" required>
-                    <label class="form-check-label" for="terms">
-                        Acepto los <a href="#">términos y condiciones</a>
-                    </label>
-                </div>
-
-                <button type="submit" class="btn-register">
-                    <i class="bi bi-check-circle"></i> Registrarse
-                </button>
-            </form>
-
-            <!-- Enlace a login -->
-            <div class="login-link">
-                ¿Ya tienes cuenta? 
-                <a th:href="@{/user/login}">Inicia sesión aquí</a>
-            </div>
+        <div class="left-bottom mt-4">
+            <a th:href="@{/login}" href="#" class="login-link">
+                <i class="bi bi-box-arrow-in-right"></i>
+                ¿Ya tienes cuenta? Inicia sesión
+            </a>
         </div>
     </div>
 
-    <script>
-        // Validación simple de contraseñas
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const password = document.querySelector('input[name="password"]').value;
-            const confirm = document.querySelector('input[name="confirmPassword"]').value;
-            
-            if (password !== confirm) {
-                e.preventDefault();
-                alert('Las contraseñas no coinciden');
-            }
-        });
-    </script>
+    <!-- ── Right Panel ── -->
+    <div class="register-right">
+
+        <p class="form-eyebrow"><i class="bi bi-person-plus me-1"></i> Nueva cuenta</p>
+        <h1 class="form-title">Crear Cuenta</h1>
+        <p class="form-subtitle">Completa los datos para registrarte en la biblioteca.</p>
+
+        <!-- Alerts -->
+        <div th:if="${param.error}" class="bv-alert danger">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            Error en el registro. Por favor, inténtalo de nuevo.
+        </div>
+        <div th:if="${param.success}" class="bv-alert success">
+            <i class="bi bi-check-circle-fill"></i>
+            ¡Registro exitoso! Ya puedes iniciar sesión.
+        </div>
+
+        <!-- Form -->
+        <form th:action="@{/user/registro}" method="post" id="registerForm" novalidate>
+
+            <div class="input-wrap">
+                <label class="field-label" for="email">Correo electrónico</label>
+                <div class="row-wrap">
+                    <input type="email" id="email" name="email"
+                           placeholder="usuario@correo.com"
+                           autocomplete="email" required>
+                    <i class="bi bi-envelope field-icon"></i>
+                </div>
+            </div>
+
+            <div class="input-wrap">
+                <label class="field-label" for="password">Contraseña</label>
+                <div class="row-wrap">
+                    <input type="password" id="password" name="password"
+                           placeholder="Mínimo 6 caracteres"
+                           autocomplete="new-password"
+                           required minlength="6">
+                    <i class="bi bi-key field-icon"></i>
+                </div>
+                <div class="strength-bar-wrap">
+                    <div class="strength-bar" id="strengthBar"></div>
+                </div>
+                <p class="strength-hint" id="strengthHint">Introduce una contraseña</p>
+            </div>
+
+            <div class="input-wrap">
+                <label class="field-label" for="confirmPassword">Confirmar contraseña</label>
+                <div class="row-wrap">
+                    <input type="password" id="confirmPassword" name="confirmPassword"
+                           placeholder="Repite tu contraseña"
+                           autocomplete="new-password"
+                           required minlength="6">
+                    <i class="bi bi-key field-icon"></i>
+                </div>
+                <p class="match-hint" id="matchHint">
+                    <i class="bi bi-check-circle-fill" id="matchIcon"></i>
+                    <span id="matchText"></span>
+                </p>
+            </div>
+
+            <div class="terms-row">
+                <input class="form-check-input terms-check" type="checkbox" id="terms" required>
+                <label class="terms-label" for="terms">
+                    Acepto los
+                    <a href="#">términos y condiciones</a>
+                    de uso del servicio
+                </label>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn" disabled>
+                <i class="bi bi-person-check-fill"></i>
+                Crear mi cuenta
+            </button>
+
+        </form>
+
+        <div class="form-footer">
+            ¿Ya tienes cuenta?
+            <a th:href="@{/login}" href="#">Inicia sesión aquí</a>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const passwordInput  = document.getElementById('password');
+    const confirmInput   = document.getElementById('confirmPassword');
+    const strengthBar    = document.getElementById('strengthBar');
+    const strengthHint   = document.getElementById('strengthHint');
+    const matchHint      = document.getElementById('matchHint');
+    const matchIcon      = document.getElementById('matchIcon');
+    const matchText      = document.getElementById('matchText');
+    const termsCheck     = document.getElementById('terms');
+    const submitBtn      = document.getElementById('submitBtn');
+
+    /* ── Password strength ── */
+    passwordInput.addEventListener('input', function () {
+        const val = this.value;
+        let score = 0;
+        if (val.length >= 6)  score++;
+        if (val.length >= 10) score++;
+        if (/[A-Z]/.test(val)) score++;
+        if (/[0-9]/.test(val)) score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+
+        const levels = [
+            { pct: '0%',   color: 'transparent', label: 'Introduce una contraseña' },
+            { pct: '25%',  color: '#e74c3c',      label: 'Contraseña débil' },
+            { pct: '50%',  color: '#e67e22',      label: 'Contraseña regular' },
+            { pct: '75%',  color: var_gold(),      label: 'Contraseña buena' },
+            { pct: '100%', color: '#3d6b4f',      label: 'Contraseña fuerte' },
+        ];
+
+        const lvl = Math.min(score, 4);
+        strengthBar.style.width      = levels[lvl].pct;
+        strengthBar.style.background = levels[lvl].color;
+        strengthHint.textContent     = levels[lvl].label;
+
+        checkMatch();
+        checkSubmit();
+    });
+
+    /* ── Password match ── */
+    confirmInput.addEventListener('input', function () {
+        checkMatch();
+        checkSubmit();
+    });
+
+    function checkMatch() {
+        const pass = passwordInput.value;
+        const conf = confirmInput.value;
+        if (!conf) {
+            matchHint.classList.remove('show');
+            confirmInput.classList.remove('is-valid', 'is-invalid');
+            return;
+        }
+        matchHint.classList.add('show');
+        if (pass === conf) {
+            matchHint.className = 'match-hint show ok';
+            matchIcon.className = 'bi bi-check-circle-fill';
+            matchText.textContent = 'Las contraseñas coinciden';
+            confirmInput.classList.remove('is-invalid');
+            confirmInput.classList.add('is-valid');
+        } else {
+            matchHint.className = 'match-hint show fail';
+            matchIcon.className = 'bi bi-x-circle-fill';
+            matchText.textContent = 'Las contraseñas no coinciden';
+            confirmInput.classList.remove('is-valid');
+            confirmInput.classList.add('is-invalid');
+        }
+    }
+
+    /* ── Terms ── */
+    termsCheck.addEventListener('change', checkSubmit);
+
+    /* ── Enable submit ── */
+    function checkSubmit() {
+        const pass = passwordInput.value;
+        const conf = confirmInput.value;
+        const ok = pass.length >= 6 && pass === conf && termsCheck.checked;
+        submitBtn.disabled = !ok;
+    }
+
+    /* ── Form submit guard ── */
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+        const pass = passwordInput.value;
+        const conf = confirmInput.value;
+        if (pass !== conf) {
+            e.preventDefault();
+            confirmInput.classList.add('is-invalid');
+            confirmInput.focus();
+        }
+    });
+
+    /* Helper: read CSS var at runtime */
+    function var_gold() {
+        return getComputedStyle(document.documentElement)
+            .getPropertyValue('--gold').trim() || '#c8941a';
+    }
+</script>
 </body>
 </html>
