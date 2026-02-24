@@ -1,7 +1,9 @@
 package com.biblioteca.app.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -180,49 +182,31 @@ public class RentalService {
      * Busca alquileres activos con filtros y paginación
      */
     public PagedResult<Rental> findActiveRentals(
-            int page,
-            int size,
-            String search,
-            String statusFilter,
-            int dueSoonDays,
-            String dateFrom,
-            String dateTo) {
+        int page, int size, String search,
+        String statusFilter, int dueSoonDays,
+        String dateFrom, String dateTo) {
 
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        LocalDateTime dateFromParsed = null;
-        LocalDateTime dateToParsed = null;
+        LocalDateTime dateFromParsed = (dateFrom != null && !dateFrom.isEmpty())
+                ? LocalDateTime.parse(dateFrom + "T00:00:00") : null;
+        LocalDateTime dateToParsed = (dateTo != null && !dateTo.isEmpty())
+                ? LocalDateTime.parse(dateTo + "T23:59:59") : null;
 
-        if (dateFrom != null && !dateFrom.isEmpty()) {
-            dateFromParsed = LocalDateTime.parse(dateFrom + "T00:00:00");
-        }
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime dueSoonThreshold = now.plusDays(dueSoonDays);
 
-        if (dateTo != null && !dateTo.isEmpty()) {
-            dateToParsed = LocalDateTime.parse(dateTo + "T23:59:59");
-        }
+        String normalizedStatus = (statusFilter != null && !statusFilter.isEmpty()) 
+                ? statusFilter : null;
 
         Page<Rental> rentalsPage = rentalRepository.findActiveRentalsWithFilters(
-                search, dateFromParsed, dateToParsed, pageable);
+                search, dateFromParsed, dateToParsed,
+                normalizedStatus, now, dueSoonThreshold, pageable);
 
-        List<Rental> filteredRentals = rentalsPage.getContent();
-
-        // Filtrar por estado si es necesario
-        if (statusFilter != null && !statusFilter.isEmpty()) {
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime dueSoonThreshold = now.plusDays(dueSoonDays);
-
-            if ("vencer".equals(statusFilter)) {
-                filteredRentals = filteredRentals.stream()
-                        .filter(r -> r.getDueDate().isAfter(now) && r.getDueDate().isBefore(dueSoonThreshold))
-                        .collect(Collectors.toList());
-            } else if ("vencido".equals(statusFilter)) {
-                filteredRentals = filteredRentals.stream()
-                        .filter(r -> r.getDueDate().isBefore(now))
-                        .collect(Collectors.toList());
-            }
-        }
-
-        return PageMapper.toPagedResult(filteredRentals, rentalsPage.getTotalElements(), page, size);
+        return PageMapper.toPagedResult(
+                rentalsPage.getContent(),
+                rentalsPage.getTotalElements(),
+                page, size);
     }
 
     public int getOnTimeRentalsCount(int dueSoonDays) {

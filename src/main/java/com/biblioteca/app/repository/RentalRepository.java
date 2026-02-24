@@ -119,18 +119,26 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
         WHERE r.rentalStatus.rentalStatusName = 'En Proceso'
         AND r.returnDate IS NULL
         AND (:search IS NULL OR :search = '' OR 
-             LOWER(r.bookCopy.book.title) LIKE LOWER(CONCAT('%', :search, '%')) OR
-             LOWER(r.bookCopy.book.author.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR
-             LOWER(r.user.email) LIKE LOWER(CONCAT('%', :search, '%')) OR
-             CAST(r.rentalId AS string) LIKE CONCAT('%', :search, '%'))
+            LOWER(r.bookCopy.book.title) LIKE LOWER(CONCAT('%', :search, '%')) OR
+            LOWER(r.bookCopy.book.author.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR
+            LOWER(r.user.email) LIKE LOWER(CONCAT('%', :search, '%')) OR
+            CAST(r.rentalId AS string) LIKE CONCAT('%', :search, '%'))
         AND (:dateFrom IS NULL OR r.rentalDate >= :dateFrom)
         AND (:dateTo IS NULL OR r.rentalDate <= :dateTo)
+        AND (
+            :statusFilter IS NULL OR :statusFilter = '' OR
+            (:statusFilter = 'vencido' AND r.dueDate < :now) OR
+            (:statusFilter = 'vencer' AND r.dueDate >= :now AND r.dueDate < :dueSoonThreshold)
+        )
         ORDER BY r.dueDate ASC
     """)
     Page<Rental> findActiveRentalsWithFilters(
             @Param("search") String search,
             @Param("dateFrom") LocalDateTime dateFrom,
             @Param("dateTo") LocalDateTime dateTo,
+            @Param("statusFilter") String statusFilter,
+            @Param("now") LocalDateTime now,
+            @Param("dueSoonThreshold") LocalDateTime dueSoonThreshold,
             Pageable pageable
     );
 
