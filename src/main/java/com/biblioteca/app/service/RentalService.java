@@ -308,50 +308,37 @@ public class RentalService {
 
     @Transactional
     public Rental createRental(User user, BookCopy bookCopy) {
-        System.out.println("=== CREANDO ALQUILER EN RENTALSERVICE ===");
 
-        try {
-            if (!"Disponible".equals(bookCopy.getBookCopyStatus().getBookCopyStatusName())) {
-                throw new IllegalStateException("El ejemplar no está disponible. Estado actual: "
-                        + bookCopy.getBookCopyStatus().getBookCopyStatusName());
-            }
-
-            BookCopyStatus alquiladoStatus = bookCopyStatusService.findByName("Alquilado")
-                    .orElseThrow(() -> new RuntimeException("Estado 'Alquilado' no encontrado"));
-
-            BookCopy freshCopy = bookCopyRepository.findById(bookCopy.getBookCopyId())
-                    .orElseThrow(() -> new RuntimeException("Ejemplar no encontrado"));
-
-            freshCopy.setBookCopyStatus(alquiladoStatus);
-            BookCopy updatedCopy = bookCopyRepository.save(freshCopy);
-            bookCopyRepository.flush();
-            System.out.println("✓ Ejemplar actualizado a estado: Alquilado");
-
-            RentalStatus status = rentalStatusRepository.findByRentalStatusName("En Proceso")
-                    .orElseThrow(() -> new RuntimeException("Estado de alquiler 'En Proceso' no encontrado"));
-
-            Rental rental = new Rental();
-            rental.setRentalId(UUID.randomUUID());
-            rental.setUser(user);
-            rental.setBookCopy(updatedCopy);
-            rental.setRentalDate(LocalDateTime.now());
-            rental.setDueDate(LocalDateTime.now().plusDays(7));
-            rental.setRentalDays(7);
-            rental.setDailyRate(BigDecimal.valueOf(5.00));
-            rental.setTotalCost(BigDecimal.valueOf(35.00));
-            rental.setRentalStatus(status);
-
-            Rental savedRental = rentalRepository.save(rental);
-            rentalRepository.flush();
-            System.out.println("✓ Alquiler guardado con ID: " + savedRental.getRentalId());
-
-            return savedRental;
-
-        } catch (Exception e) {
-            System.out.println("✗ ERROR en createRental: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+        if (!"Disponible".equals(bookCopy.getBookCopyStatus().getBookCopyStatusName())) {
+            throw new IllegalStateException("El ejemplar no está disponible");
         }
+        
+        RentalStatus enProcesoStatus = rentalStatusRepository.findByRentalStatusName("En Proceso")
+            .orElseThrow(() -> new RuntimeException("Estado 'En Proceso' no encontrado"));
+        
+        BookCopyStatus alquiladoStatus = bookCopyStatusService.findByName("Alquilado")
+            .orElseThrow(() -> new RuntimeException("Estado 'Alquilado' no encontrado"));
+        
+        LocalDateTime rentalDate = LocalDateTime.now();
+        LocalDateTime dueDate = rentalDate.plusDays(5);
+        BigDecimal dailyRate = BigDecimal.valueOf(getDefaultDailyRate());
+        BigDecimal totalCost = dailyRate.multiply(BigDecimal.valueOf(5));
+        
+        Rental rental = new Rental();
+        rental.setUser(user);
+        rental.setBookCopy(bookCopy);
+        rental.setRentalDate(rentalDate);
+        rental.setDueDate(dueDate);
+        rental.setRentalDays(5);
+        rental.setDailyRate(dailyRate);
+        rental.setTotalCost(totalCost);
+        rental.setRentalStatus(enProcesoStatus);
+        rental.setNotes("Alquiler creado por usuario");
+        
+        bookCopy.setBookCopyStatus(alquiladoStatus);
+        bookCopyRepository.save(bookCopy);
+        
+        return rentalRepository.save(rental);
     }
 
     @Transactional
