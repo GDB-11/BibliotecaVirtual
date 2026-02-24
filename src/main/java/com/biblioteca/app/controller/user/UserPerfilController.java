@@ -1,7 +1,6 @@
 package com.biblioteca.app.controller.user;
 
 import java.security.Principal;
-import java.util.UUID;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

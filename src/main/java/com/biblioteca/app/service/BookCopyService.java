@@ -321,4 +321,6 @@ public class BookCopyService {
     public List<Book> findAvailableBooks() {
         return bookCopyRepository.findDistinctAvailableBooks();
     }
+
+    
 }

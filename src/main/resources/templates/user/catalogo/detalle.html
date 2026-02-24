@@ -1,5 +1,6 @@
+<!-- src/main/resources/templates/user/catalogo/detalle.html -->
 <!DOCTYPE html>
-<html lang="es" 
+<html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{user/layout}">
@@ -7,92 +8,303 @@
     <title th:text="${libro.title}">Detalle del Libro</title>
 </head>
 <body>
-    <div layout:fragment="content">
-        <div class="container py-4">
+<div layout:fragment="content">
+
+    <!-- ── Page Header ── -->
+    <div class="page-header">
+        <div class="container">
             <!-- Breadcrumb -->
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a th:href="@{/user/dashboard}">Inicio</a></li>
-                    <li class="breadcrumb-item"><a th:href="@{/user/catalogo}">Catálogo</a></li>
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb bv-breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/user/dashboard}"><i class="bi bi-house-door me-1"></i>Inicio</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/user/catalogo}">Catálogo</a>
+                    </li>
                     <li class="breadcrumb-item active" th:text="${libro.title}">Libro</li>
                 </ol>
             </nav>
+            <h1 th:text="${libro.title}">Título del Libro</h1>
+            <p class="lead"
+               th:text="${libro.author != null ? libro.author.fullName : 'Autor desconocido'}">
+                Autor
+            </p>
+        </div>
+    </div>
 
-            <div class="row">
-                <div class="col-md-4">
-                    <!-- Portada del libro (placeholder) -->
-                    <div class="card shadow-sm">
-                        <div class="card-body text-center py-5">
-                            <i class="bi bi-book display-1 text-primary"></i>
-                            <p class="text-muted mt-3">Portada no disponible</p>
+    <div class="container pb-5">
+        <div class="row g-4 align-items-start">
+
+            <!-- ── Left: Book Cover Placeholder ── -->
+            <div class="col-md-4 col-lg-3 fade-up fade-up-1">
+                <div class="book-cover-wrap">
+                    <!-- Real cover -->
+                    <div th:if="${libro.coverImageUrl != null and !#strings.isEmpty(libro.coverImageUrl)}"
+                         class="book-cover-inner book-cover-real">
+                        <img th:src="${libro.coverImageUrl}" th:alt="${libro.title}">
+                    </div>
+                    <!-- Fallback placeholder -->
+                    <div th:unless="${libro.coverImageUrl != null and !#strings.isEmpty(libro.coverImageUrl)}"
+                         class="book-cover-inner">
+                        <div class="book-cover-spine"></div>
+                        <div class="book-cover-face">
+                            <i class="bi bi-book-half"></i>
+                            <p class="book-cover-cat"
+                               th:text="${libro.category != null ? libro.category.categoryName : 'Sin categoría'}">
+                                Categoría
+                            </p>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-8">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h1 class="card-title" th:text="${libro.title}">Título</h1>
-                            <h5 class="card-subtitle mb-3 text-muted" th:text="${libro.author != null ? libro.author.fullName : 'Autor desconocido'}">
-                                Autor
-                            </h5>
-
-                            <hr>
-
-                            <div class="row mb-3">
-                                <div class="col-sm-3"><strong>ISBN:</strong></div>
-                                <div class="col-sm-9" th:text="${libro.isbn}">978-3-16-148410-0</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-3"><strong>Categoría:</strong></div>
-                                <div class="col-sm-9" th:text="${libro.category != null ? libro.category.categoryName : 'Sin categoría'}">
-                                    Novela
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-3"><strong>Año:</strong></div>
-                                <div class="col-sm-9" th:text="${libro.publicationYear}">2020</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-3"><strong>Editorial:</strong></div>
-                                <div class="col-sm-9" th:text="${libro.publisher}">Editorial</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-3"><strong>Páginas:</strong></div>
-                                <div class="col-sm-9" th:text="${libro.pages}">300</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-3"><strong>Ejemplares disponibles:</strong></div>
-                                <div class="col-sm-9">
-                                    <span class="badge bg-success fs-6" th:text="${ejemplaresDisponibles}">5</span>
-                                </div>
-                            </div>
-
-                            <hr>
-
-                            <h6>Descripción:</h6>
-                            <p class="text-muted" th:text="${libro.description ?: 'No hay descripción disponible'}">
-                                Descripción del libro...
-                            </p>
-
-                            <div class="mt-4">
-                                <a th:if="${ejemplaresDisponibles > 0}" 
-                                   th:href="@{/user/alquiler/nuevo/{id}(id=${libro.bookId})}" 
-                                   class="btn btn-success btn-lg">
-                                    <i class="bi bi-cart-plus"></i> Alquilar este libro
-                                </a>
-                                <button th:unless="${ejemplaresDisponibles > 0}" 
-                                        class="btn btn-secondary btn-lg" disabled>
-                                    <i class="bi bi-x-circle"></i> No disponible
-                                </button>
-                                <a th:href="@{/user/catalogo}" class="btn btn-outline-secondary btn-lg ms-2">
-                                    <i class="bi bi-arrow-left"></i> Volver al catálogo
-                                </a>
-                            </div>
-                        </div>
+                    <!-- Availability pill -->
+                    <div class="avail-badge" th:if="${ejemplaresDisponibles > 0}">
+                        <i class="bi bi-check-circle-fill me-1"></i>
+                        <span th:text="${ejemplaresDisponibles}">0</span> disponibles
+                    </div>
+                    <div class="avail-badge unavailable" th:unless="${ejemplaresDisponibles > 0}">
+                        <i class="bi bi-x-circle-fill me-1"></i>
+                        No disponible
                     </div>
                 </div>
             </div>
+
+            <!-- ── Right: Book Info ── -->
+            <div class="col-md-8 col-lg-9 fade-up fade-up-2">
+
+                <!-- Meta Grid -->
+                <div class="bv-card mb-4">
+                    <div class="bv-card-header">
+                        <h5><i class="bi bi-info-circle" style="color:var(--gold-lt);"></i> Información del libro</h5>
+                    </div>
+                    <div class="p-4">
+                        <div class="meta-grid">
+                            <div class="meta-item">
+                                <span class="meta-label"><i class="bi bi-upc me-1"></i>ISBN</span>
+                                <span class="meta-value" th:text="${libro.isbn}">—</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label"><i class="bi bi-grid me-1"></i>Categoría</span>
+                                <span class="meta-value"
+                                      th:text="${libro.category != null ? libro.category.categoryName : 'Sin categoría'}">
+                                    —
+                                </span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label"><i class="bi bi-calendar3 me-1"></i>Año</span>
+                                <span class="meta-value" th:text="${libro.publicationYear}">—</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label"><i class="bi bi-building me-1"></i>Editorial</span>
+                                <span class="meta-value" th:text="${libro.publisher}">—</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label"><i class="bi bi-file-text me-1"></i>Páginas</span>
+                                <span class="meta-value" th:text="${libro.pages}">—</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label"><i class="bi bi-person me-1"></i>Autor</span>
+                                <span class="meta-value"
+                                      th:text="${libro.author != null ? libro.author.fullName : 'Desconocido'}">
+                                    —
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="bv-card mb-4">
+                    <div class="bv-card-header">
+                        <h5><i class="bi bi-text-paragraph" style="color:var(--gold-lt);"></i> Descripción</h5>
+                    </div>
+                    <div class="p-4">
+                        <p class="book-description"
+                           th:text="${libro.description ?: 'No hay descripción disponible para este título.'}">
+                            Descripción...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CTA -->
+                <div class="cta-row fade-up fade-up-3">
+                    <!-- Available -->
+                    <a th:if="${ejemplaresDisponibles > 0}"
+                       th:href="@{/user/alquiler/nuevo/{id}(id=${libro.bookId})}"
+                       class="btn-bv-primary btn-lg-bv">
+                        <i class="bi bi-cart-plus"></i>
+                        Alquilar este libro
+                    </a>
+
+                    <!-- Not available -->
+                    <button th:unless="${ejemplaresDisponibles > 0}"
+                            class="btn-bv-disabled btn-lg-bv" disabled>
+                        <i class="bi bi-x-circle"></i>
+                        Sin ejemplares disponibles
+                    </button>
+
+                    <!-- Back -->
+                    <a th:href="@{/user/catalogo}" class="btn-bv-ghost btn-lg-bv">
+                        <i class="bi bi-arrow-left"></i>
+                        Volver al catálogo
+                    </a>
+                </div>
+
+            </div>
         </div>
-    </div>
+    </div><!-- /container -->
+</div><!-- /fragment -->
 </body>
 </html>
+
+<!-- ── Detalle-specific styles ── -->
+<th:block layout:fragment="extra-css">
+<style>
+    /* ── Breadcrumb ── */
+    .bv-breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+    }
+    .bv-breadcrumb .breadcrumb-item a {
+        color: rgba(255,255,255,0.5);
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: color 0.2s;
+    }
+    .bv-breadcrumb .breadcrumb-item a:hover { color: var(--gold-lt); }
+    .bv-breadcrumb .breadcrumb-item.active {
+        color: rgba(255,255,255,0.75);
+        font-size: 0.8rem;
+    }
+    .bv-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255,255,255,0.25);
+    }
+
+    /* ── Book Cover ── */
+    .book-cover-wrap {
+        position: sticky;
+        top: 88px;
+    }
+    .book-cover-inner {
+        border-radius: 16px;
+        overflow: hidden;
+        display: flex;
+        height: 280px;
+        box-shadow: var(--shadow-lg);
+        margin-bottom: 12px;
+    }
+    /* Real cover: full image */
+    .book-cover-inner.book-cover-real {
+        display: block;
+    }
+    .book-cover-inner.book-cover-real img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .book-cover-spine {
+        width: 18px;
+        background: linear-gradient(180deg, var(--gold), var(--sienna));
+        flex-shrink: 0;
+    }
+    .book-cover-face {
+        flex: 1;
+        background: linear-gradient(160deg, var(--ink) 0%, #2d2520 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+    .book-cover-face i {
+        font-size: 4rem;
+        color: rgba(200,148,26,0.4);
+    }
+    .book-cover-cat {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.3);
+        margin: 0;
+    }
+
+    /* Availability pill */
+    .avail-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(61,107,79,0.1);
+        border: 1px solid rgba(61,107,79,0.25);
+        color: var(--moss);
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 8px 14px;
+        border-radius: 10px;
+    }
+    .avail-badge.unavailable {
+        background: rgba(192,57,43,0.08);
+        border-color: rgba(192,57,43,0.2);
+        color: #c0392b;
+    }
+
+    /* ── Meta Grid ── */
+    .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.25rem 2rem;
+    }
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .meta-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--slate);
+    }
+    .meta-value {
+        font-size: 0.925rem;
+        color: var(--ink);
+        font-weight: 500;
+    }
+
+    /* ── Description ── */
+    .book-description {
+        font-size: 0.95rem;
+        line-height: 1.75;
+        color: #5a524a;
+        margin: 0;
+    }
+
+    /* ── CTA Row ── */
+    .cta-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .btn-lg-bv {
+        padding: 12px 26px !important;
+        font-size: 0.95rem !important;
+    }
+    .btn-bv-disabled {
+        background: rgba(90,100,114,0.1);
+        color: var(--slate);
+        border: 1px solid rgba(90,100,114,0.2);
+        padding: 9px 22px;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+</style>
+</th:block>

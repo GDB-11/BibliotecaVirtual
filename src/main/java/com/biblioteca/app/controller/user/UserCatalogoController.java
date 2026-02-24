@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.biblioteca.app.entity.Book;
+import com.biblioteca.app.service.BookCopyService;
 import com.biblioteca.app.service.BookService;
 import com.biblioteca.app.service.CategoryService;
 
@@ -21,10 +22,12 @@ import com.biblioteca.app.service.CategoryService;
 public class UserCatalogoController {
     
     private final BookService bookService;
+    private final BookCopyService bookCopyService;
     private final CategoryService categoryService;
     
-    public UserCatalogoController(BookService bookService, CategoryService categoryService) {
+    public UserCatalogoController(BookService bookService, BookCopyService bookCopyService, CategoryService categoryService) {
         this.bookService = bookService;
+        this.bookCopyService = bookCopyService;
         this.categoryService = categoryService;
     }
     
@@ -56,7 +59,7 @@ public class UserCatalogoController {
             .orElseThrow(() -> new IllegalArgumentException("Libro no encontrado"));
         
         model.addAttribute("libro", libro);
-        model.addAttribute("ejemplaresDisponibles", bookService.countAvailableCopies(id));
+        model.addAttribute("ejemplaresDisponibles", bookCopyService.countAvailableCopiesByBookId(id));
         
         return "user/catalogo/detalle";
     }

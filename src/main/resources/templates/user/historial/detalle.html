@@ -1,0 +1,367 @@
+<!-- src/main/resources/templates/user/historial/detalle.html -->
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout}">
+<head>
+    <title>Detalle de Alquiler</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- ── Page Header ── -->
+    <div class="page-header">
+        <div class="container">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb bv-breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/user/dashboard}"><i class="bi bi-house-door me-1"></i>Inicio</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/user/historial}">Mi Historial</a>
+                    </li>
+                    <li class="breadcrumb-item active">Detalle de Alquiler</li>
+                </ol>
+            </nav>
+            <p class="text-uppercase fw-semibold mb-2"
+               style="font-size:0.72rem; letter-spacing:0.12em; color:rgba(232,184,75,0.8);">
+                <i class="bi bi-receipt me-1"></i> Alquiler
+                <code style="background:rgba(200,148,26,0.15); color:var(--gold-lt); padding:2px 8px;
+                             border-radius:5px; font-size:0.7rem; letter-spacing:0.05em;"
+                      th:text="'#' + ${#strings.substring(alquiler.rentalId.toString(), 0, 8)}">
+                    #xxxxxxxx
+                </code>
+            </p>
+            <h1>Detalle de Alquiler</h1>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row g-4 align-items-start">
+
+            <!-- ── Left: Book info ── -->
+            <div class="col-lg-4 fade-up fade-up-1">
+
+                <!-- Book cover card -->
+                <div class="bv-card mb-4">
+                    <div class="book-cover-wrap">
+                        <!-- Real cover -->
+                        <div th:if="${alquiler.bookCopy.book.coverImageUrl != null
+                                      and !#strings.isEmpty(alquiler.bookCopy.book.coverImageUrl)}"
+                             class="detail-cover real">
+                            <img th:src="${alquiler.bookCopy.book.coverImageUrl}"
+                                 th:alt="${alquiler.bookCopy.book.title}">
+                        </div>
+                        <!-- Placeholder -->
+                        <div th:unless="${alquiler.bookCopy.book.coverImageUrl != null
+                                         and !#strings.isEmpty(alquiler.bookCopy.book.coverImageUrl)}"
+                             class="detail-cover placeholder">
+                            <div class="detail-spine"></div>
+                            <div class="detail-face">
+                                <i class="bi bi-book-half"></i>
+                                <p th:text="${alquiler.bookCopy.book.category != null
+                                             ? alquiler.bookCopy.book.category.categoryName
+                                             : 'Sin categoría'}">Categoría</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <span class="book-cat mb-2 d-inline-block"
+                              th:text="${alquiler.bookCopy.book.category != null
+                                        ? alquiler.bookCopy.book.category.categoryName
+                                        : 'Sin categoría'}">Categoría</span>
+                        <h4 class="book-det-title"
+                            th:text="${alquiler.bookCopy.book.title}">Título</h4>
+                        <p class="book-det-author">
+                            <i class="bi bi-person me-1"></i>
+                            <span th:text="${alquiler.bookCopy.book.author != null
+                                            ? alquiler.bookCopy.book.author.fullName
+                                            : 'Autor desconocido'}">Autor</span>
+                        </p>
+                        <div class="mt-3">
+                            <a th:href="@{/user/catalogo/{id}(id=${alquiler.bookCopy.book.bookId})}"
+                               class="btn-bv-ghost w-100" style="justify-content:center; font-size:0.8rem;">
+                                <i class="bi bi-arrow-right-circle"></i> Ver libro en catálogo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status card -->
+                <div class="bv-card">
+                    <div class="bv-card-header">
+                        <h5><i class="bi bi-activity" style="color:var(--gold-lt);"></i> Estado</h5>
+                    </div>
+                    <div class="p-4">
+                        <div class="status-display">
+                            <span th:if="${alquiler.rentalStatus.rentalStatusName == 'En Proceso'}"
+                                  class="status-pill active">
+                                <i class="bi bi-circle-fill pulse"></i> En proceso
+                            </span>
+                            <span th:if="${alquiler.rentalStatus.rentalStatusName == 'Completado'}"
+                                  class="status-pill completed">
+                                <i class="bi bi-check-circle-fill"></i> Completado
+                            </span>
+                            <span th:if="${alquiler.rentalStatus.rentalStatusName == 'Cancelado'}"
+                                  class="status-pill cancelled">
+                                <i class="bi bi-x-circle-fill"></i> Cancelado
+                            </span>
+                        </div>
+
+                        <!-- Overdue warning -->
+                        <div th:if="${alquiler.rentalStatus.rentalStatusName == 'En Proceso'
+                                      and alquiler.dueDate != null
+                                      and alquiler.dueDate.isBefore(#temporals.createNow())}"
+                             class="overdue-alert mt-3">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <span>Este alquiler está vencido. Por favor devuelve el libro a la brevedad.</span>
+                        </div>
+
+                        <!-- Days remaining -->
+                        <div th:if="${alquiler.rentalStatus.rentalStatusName == 'En Proceso'
+                                      and alquiler.dueDate != null
+                                      and !alquiler.dueDate.isBefore(#temporals.createNow())}"
+                             class="days-remaining mt-3">
+                            <i class="bi bi-hourglass-split me-2" style="color:var(--gold);"></i>
+                            Vence el
+                            <strong th:text="${#temporals.format(alquiler.dueDate, 'dd/MM/yyyy')}">—</strong>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── Right: Rental details ── -->
+            <div class="col-lg-8 fade-up fade-up-2">
+
+                <!-- Rental info -->
+                <div class="bv-card mb-4">
+                    <div class="bv-card-header">
+                        <h5><i class="bi bi-info-circle" style="color:var(--gold-lt);"></i> Información del Alquiler</h5>
+                    </div>
+                    <div class="p-4">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="bi bi-hash me-1"></i>ID de Alquiler</span>
+                                <code class="rental-id"
+                                      th:text="${#strings.substring(alquiler.rentalId.toString(), 0, 8)}">—</code>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="bi bi-calendar-event me-1"></i>Fecha de Alquiler</span>
+                                <span class="detail-value"
+                                      th:text="${#temporals.format(alquiler.rentalDate, 'dd/MM/yyyy HH:mm')}">—</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="bi bi-calendar-x me-1"></i>Fecha de Vencimiento</span>
+                                <span class="detail-value"
+                                      th:classappend="${alquiler.rentalStatus.rentalStatusName == 'En Proceso'
+                                                        and alquiler.dueDate != null
+                                                        and alquiler.dueDate.isBefore(#temporals.createNow())} ? 'text-danger fw-semibold' : ''"
+                                      th:text="${alquiler.dueDate != null ? #temporals.format(alquiler.dueDate, 'dd/MM/yyyy HH:mm') : '—'}">—</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="bi bi-calendar-check me-1"></i>Fecha de Devolución</span>
+                                <span class="detail-value"
+                                      th:text="${alquiler.returnDate != null ? #temporals.format(alquiler.returnDate, 'dd/MM/yyyy HH:mm') : '—'}">—</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="bi bi-clock me-1"></i>Días de Alquiler</span>
+                                <span class="detail-value"
+                                      th:text="${alquiler.rentalDays != null ? alquiler.rentalDays + ' días' : '—'}">—</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="bi bi-upc me-1"></i>Ejemplar (código)</span>
+                                <code class="rental-id"
+                                      th:text="${#strings.substring(alquiler.bookCopy.bookCopyId.toString(), 0, 8)}">—</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cost summary -->
+                <div class="bv-card mb-4">
+                    <div class="bv-card-header">
+                        <h5><i class="bi bi-receipt" style="color:var(--gold-lt);"></i> Resumen de Costos</h5>
+                    </div>
+                    <div class="p-4">
+                        <div class="cost-row">
+                            <span class="cost-label">Tarifa diaria</span>
+                            <span class="cost-value"
+                                  th:text="${'$' + #numbers.formatDecimal(alquiler.dailyRate, 1, 2)}">$0.00</span>
+                        </div>
+                        <div class="cost-row">
+                            <span class="cost-label">Días de alquiler</span>
+                            <span class="cost-value"
+                                  th:text="${alquiler.rentalDays != null ? alquiler.rentalDays + ' días' : '—'}">—</span>
+                        </div>
+                        <div class="cost-divider"></div>
+                        <div class="cost-row total">
+                            <span class="cost-label">Total</span>
+                            <span class="cost-total"
+                                  th:text="${'$' + #numbers.formatDecimal(alquiler.totalCost, 1, 2)}">$0.00</span>
+                        </div>
+                        <p class="cost-note" th:if="${alquiler.rentalStatus.rentalStatusName == 'En Proceso'}">
+                            <i class="bi bi-clock me-1" style="color:var(--gold);"></i>
+                            El pago se realiza al momento de devolver el libro.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Notes (if any) -->
+                <div class="bv-card mb-4"
+                     th:if="${alquiler.notes != null and !#strings.isEmpty(alquiler.notes)}">
+                    <div class="bv-card-header">
+                        <h5><i class="bi bi-chat-left-text" style="color:var(--gold-lt);"></i> Notas</h5>
+                    </div>
+                    <div class="p-4">
+                        <p style="font-size:0.9rem; color:var(--slate); line-height:1.7; margin:0;"
+                           th:text="${alquiler.notes}">—</p>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex gap-2 flex-wrap fade-up fade-up-3">
+                    <a th:href="@{/user/historial}" class="btn-bv-ghost">
+                        <i class="bi bi-arrow-left"></i> Volver al historial
+                    </a>
+                    <a th:href="@{/user/catalogo/{id}(id=${alquiler.bookCopy.book.bookId})}"
+                       class="btn-bv-primary">
+                        <i class="bi bi-book"></i> Ver libro en catálogo
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div><!-- /container -->
+</div><!-- /fragment -->
+</body>
+</html>
+
+<th:block layout:fragment="extra-css">
+<style>
+    /* ── Breadcrumb ── */
+    .bv-breadcrumb .breadcrumb-item a {
+        color: rgba(255,255,255,0.5); text-decoration:none;
+        font-size:0.8rem; transition:color 0.2s;
+    }
+    .bv-breadcrumb .breadcrumb-item a:hover { color:var(--gold-lt); }
+    .bv-breadcrumb .breadcrumb-item.active { color:rgba(255,255,255,0.75); font-size:0.8rem; }
+    .bv-breadcrumb .breadcrumb-item+.breadcrumb-item::before { color:rgba(255,255,255,0.25); }
+
+    /* ── Book cover in detail ── */
+    .detail-cover {
+        height: 220px;
+        overflow: hidden;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .detail-cover.real img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .detail-cover.placeholder {
+        display: flex;
+        background: linear-gradient(160deg, var(--ink), #2d2520);
+    }
+    .detail-spine {
+        width: 18px;
+        background: linear-gradient(180deg, var(--gold), var(--sienna));
+        flex-shrink: 0;
+    }
+    .detail-face {
+        flex: 1; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; gap: 0.75rem;
+    }
+    .detail-face i { font-size: 3rem; color: rgba(200,148,26,0.35); }
+    .detail-face p {
+        font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em;
+        text-transform: uppercase; color: rgba(255,255,255,0.25); margin: 0;
+    }
+    .book-det-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.1rem; font-weight: 700;
+        color: var(--ink); margin-bottom: 0.3rem; line-height: 1.35;
+    }
+    .book-det-author { font-size: 0.85rem; color: var(--slate); margin-bottom: 0; }
+
+    /* ── Status pill ── */
+    .status-display { display: flex; justify-content: center; }
+    .status-pill {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-size: 0.9rem; font-weight: 600; padding: 10px 20px;
+        border-radius: 10px; width: 100%; justify-content: center;
+    }
+    .status-pill.active    { background:rgba(61,107,79,0.12); color:var(--moss); border:1px solid rgba(61,107,79,0.25); }
+    .status-pill.completed { background:rgba(52,120,190,0.10); color:#2266aa; border:1px solid rgba(52,120,190,0.2); }
+    .status-pill.cancelled { background:rgba(90,100,114,0.08); color:var(--slate); border:1px solid var(--border); }
+
+    /* Pulse dot for active */
+    .pulse {
+        font-size: 8px;
+        animation: pulseDot 1.5s ease-in-out infinite;
+    }
+    @keyframes pulseDot {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.3; }
+    }
+
+    /* Overdue / days remaining */
+    .overdue-alert {
+        background: rgba(192,57,43,0.08);
+        border: 1px solid rgba(192,57,43,0.2);
+        border-radius: 8px; padding: 10px 13px;
+        font-size: 0.8rem; color: #c0392b;
+        display: flex; align-items: flex-start; gap: 4px;
+    }
+    .days-remaining {
+        font-size: 0.82rem; color: var(--slate);
+        background: var(--cream); border: 1px solid var(--border);
+        border-radius: 8px; padding: 10px 13px;
+    }
+
+    /* ── Detail grid ── */
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.25rem 2rem;
+    }
+    .detail-item { display: flex; flex-direction: column; gap: 4px; }
+    .detail-label {
+        font-size: 0.7rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.07em; color: var(--slate);
+    }
+    .detail-value { font-size: 0.9rem; color: var(--ink); font-weight: 500; }
+    .rental-id {
+        background: var(--cream); color: var(--sienna);
+        padding: 2px 8px; border-radius: 5px;
+        font-size: 0.78rem; font-weight: 600; display: inline-block;
+    }
+
+    /* ── Cost summary ── */
+    .cost-row {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 0.75rem;
+    }
+    .cost-label { font-size: 0.85rem; color: var(--slate); }
+    .cost-value { font-size: 0.9rem; font-weight: 600; color: var(--ink); }
+    .cost-divider { height: 1px; background: var(--border); margin: 1rem 0; }
+    .cost-row.total { margin-bottom: 0.5rem; }
+    .cost-total {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.75rem; font-weight: 700; color: var(--moss);
+    }
+    .cost-note {
+        font-size: 0.78rem; color: var(--slate);
+        background: var(--cream); border: 1px solid var(--border);
+        border-radius: 8px; padding: 10px 13px; margin-top: 1rem; margin-bottom: 0;
+    }
+
+    /* Category chip reuse */
+    .book-cat {
+        font-size: 0.68rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--gold); background: rgba(200,148,26,0.1);
+        padding: 3px 8px; border-radius: 4px;
+    }
+    .btn-bv-ghost { text-decoration: none; }
+</style>
+</th:block>

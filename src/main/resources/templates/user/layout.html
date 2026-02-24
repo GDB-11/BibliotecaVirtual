@@ -1,205 +1,528 @@
+<!-- src/main/resources/templates/user/layout.html -->
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biblioteca Virtual - Usuario</title>
+    <title>Biblioteca Virtual</title>
+
+    <!-- Google Fonts: Playfair Display + DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
+        /* ─── Design Tokens ─────────────────────────────── */
         :root {
-            --primary-start: #2ecc71;
-            --primary-end: #1abc9c;
-            --secondary-start: #3498db;
-            --secondary-end: #2980b9;
-            --accent-color: #f1c40f;
+            --ink:       #1c1714;
+            --parchment: #f9f5ef;
+            --cream:     #f3ede3;
+            --sienna:    #8b4513;
+            --gold:      #c8941a;
+            --gold-lt:   #e8b84b;
+            --moss:      #3d6b4f;
+            --moss-lt:   #5a9e72;
+            --slate:     #5a6472;
+            --border:    rgba(139, 69, 19, 0.15);
+            --shadow-sm: 0 2px 8px rgba(28, 23, 20, 0.08);
+            --shadow-md: 0 8px 32px rgba(28, 23, 20, 0.12);
+            --shadow-lg: 0 20px 60px rgba(28, 23, 20, 0.18);
+            --radius:    12px;
+            --radius-lg: 20px;
         }
+
+        /* ─── Base ───────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; }
+
         body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--parchment);
+            color: var(--ink);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8f0fe 100%);
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(200, 148, 26, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(61, 107, 79, 0.06) 0%, transparent 50%);
         }
-        .navbar {
-            background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%) !important;
-            box-shadow: 0 4px 20px rgba(46, 204, 113, 0.3);
+
+        /* ─── Navbar ─────────────────────────────────────── */
+        .bv-navbar {
+            background: var(--ink);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            box-shadow: 0 1px 0 rgba(200, 148, 26, 0.3), var(--shadow-md);
         }
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+
+        .bv-navbar .container {
+            height: 68px;
+            display: flex;
+            align-items: center;
         }
-        .nav-link {
+
+        .bv-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--gold-lt) !important;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.01em;
+            transition: opacity 0.2s;
+        }
+        .bv-brand:hover { opacity: 0.85; }
+
+        .bv-brand-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--gold), var(--sienna));
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
             font-size: 1.1rem;
-            margin: 0 5px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-        .nav-link:hover {
-            background-color: rgba(255,255,255,0.2);
-            transform: translateY(-2px);
-        }
-        .dropdown-menu {
-            border: none;
-            box-shadow: 0 5px 20px rgba(46, 204, 113, 0.2);
-        }
-        .footer {
-            margin-top: auto;
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: white;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
         }
+
+        .bv-nav-link {
+            color: rgba(255,255,255,0.65) !important;
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            padding: 6px 14px !important;
+            border-radius: 6px;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .bv-nav-link:hover,
+        .bv-nav-link.active {
+            color: var(--gold-lt) !important;
+            background: rgba(200, 148, 26, 0.12);
+        }
+
+        .bv-nav-divider {
+            width: 1px; height: 24px;
+            background: rgba(255,255,255,0.1);
+            margin: 0 6px;
+        }
+
+        .bv-user-btn {
+            background: rgba(200, 148, 26, 0.15);
+            border: 1px solid rgba(200, 148, 26, 0.3);
+            color: var(--gold-lt) !important;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 7px 16px !important;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .bv-user-btn:hover {
+            background: rgba(200, 148, 26, 0.25);
+            border-color: rgba(200, 148, 26, 0.5);
+        }
+
+        .dropdown-menu.bv-dropdown {
+            background: var(--ink);
+            border: 1px solid rgba(200,148,26,0.2);
+            border-radius: var(--radius);
+            padding: 8px;
+            min-width: 200px;
+            box-shadow: var(--shadow-lg);
+        }
+        .bv-dropdown .dropdown-item {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.875rem;
+            padding: 9px 14px;
+            border-radius: 6px;
+            display: flex; align-items: center; gap: 9px;
+            transition: all 0.15s;
+        }
+        .bv-dropdown .dropdown-item:hover { color: var(--gold-lt); background: rgba(200,148,26,0.12); }
+        .bv-dropdown .dropdown-item.text-danger { color: #e87070 !important; }
+        .bv-dropdown .dropdown-item.text-danger:hover { background: rgba(232,112,112,0.1); }
+        .bv-dropdown .dropdown-divider { border-color: rgba(255,255,255,0.08); margin: 6px 0; }
+
+        /* ─── Page Header ────────────────────────────────── */
         .page-header {
-            background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%);
-            color: white;
-            padding: 3rem 0;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 30px rgba(46, 204, 113, 0.3);
+            background: linear-gradient(135deg, var(--ink) 0%, #2d2420 60%, #1a2a20 100%);
+            padding: 3.5rem 0 3rem;
+            margin-bottom: 2.5rem;
             position: relative;
             overflow: hidden;
         }
         .page-header::before {
             content: '';
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(200,148,26,0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 50%, rgba(61,107,79,0.12) 0%, transparent 50%);
+        }
+        .page-header::after {
+            content: '"';
+            font-family: 'Playfair Display', serif;
+            font-size: 16rem;
+            color: rgba(255,255,255,0.02);
             position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
-            animation: rotate 20s linear infinite;
+            top: -2rem; right: 2rem;
+            line-height: 1;
+            pointer-events: none;
         }
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .page-header .container { position: relative; z-index: 1; }
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
         }
-        .card {
-            border: none;
-            border-radius: 15px;
+        .page-header .lead {
+            color: rgba(255,255,255,0.55);
+            font-size: 0.95rem;
+            margin-top: 0.4rem;
+        }
+
+        /* ─── Cards ──────────────────────────────────────── */
+        .bv-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
             overflow: hidden;
-            transition: all 0.3s ease;
         }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(46, 204, 113, 0.2);
+        .bv-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
         }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
-            border: none;
-            transition: all 0.3s ease;
+
+        .bv-card-header {
+            background: linear-gradient(135deg, var(--ink), #2d2420);
+            color: white;
+            padding: 18px 22px;
+            display: flex; align-items: center; justify-content: space-between;
         }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-end), var(--primary-start));
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        .bv-card-header h5 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05rem;
+            margin: 0;
+            display: flex; align-items: center; gap: 9px;
         }
-        .btn-outline-primary {
-            color: var(--primary-start);
-            border-color: var(--primary-start);
-        }
-        .btn-outline-primary:hover {
-            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
-            border-color: transparent;
-        }
-        .badge {
-            padding: 8px 12px;
-            border-radius: 8px;
-        }
-        .badge.bg-success {
-            background: linear-gradient(135deg, #2ecc71, #27ae60) !important;
-        }
-        .badge.bg-info {
-            background: linear-gradient(135deg, #3498db, #2980b9) !important;
-        }
-        .badge.bg-warning {
-            background: linear-gradient(135deg, #f1c40f, #f39c12) !important;
-        }
+
+        /* ─── Stat Cards ─────────────────────────────────── */
         .stat-card {
             background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(46, 204, 113, 0.2);
-        }
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 1.75rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
-            color: white;
-            font-size: 2rem;
-        }
-        .pagination .page-link {
-            color: var(--primary-start);
-            border: none;
-            margin: 0 3px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        .pagination .page-link:hover {
-            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
-            color: white;
-            transform: translateY(-2px);
-        }
-        .pagination .active .page-link {
-            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
-            color: white;
-        }
-        .table {
-            border-radius: 15px;
+            gap: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            position: relative;
             overflow: hidden;
         }
-        .table thead {
-            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            height: 3px; width: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--moss-lt));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .stat-card:hover::after { transform: scaleX(1); }
+
+        .stat-icon {
+            width: 56px; height: 56px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        .stat-icon.gold  { background: linear-gradient(135deg, #f5d67a, var(--gold)); color: var(--ink); }
+        .stat-icon.moss  { background: linear-gradient(135deg, var(--moss-lt), var(--moss)); color: white; }
+        .stat-icon.sienna{ background: linear-gradient(135deg, #c4845a, var(--sienna)); color: white; }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--slate);
+            margin-bottom: 2px;
+        }
+        .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--ink);
+            line-height: 1;
+        }
+        .stat-sub {
+            font-size: 0.75rem;
+            color: #e05555;
+            font-weight: 600;
+            margin-top: 3px;
+        }
+
+        /* ─── Table ──────────────────────────────────────── */
+        .bv-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .bv-table thead tr {
+            background: var(--cream);
+        }
+        .bv-table thead th {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--slate);
+            padding: 14px 18px;
+            border-bottom: 2px solid var(--border);
+        }
+        .bv-table tbody tr {
+            transition: background 0.15s;
+        }
+        .bv-table tbody tr:hover { background: var(--cream); }
+        .bv-table tbody td {
+            padding: 14px 18px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .bv-table tbody tr:last-child td { border-bottom: none; }
+
+        /* ─── Badges ─────────────────────────────────────── */
+        .bv-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 5px 10px;
+            border-radius: 6px;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .bv-badge.active    { background: rgba(90,158,114,0.15); color: var(--moss); }
+        .bv-badge.completed { background: rgba(52,120,190,0.12); color: #2266aa; }
+        .bv-badge.cancelled { background: rgba(90,100,114,0.1);  color: var(--slate); }
+
+        /* ─── Buttons ────────────────────────────────────── */
+        .btn-bv-primary {
+            background: linear-gradient(135deg, var(--gold), #a87010);
+            color: white;
+            border: none;
+            padding: 9px 22px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 7px;
+        }
+        .btn-bv-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(200,148,26,0.35);
             color: white;
         }
+
+        .btn-bv-ghost {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid rgba(200,148,26,0.4);
+            padding: 7px 18px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-bv-ghost:hover {
+            background: rgba(200,148,26,0.08);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* ─── Pagination ─────────────────────────────────── */
+        .pagination .page-link {
+            color: var(--sienna);
+            border-color: var(--border);
+            border-radius: 7px !important;
+            margin: 0 2px;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        .pagination .page-link:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: white;
+        }
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--gold), var(--sienna));
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 3px 10px rgba(200,148,26,0.35);
+        }
+
+        /* ─── Forms ──────────────────────────────────────── */
+        .form-control, .form-select {
+            border-color: var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            padding: 9px 14px;
+            transition: all 0.2s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(200,148,26,0.15);
+        }
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--slate);
+            margin-bottom: 6px;
+        }
+
+        /* ─── Alerts ─────────────────────────────────────── */
+        .alert-bv {
+            border-radius: var(--radius);
+            border: none;
+            padding: 14px 18px;
+            font-size: 0.875rem;
+        }
+        .alert-bv.success { background: rgba(90,158,114,0.1); color: var(--moss); }
+        .alert-bv.danger  { background: rgba(220, 80, 80, 0.08); color: #c0392b; }
+
+        /* ─── Empty State ────────────────────────────────── */
+        .empty-state {
+            padding: 3rem 1rem;
+            text-align: center;
+            color: var(--slate);
+        }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5; }
+        .empty-state p { font-size: 0.95rem; margin-bottom: 1.25rem; }
+
+        /* ─── Footer ─────────────────────────────────────── */
+        .bv-footer {
+            margin-top: auto;
+            background: var(--ink);
+            border-top: 1px solid rgba(200,148,26,0.2);
+            padding: 1.25rem 0;
+        }
+        .bv-footer p {
+            color: rgba(255,255,255,0.3);
+            font-size: 0.8rem;
+            margin: 0;
+            letter-spacing: 0.02em;
+        }
+
+        /* ─── Scroll & Load Animation ────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp 0.45s ease both; }
+        .fade-up-1 { animation-delay: 0.05s; }
+        .fade-up-2 { animation-delay: 0.12s; }
+        .fade-up-3 { animation-delay: 0.19s; }
+        .fade-up-4 { animation-delay: 0.26s; }
+
+        /* ─── Responsive ─────────────────────────────────── */
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 1.65rem; }
+            .stat-value { font-size: 1.6rem; }
+            .bv-nav-link span { display: none; }
+        }
     </style>
+
+    <!-- Page-specific styles slot -->
+    <th:block layout:fragment="extra-css"></th:block>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
+
+    <!-- ── Navbar ── -->
+    <nav class="bv-navbar navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" th:href="@{/user/dashboard}">
-                <i class="bi bi-book-half me-2"></i>Biblioteca Virtual
+            <a class="bv-brand" th:href="@{/user/dashboard}">
+                <div class="bv-brand-icon"><i class="bi bi-book-half"></i></div>
+                Biblioteca Virtual
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+
+            <button class="navbar-toggler border-0 text-white" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#bvNav"
+                    aria-controls="bvNav" aria-expanded="false">
+                <i class="bi bi-list fs-4"></i>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+
+            <div class="collapse navbar-collapse" id="bvNav">
+                <ul class="navbar-nav mx-auto gap-1">
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/user/dashboard}">
-                            <i class="bi bi-house-door"></i> Inicio
+                        <a class="bv-nav-link" th:href="@{/user/dashboard}">
+                            <i class="bi bi-house-door"></i>
+                            <span>Inicio</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/user/catalogo}">
-                            <i class="bi bi-grid"></i> Catálogo
+                        <a class="bv-nav-link" th:href="@{/user/catalogo}">
+                            <i class="bi bi-grid-3x3-gap"></i>
+                            <span>Catálogo</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/user/historial}">
-                            <i class="bi bi-clock-history"></i> Mi Historial
+                        <a class="bv-nav-link" th:href="@{/user/historial}">
+                            <i class="bi bi-clock-history"></i>
+                            <span>Mi Historial</span>
                         </a>
                     </li>
                 </ul>
-                <ul class="navbar-nav">
+
+                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    <div class="bv-nav-divider d-none d-lg-block"></div>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i> Mi Cuenta
+                        <a class="bv-user-btn nav-link dropdown-toggle d-flex align-items-center gap-2"
+                           href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                            <span>Mi Cuenta</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" th:href="@{/user/perfil}"><i class="bi bi-person"></i> Perfil</a></li>
-                            <li><a class="dropdown-item" th:href="@{/user/perfil/editar}"><i class="bi bi-pencil"></i> Editar Perfil</a></li>
-                            <li><a class="dropdown-item" th:href="@{/user/perfil/cambiar-password}"><i class="bi bi-key"></i> Cambiar Contraseña</a></li>
+                        <ul class="dropdown-menu bv-dropdown dropdown-menu-end" aria-labelledby="userMenu">
+                            <li>
+                                <a class="dropdown-item" th:href="@{/user/perfil}">
+                                    <i class="bi bi-person"></i> Perfil
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{/user/perfil/editar}">
+                                    <i class="bi bi-pencil-square"></i> Editar Perfil
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{/user/perfil/cambiar-password}">
+                                    <i class="bi bi-key"></i> Cambiar Contraseña
+                                </a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
+                            <li>
+                                <a class="dropdown-item text-danger" th:href="@{/logout}">
+                                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 </ul>
@@ -207,24 +530,26 @@
         </div>
     </nav>
 
-    <!-- Content -->
-    <main>
+    <!-- ── Main ── -->
+    <main class="flex-grow-1">
         <div layout:fragment="content">
-            <!-- El contenido específico de cada página irá aquí -->
+            <!-- Content here -->
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="footer py-3 mt-5">
+    <!-- ── Footer ── -->
+    <footer class="bv-footer">
         <div class="container text-center">
-            <p class="mb-0 text-white-50">
-                <i class="bi bi-c-circle"></i> 2026 Biblioteca Virtual - Todos los derechos reservados
+            <p>
+                <i class="bi bi-c-circle me-1"></i>
+                2026 Biblioteca Virtual — Todos los derechos reservados
             </p>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Page-specific scripts slot -->
+    <th:block layout:fragment="extra-scripts"></th:block>
 </body>
 </html>
-
-

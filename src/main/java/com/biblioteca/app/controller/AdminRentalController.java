@@ -199,34 +199,4 @@ public class AdminRentalController {
         }
         return "redirect:/admin/alquileres";
     }
-    
-    /**
-     * Escapa caracteres HTML para prevenir XSS.
-     */
-    private String escapeHtml(String text) {
-        if (text == null) return "";
-        return text.replace("&", "&amp;")
-                   .replace("<", "&lt;")
-                   .replace(">", "&gt;")
-                   .replace("\"", "&quot;")
-                   .replace("'", "&#39;");
-    }
-    
-    /**
-     * Retorna el badge HTML según el estado del alquiler.
-     */
-    private String getStatusBadge(String statusName) {
-        if (statusName == null) return "<span class=\"badge bg-secondary\">Desconocido</span>";
-        
-        switch (statusName) {
-            case "En Proceso":
-                return "<span class=\"badge bg-warning\">En Proceso</span>";
-            case "Devuelto":
-                return "<span class=\"badge bg-success\">Devuelto</span>";
-            case "Cancelado":
-                return "<span class=\"badge bg-danger\">Cancelado</span>";
-            default:
-                return "<span class=\"badge bg-secondary\">" + escapeHtml(statusName) + "</span>";
-        }
-    }
 }

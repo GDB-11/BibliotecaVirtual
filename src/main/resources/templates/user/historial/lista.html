@@ -1,135 +1,201 @@
+<!-- src/main/resources/templates/user/historial/lista.html -->
 <!DOCTYPE html>
-<html lang="es" 
+<html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{user/layout}">
 <head>
-    <title>Mi Historial - Biblioteca Virtual</title>
+    <title>Mi Historial</title>
 </head>
 <body>
-    <div layout:fragment="content">
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="container">
-                <h1 class="display-4"><i class="bi bi-clock-history me-2"></i>Mi Historial</h1>
-                <p class="lead">Registro de todos tus alquileres</p>
-            </div>
-        </div>
+<div layout:fragment="content">
 
+    <!-- ── Page Header ── -->
+    <div class="page-header">
         <div class="container">
-            <!-- Stats -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-4">
-                    <div class="stat-card d-flex align-items-center">
-                        <div class="stat-icon me-3">
-                            <i class="bi bi-journal-bookmark-fill"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted">Total Alquileres</small>
-                            <h3 class="mb-0" th:text="${totalItems}">0</h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="stat-card d-flex align-items-center">
-                        <div class="stat-icon me-3" style="background: linear-gradient(135deg, #3498db, #2980b9);">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted">Activos</small>
-                            <h3 class="mb-0">0</h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="stat-card d-flex align-items-center">
-                        <div class="stat-icon me-3" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
-                            <i class="bi bi-x-circle"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted">Finalizados</small>
-                            <h3 class="mb-0">0</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabla de historial -->
-            <div class="card">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">Listado de Alquileres</h5>
-                </div>
-                <div class="card-body">
-                    <div th:if="${alquileres == null or #lists.isEmpty(alquileres)}" class="text-center py-5">
-                        <i class="bi bi-inbox fs-1 text-muted"></i>
-                        <p class="text-muted mt-3">No tienes alquileres registrados</p>
-                        <a th:href="@{/user/catalogo}" class="btn btn-primary">
-                            <i class="bi bi-search"></i> Explorar Catálogo
-                        </a>
-                    </div>
-
-                    <div th:unless="${alquileres == null or #lists.isEmpty(alquileres)}" class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Libro</th>
-                                    <th>Fecha Alquiler</th>
-                                    <th>Fecha Devolución</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="rental : ${alquileres}">
-                                    <td><code th:text="${#strings.substring(rental.rentalId.toString(), 0, 8)}">12345678</code></td>
-                                    <td>
-                                        <strong th:text="${rental.bookCopy.book.title}">Título del libro</strong>
-                                    </td>
-                                    <td th:text="${#temporals.format(rental.rentalDate, 'dd/MM/yyyy')}">01/01/2024</td>
-                                    <td th:text="${rental.returnDate != null ? #temporals.format(rental.returnDate, 'dd/MM/yyyy') : '-'}">-</td>
-                                    <td>
-                                        <span th:if="${rental.rentalStatus.rentalStatusName == 'En Proceso'}" 
-                                              class="badge bg-success">Activo</span>
-                                        <span th:if="${rental.rentalStatus.rentalStatusName == 'Completado'}" 
-                                              class="badge bg-info">Completado</span>
-                                        <span th:if="${rental.rentalStatus.rentalStatusName == 'Cancelado'}" 
-                                              class="badge bg-secondary">Cancelado</span>
-                                    </td>
-                                    <td>
-                                        <a th:href="@{/user/historial/{id}(id=${rental.rentalId})}" 
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-eye"></i> Ver
-                                        </a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Paginación -->
-                    <nav th:if="${totalPages > 1}" class="mt-4">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-                                <a class="page-link" th:href="@{/user/historial(page=${currentPage - 1})}">
-                                    Anterior
-                                </a>
-                            </li>
-                            <li th:each="i : ${#numbers.sequence(1, totalPages)}" 
-                                class="page-item" th:classappend="${i == currentPage} ? 'active'">
-                                <a class="page-link" th:href="@{/user/historial(page=${i})}" 
-                                   th:text="${i}">1</a>
-                            </li>
-                            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-                                <a class="page-link" th:href="@{/user/historial(page=${currentPage + 1})}">
-                                    Siguiente
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
+            <p class="text-uppercase fw-semibold mb-2"
+               style="font-size:0.72rem; letter-spacing:0.12em; color:rgba(232,184,75,0.8);">
+                <i class="bi bi-clock-history me-1"></i> Actividad
+            </p>
+            <h1>Mi Historial</h1>
+            <p class="lead">Registro completo de todos tus alquileres.</p>
         </div>
     </div>
+
+    <div class="container pb-5">
+
+        <!-- ── Stats ── -->
+        <div class="row g-4 mb-5">
+            <div class="col-sm-6 col-lg-4 d-flex fade-up fade-up-1">
+                <div class="stat-card w-100">
+                    <div class="stat-icon gold"><i class="bi bi-journal-bookmark-fill"></i></div>
+                    <div>
+                        <p class="stat-label mb-0">Total Alquileres</p>
+                        <p class="stat-value mb-0" th:text="${totalItems}">0</p>
+                        <p class="stat-sub" style="visibility:hidden; margin:0;">·</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-4 d-flex fade-up fade-up-2">
+                <div class="stat-card w-100">
+                    <div class="stat-icon moss"><i class="bi bi-check-circle"></i></div>
+                    <div>
+                        <p class="stat-label mb-0">Activos</p>
+                        <p class="stat-value mb-0" th:text="${activosCount}">0</p>
+                        <p class="stat-sub" style="visibility:hidden; margin:0;">·</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-4 d-flex fade-up fade-up-3">
+                <div class="stat-card w-100">
+                    <div class="stat-icon" style="background:linear-gradient(135deg,#8a9eb5,#5a6e84); color:white;">
+                        <i class="bi bi-archive"></i>
+                    </div>
+                    <div>
+                        <p class="stat-label mb-0">Finalizados</p>
+                        <p class="stat-value mb-0" th:text="${finalizadosCount}">0</p>
+                        <p class="stat-sub" style="visibility:hidden; margin:0;">·</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Table ── -->
+        <div class="bv-card fade-up fade-up-2">
+            <div class="bv-card-header">
+                <h5><i class="bi bi-list-ul" style="color:var(--gold-lt);"></i> Listado de Alquileres</h5>
+                <span class="bv-badge" style="background:rgba(200,148,26,0.15); color:var(--gold-lt); font-size:0.72rem;"
+                      th:if="${totalItems > 0}">
+                    <span th:text="${totalItems}">0</span> registros
+                </span>
+            </div>
+
+            <!-- Empty state -->
+            <div th:if="${alquileres == null or #lists.isEmpty(alquileres)}" class="empty-state">
+                <i class="bi bi-inbox" style="color:var(--gold);"></i>
+                <p class="fw-semibold" style="color:var(--ink);">No tienes alquileres registrados</p>
+                <p style="font-size:0.85rem;">Explora el catálogo y alquila tu primer libro.</p>
+                <a th:href="@{/user/catalogo}" class="btn-bv-primary">
+                    <i class="bi bi-search"></i> Explorar Catálogo
+                </a>
+            </div>
+
+            <!-- Table -->
+            <div th:unless="${alquileres == null or #lists.isEmpty(alquileres)}" class="table-responsive">
+                <table class="bv-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Libro</th>
+                            <th>Autor</th>
+                            <th>Alquiler</th>
+                            <th>Vencimiento</th>
+                            <th>Devolución</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="rental : ${alquileres}">
+                            <td>
+                                <code class="rental-id"
+                                      th:text="${#strings.substring(rental.rentalId.toString(), 0, 8)}">
+                                    12345678
+                                </code>
+                            </td>
+                            <td>
+                                <span class="fw-semibold"
+                                      th:text="${rental.bookCopy.book.title}">Título</span>
+                            </td>
+                            <td class="text-muted"
+                                th:text="${rental.bookCopy.book.author != null ? rental.bookCopy.book.author.fullName : '—'}">
+                                Autor
+                            </td>
+                            <td class="text-muted"
+                                th:text="${#temporals.format(rental.rentalDate, 'dd/MM/yyyy')}">
+                                —
+                            </td>
+                            <td>
+                                <!-- Highlight overdue -->
+                                <span th:if="${rental.rentalStatus.rentalStatusName == 'En Proceso'
+                                              and rental.dueDate != null
+                                              and rental.dueDate.isBefore(#temporals.createNow())}"
+                                      class="text-danger fw-semibold"
+                                      th:text="${#temporals.format(rental.dueDate, 'dd/MM/yyyy')}">—</span>
+                                <span th:unless="${rental.rentalStatus.rentalStatusName == 'En Proceso'
+                                                  and rental.dueDate != null
+                                                  and rental.dueDate.isBefore(#temporals.createNow())}"
+                                      class="text-muted"
+                                      th:text="${rental.dueDate != null ? #temporals.format(rental.dueDate, 'dd/MM/yyyy') : '—'}">—</span>
+                            </td>
+                            <td class="text-muted"
+                                th:text="${rental.returnDate != null ? #temporals.format(rental.returnDate, 'dd/MM/yyyy') : '—'}">
+                                —
+                            </td>
+                            <td>
+                                <span th:if="${rental.rentalStatus.rentalStatusName == 'En Proceso'}"
+                                      class="bv-badge active">
+                                    <i class="bi bi-circle-fill" style="font-size:6px;"></i> Activo
+                                </span>
+                                <span th:if="${rental.rentalStatus.rentalStatusName == 'Completado'}"
+                                      class="bv-badge completed">
+                                    <i class="bi bi-check2-circle" style="font-size:0.75rem;"></i> Completado
+                                </span>
+                                <span th:if="${rental.rentalStatus.rentalStatusName == 'Cancelado'}"
+                                      class="bv-badge cancelled">
+                                    <i class="bi bi-x-circle" style="font-size:0.75rem;"></i> Cancelado
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/user/historial/{id}(id=${rental.rentalId})}"
+                                   class="btn-bv-ghost" style="font-size:0.75rem; padding:5px 12px; white-space:nowrap;">
+                                    <i class="bi bi-eye"></i> Ver
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${totalPages > 1}" class="d-flex justify-content-center py-4">
+                <ul class="pagination mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/user/historial(page=${currentPage - 1})}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(1, totalPages)}"
+                        class="page-item" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/user/historial(page=${i})}"
+                           th:text="${i}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/user/historial(page=${currentPage + 1})}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div><!-- /bv-card -->
+    </div><!-- /container -->
+</div><!-- /fragment -->
 </body>
 </html>
+
+<th:block layout:fragment="extra-css">
+<style>
+    .rental-id {
+        background: var(--cream);
+        color: var(--sienna);
+        padding: 2px 7px;
+        border-radius: 5px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+</style>
+</th:block>
